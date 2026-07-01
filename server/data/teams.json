@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "teams": [
+    {
+      "id": "t1",
+      "name": "FC Lions",
+      "shortName": "LIO"
+    },
+    {
+      "id": "t2",
+      "name": "Eagles United",
+      "shortName": "EAG"
+    },
+    {
+      "id": "t3",
+      "name": "Blue Sharks",
+      "shortName": "SHA"
+    },
+    {
+      "id": "t4",
+      "name": "Grey Wolves",
+      "shortName": "WOL"
+    },
+    {
+      "id": "t5",
+      "name": "Red Foxes",
+      "shortName": "FOX"
+    },
+    {
+      "id": "t6",
+      "name": "City Bears",
+      "shortName": "BEA"
+    }
+  ]
+}

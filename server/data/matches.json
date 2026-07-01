@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "matches": [
+    {
+      "id": "m1",
+      "group": "A",
+      "homeId": "t1",
+      "awayId": "t2",
+      "homeScore": 1,
+      "awayScore": 0,
+      "status": "live",
+      "minute": 37,
+      "startsAt": "2026-07-01T14:47:42.516Z",
+      "rev": 1
+    },
+    {
+      "id": "m2",
+      "group": "A",
+      "homeId": "t3",
+      "awayId": "t4",
+      "homeScore": 2,
+      "awayScore": 2,
+      "status": "live",
+      "minute": 71,
+      "startsAt": "2026-07-01T14:13:42.516Z",
+      "rev": 7
+    },
+    {
+      "id": "m3",
+      "group": "A",
+      "homeId": "t1",
+      "awayId": "t3",
+      "homeScore": 0,
+      "awayScore": 0,
+      "status": "scheduled",
+      "minute": 0,
+      "startsAt": "2026-07-01T16:09:42.516Z",
+      "rev": 1
+    },
+    {
+      "id": "m4",
+      "group": "B",
+      "homeId": "t5",
+      "awayId": "t6",
+      "homeScore": 5,
+      "awayScore": 1,
+      "status": "finished",
+      "minute": 90,
+      "startsAt": "2026-07-01T13:24:42.516Z",
+      "rev": 7
+    },
+    {
+      "id": "m5",
+      "group": "B",
+      "homeId": "t2",
+      "awayId": "t4",
+      "homeScore": 0,
+      "awayScore": 0,
+      "status": "scheduled",
+      "minute": 0,
+      "startsAt": "2026-07-01T16:54:42.516Z",
+      "rev": 1
+    },
+    {
+      "id": "m6",
+      "group": "B",
+      "homeId": "t5",
+      "awayId": "t1",
+      "homeScore": 0,
+      "awayScore": 0,
+      "status": "scheduled",
+      "minute": 0,
+      "startsAt": "2026-07-01T17:54:42.516Z",
+      "rev": 1
+    }
+  ]
+}
