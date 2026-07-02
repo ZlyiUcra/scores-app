@@ -18,9 +18,19 @@ function toLocalInput(iso: string): string {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
+/** Which card of the panel an error belongs to — every failure surfaces
+ * inside the section whose data was being manipulated, not page-wide. */
+enum PanelSection {
+  Groups = 'Groups',
+  NewTeam = 'NewTeam',
+  Teams = 'Teams',
+  NewGame = 'NewGame',
+  Matches = 'Matches',
+}
+
 export function AdminMatches() {
   const { t } = useI18n();
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<PanelSection, string>>>({});
   const order = useMatchStore(selectOrder);
   const byId = useMatchStore((s) => s.byId);
   // Groups + teams come from the live roster store (updated via socket after
@@ -118,13 +128,15 @@ export function AdminMatches() {
     ? teams.filter((tm) => openOpponentIds(homeId).includes(tm.id))
     : homeCandidates;
 
-  async function run(fn: () => Promise<unknown>, fallback: string) {
+  // One action runs at a time (single busy flag), so starting a new one may
+  // clear every section's stale error.
+  async function run(section: PanelSection, fn: () => Promise<unknown>, fallback: string) {
     setBusy(true);
-    setError(null);
+    setErrors({});
     try {
       await fn();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t(fallback));
+      setErrors({ [section]: err instanceof ApiError ? err.message : t(fallback) });
     } finally {
       setBusy(false);
     }
@@ -132,7 +144,7 @@ export function AdminMatches() {
 
   async function onCreateGroup(e: FormEvent) {
     e.preventDefault();
-    await run(async () => {
+    await run(PanelSection.Groups, async () => {
       await adminApi.createGroup({ name: groupName.trim() });
       setGroupName('');
     }, 'adminMatches.errorCreateGroup');
@@ -140,7 +152,7 @@ export function AdminMatches() {
 
   async function onCreateTeam(e: FormEvent) {
     e.preventDefault();
-    await run(async () => {
+    await run(PanelSection.NewTeam, async () => {
       const { team } = await adminApi.createTeam({ name: teamName.trim(), shortName: teamShort.trim() });
       setTeamName('');
       setTeamShort('');
@@ -155,7 +167,7 @@ export function AdminMatches() {
 
   async function onCreateMatch(e: FormEvent) {
     e.preventDefault();
-    await run(async () => {
+    await run(PanelSection.NewGame, async () => {
       const iso = new Date(startsAt).toISOString();
       await adminApi.createMatch({ homeId, awayId, startsAt: iso, field: field.trim() });
       setHomeId('');
@@ -167,11 +179,10 @@ export function AdminMatches() {
 
   return (
     <div className="admin-panel">
-      {error && <p className="admin__error">{error}</p>}
-
       <div className="admin-grid">
         <section className="card">
           <h3>{t('adminMatches.groups')}</h3>
+          {errors[PanelSection.Groups] && <p className="admin__error">{errors[PanelSection.Groups]}</p>}
           <form className="stack" onSubmit={onCreateGroup}>
             <input className="input" placeholder={t('adminMatches.groupNamePlaceholder')} value={groupName}
               onChange={(e) => setGroupName(e.target.value)} required minLength={2} maxLength={40} />
@@ -194,7 +205,7 @@ export function AdminMatches() {
                     {editing ? (
                       <>
                         <button className="btn btn--sm btn--primary" disabled={busy}
-                          onClick={() => void run(async () => {
+                          onClick={() => void run(PanelSection.Groups, async () => {
                             await adminApi.updateGroup(g.id, { name: editGroupName.trim() });
                             setEditGroupId(null);
                           }, 'adminMatches.errorUpdateGroup')}>{t('adminMatches.save')}</button>
@@ -205,13 +216,13 @@ export function AdminMatches() {
                         {countInGroup(g.id) >= 2 && (
                           <button className="btn btn--sm btn--primary" disabled={busy || missingInGroup(g.id) === 0}
                             title={t('adminMatches.generateTitle')}
-                            onClick={() => void run(() => adminApi.generateFixtures(g.id), 'adminMatches.errorGenerate')}>
+                            onClick={() => void run(PanelSection.Groups, () => adminApi.generateFixtures(g.id), 'adminMatches.errorGenerate')}>
                             {t('adminMatches.generate', { n: missingInGroup(g.id) })}
                           </button>
                         )}
                         <button className="btn btn--sm" onClick={() => { setEditGroupId(g.id); setEditGroupName(g.name); }}>{t('adminMatches.edit')}</button>
                         <button className="btn btn--sm btn--danger" title={t('adminMatches.deleteGroupTitle')}
-                          onClick={() => void run(() => adminApi.deleteGroup(g.id), 'adminMatches.errorDeleteGroup')}>{t('adminMatches.delete')}</button>
+                          onClick={() => void run(PanelSection.Groups, () => adminApi.deleteGroup(g.id), 'adminMatches.errorDeleteGroup')}>{t('adminMatches.delete')}</button>
                       </>
                     )}
                   </div>
@@ -223,6 +234,7 @@ export function AdminMatches() {
 
         <section className="card">
           <h3>{t('adminMatches.newTeam')}</h3>
+          {errors[PanelSection.NewTeam] && <p className="admin__error">{errors[PanelSection.NewTeam]}</p>}
           <form className="stack" onSubmit={onCreateTeam}>
             <input className="input" placeholder={t('adminMatches.teamNamePlaceholder')} value={teamName}
               onChange={(e) => setTeamName(e.target.value)} required minLength={2} maxLength={40} />
@@ -240,6 +252,7 @@ export function AdminMatches() {
 
       <section className="card">
         <h3>{t('adminMatches.teamsTitle')} ({teams.length})</h3>
+        {errors[PanelSection.Teams] && <p className="admin__error">{errors[PanelSection.Teams]}</p>}
         <div className="table-wrap">
           <table className="table">
             <thead>
@@ -287,7 +300,7 @@ export function AdminMatches() {
                             {editing ? (
                               <>
                                 <button className="btn btn--sm btn--primary" disabled={busy}
-                                  onClick={() => void run(async () => {
+                                  onClick={() => void run(PanelSection.Teams, async () => {
                                     await adminApi.updateTeam(tm.id, { name: editName.trim(), shortName: editShort.trim() });
                                     // Reassign through the regular path so the
                                     // max-per-group / knockout-lock guards apply.
@@ -302,7 +315,7 @@ export function AdminMatches() {
                               <>
                                 <button className="btn btn--sm" onClick={() => { setEditId(tm.id); setEditName(tm.name); setEditShort(tm.shortName); setEditTeamGroupId(tm.groupId ?? ''); }}>{t('adminMatches.edit')}</button>
                                 <button className="btn btn--sm btn--danger"
-                                  onClick={() => void run(() => adminApi.deleteTeam(tm.id), 'adminMatches.errorDeleteTeam')}>{t('adminMatches.delete')}</button>
+                                  onClick={() => void run(PanelSection.Teams, () => adminApi.deleteTeam(tm.id), 'adminMatches.errorDeleteTeam')}>{t('adminMatches.delete')}</button>
                               </>
                             )}
                           </td>
@@ -322,6 +335,7 @@ export function AdminMatches() {
       {totalMissing > 0 && (
       <section className="card">
         <h3>{t('adminMatches.newGame')}</h3>
+        {errors[PanelSection.NewGame] && <p className="admin__error">{errors[PanelSection.NewGame]}</p>}
         <form className="stack admin-grid" onSubmit={onCreateMatch}>
           <label className="field">
             <span>{t('adminMatches.home')}</span>
@@ -360,6 +374,7 @@ export function AdminMatches() {
 
       <section className="card">
         <h3>{t('adminMatches.matchesTitle')} ({order.length})</h3>
+        {errors[PanelSection.Matches] && <p className="admin__error">{errors[PanelSection.Matches]}</p>}
         <div className="table-wrap">
           <table className="table">
             <thead>
@@ -384,18 +399,22 @@ export function AdminMatches() {
                 const editing = editMatchId === id;
                 return (
                   <tr key={id}>
-                    <td>{m.home.name} — {m.away.name}</td>
+                    {/* Edit mode grows the schedule cell, so the game column
+                        shrinks to the short codes to keep the row in bounds. */}
+                    <td title={`${m.home.name} — ${m.away.name}`}>
+                      {editing ? `${m.home.shortName} — ${m.away.shortName}` : `${m.home.name} — ${m.away.name}`}
+                    </td>
                     <td>
                       {editing ? (
-                        <div className="team-edit">
-                          <input className="input" type="datetime-local" value={editStartsAt}
-                            onChange={(e) => setEditStartsAt(e.target.value)} aria-label={t('adminMatches.start')} />
-                          <input className="input input--short" value={editField} maxLength={40}
+                        <div className="team-edit team-edit--stack">
+                          <input className="input" value={editField} maxLength={40}
                             onChange={(e) => setEditField(e.target.value)}
                             placeholder={t('adminMatches.fieldPlaceholder')} aria-label={t('adminMatches.fieldLabel')} />
+                          <input className="input" type="datetime-local" value={editStartsAt}
+                            onChange={(e) => setEditStartsAt(e.target.value)} aria-label={t('adminMatches.start')} />
                         </div>
                       ) : (
-                        <span>{formatTime(m.startsAt)}{m.field ? ` · ${m.field}` : ''}</span>
+                        <span>{m.field ? `${m.field} · ` : ''}{formatTime(m.startsAt)}</span>
                       )}
                     </td>
                     <td>{m.homeScore}:{m.awayScore}</td>
@@ -406,7 +425,7 @@ export function AdminMatches() {
                       {editing ? (
                         <>
                           <button className="btn btn--sm btn--primary" disabled={busy || editStartsAt === ''}
-                            onClick={() => void run(async () => {
+                            onClick={() => void run(PanelSection.Matches, async () => {
                               await api.updateMatch(id, {
                                 startsAt: new Date(editStartsAt).toISOString(),
                                 field: editField.trim(),
@@ -421,7 +440,7 @@ export function AdminMatches() {
                           <button className="btn btn--sm"
                             onClick={() => { setEditMatchId(id); setEditStartsAt(toLocalInput(m.startsAt)); setEditField(m.field); }}>{t('adminMatches.edit')}</button>
                           <button className="btn btn--sm btn--danger"
-                            onClick={() => void run(() => adminApi.deleteMatch(id), 'adminMatches.errorDeleteMatch')}>{t('adminMatches.delete')}</button>
+                            onClick={() => void run(PanelSection.Matches, () => adminApi.deleteMatch(id), 'adminMatches.errorDeleteMatch')}>{t('adminMatches.delete')}</button>
                         </>
                       )}
                     </td>

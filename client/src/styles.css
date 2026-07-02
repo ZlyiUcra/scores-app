@@ -404,6 +404,10 @@ body {
 .input--short { width: 5rem; }
 .team-edit { display: flex; gap: 0.4rem; align-items: center; }
 .team-edit .input { min-width: 0; }
+/* Inline schedule edit: inputs stack vertically so the row grows down, not
+   sideways — the table is nowrap and would overflow into the scroll bar. */
+.team-edit--stack { flex-direction: column; align-items: stretch; }
+.team-edit--stack .input { width: auto; }
 
 .group-list { display: flex; flex-direction: column; margin-top: 0.75rem; }
 .group-row {
