@@ -121,8 +121,9 @@ function headToHeadDelta(aId: string, bId: string, groupId: string, matches: Mat
 
 /**
  * Per-group standings from FINISHED matches only. Sort: points, then wins,
- * then goals scored, then (only when all three are level) the head-to-head
- * meetings, then a deterministic teamId fallback so order never flickers.
+ * then goal difference, then goals scored, then (only when all four are level)
+ * the head-to-head meetings, then a deterministic teamId fallback so order
+ * never flickers.
  */
 export function computeStandings(groups: Group[], teams: Team[], matches: Match[]): GroupTable[] {
   const tables: GroupTable[] = [];
@@ -185,6 +186,7 @@ export function computeStandings(groups: Group[], teams: Team[], matches: Match[
       (a, b) =>
         b.points - a.points ||
         b.won - a.won ||
+        b.goalDiff - a.goalDiff ||
         b.goalsFor - a.goalsFor ||
         headToHeadDelta(a.team.id, b.team.id, group.id, matches) ||
         a.team.id.localeCompare(b.team.id),
@@ -244,7 +246,8 @@ export function computeSize(
 
 /**
  * Third-placed rows across all groups in QUALIFICATION order — the exact
- * comparator used to pick the best thirds for the bracket (points, then a
+ * comparator used to pick the best thirds for the bracket (points, wins,
+ * goal difference, goals for — no head-to-head across groups — then a
  * deterministic teamId fallback). Also drives the public best-3rds table.
  */
 export function computeThirdPlaces(tables: GroupTable[]): Array<{ group: Group; row: StandingRow }> {
@@ -252,7 +255,14 @@ export function computeThirdPlaces(tables: GroupTable[]): Array<{ group: Group; 
   for (let i = 0; i < tables.length; i++) {
     if (tables[i].rows.length >= 3) out.push({ group: tables[i].group, row: tables[i].rows[2] });
   }
-  out.sort((a, b) => b.row.points - a.row.points || a.row.team.id.localeCompare(b.row.team.id));
+  out.sort(
+    (a, b) =>
+      b.row.points - a.row.points ||
+      b.row.won - a.row.won ||
+      b.row.goalDiff - a.row.goalDiff ||
+      b.row.goalsFor - a.row.goalsFor ||
+      a.row.team.id.localeCompare(b.row.team.id),
+  );
   return out;
 }
 
