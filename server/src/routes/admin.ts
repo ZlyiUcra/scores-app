@@ -14,26 +14,21 @@ import {
 } from '../validation.js';
 import { audit } from '../audit.js';
 import { deleteUser, listUsers, updateUser } from '../services/admin.js';
+import { createMatch, generateGroupFixtures, listMatches, removeMatch } from '../services/matches.js';
 import {
   assignTeam,
   createGroup,
-  createMatch,
-  createPlayer,
   createTeam,
-  generateGroupFixtures,
   getRoster,
-  listBracket,
   listGroups,
-  listMatches,
   listTeams,
   removeGroup,
-  removeMatch,
-  removePlayer,
   removeTeam,
   updateGroup,
-  updatePlayer,
   updateTeam,
-} from '../services/tournament.js';
+} from '../services/roster.js';
+import { createPlayer, removePlayer, updatePlayer } from '../services/players.js';
+import { listBracket } from '../services/bracket.js';
 import {
   broadcastBracket,
   broadcastMatchCreated,

@@ -14,7 +14,9 @@ import { SOCKET_EVENTS } from '../../shared/types.js';
 import { config } from './config.js';
 import { verifyToken } from './auth.js';
 import { userRepository } from './repos/users.js';
-import { getRoster, listBracket, listMatches } from './services/tournament.js';
+import { listMatches } from './services/matches.js';
+import { getRoster } from './services/roster.js';
+import { listBracket } from './services/bracket.js';
 
 let io: Server<ClientToServerEvents, ServerToClientEvents> | null = null;
 

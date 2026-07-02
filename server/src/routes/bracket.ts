@@ -3,7 +3,7 @@ import rateLimit from 'express-rate-limit';
 import { requireAdmin, requireAuth } from '../auth.js';
 import { audit } from '../audit.js';
 import { updateBracketSchema } from '../validation.js';
-import { listBracket, resetBracket, updateBracketSlot } from '../services/tournament.js';
+import { listBracket, resetBracket, updateBracketSlot } from '../services/bracket.js';
 import { broadcastBracket } from '../socket.js';
 
 export const bracketRouter = Router();

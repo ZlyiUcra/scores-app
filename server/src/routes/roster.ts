@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../auth.js';
-import { getRoster } from '../services/tournament.js';
+import { getRoster } from '../services/roster.js';
 
 export const rosterRouter = Router();
 
