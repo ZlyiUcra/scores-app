@@ -34,7 +34,7 @@
     "reset": "Reset",
     "error": "Request failed."
   },
-  "adminLayout": { "back": "← Back to scoreboard", "users": "Users", "matches": "Games", "squads": "Squads", "bracket": "Knockout" },
+  "adminLayout": { "back": "← Back to scoreboard", "users": "Users", "matches": "Games", "squads": "Squads" },
   "adminUsers": {
     "title": "Users",
     "search": "Search by username…",
@@ -187,8 +187,6 @@
     "loser": "Loser {slot}"
   },
   "adminBracket": {
-    "title": "Knockout results",
-    "hint": "Teams fill in automatically from the group standings once each group is decided. A level match needs a penalty result.",
     "reset": "Reset knockout",
     "resetConfirm": "Clear all knockout results? Group matches become editable again.",
     "resetError": "Could not reset the bracket.",

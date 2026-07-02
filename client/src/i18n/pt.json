@@ -34,7 +34,7 @@
     "reset": "Repor",
     "error": "Falha no pedido."
   },
-  "adminLayout": { "back": "← Voltar ao placar", "users": "Utilizadores", "matches": "Jogos", "squads": "Plantéis", "bracket": "Eliminatórias" },
+  "adminLayout": { "back": "← Voltar ao placar", "users": "Utilizadores", "matches": "Jogos", "squads": "Plantéis" },
   "adminUsers": {
     "title": "Utilizadores",
     "search": "Procurar por utilizador…",
@@ -187,8 +187,6 @@
     "loser": "Perdedor {slot}"
   },
   "adminBracket": {
-    "title": "Resultados das eliminatórias",
-    "hint": "As equipas são preenchidas automaticamente a partir das classificações dos grupos. Um jogo empatado precisa de resultado nas grandes penalidades.",
     "reset": "Repor eliminatórias",
     "resetConfirm": "Limpar todos os resultados das eliminatórias? Os jogos de grupo voltam a ser editáveis.",
     "resetError": "Não foi possível repor o bracket.",

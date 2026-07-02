@@ -18,7 +18,6 @@ import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminMatches } from './pages/admin/AdminMatches';
 import { AdminSquads } from './pages/admin/AdminSquads';
-import { AdminBracket } from './pages/admin/AdminBracket';
 
 function LangSwitcher() {
   const { lang, setLang } = useI18n();
@@ -145,7 +144,6 @@ export function App() {
             <Route path="users" element={<AdminUsers />} />
             <Route path="matches" element={<AdminMatches />} />
             <Route path="squads" element={<AdminSquads />} />
-            <Route path="bracket" element={<AdminBracket />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
