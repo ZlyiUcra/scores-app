@@ -66,8 +66,11 @@ class JsonFileUserRepository implements UserRepository {
   private seed(): StoredUser[] {
     // Seeded operators. Passwords hashed at boot; reserved so they can't be
     // registered by a stranger (see reserved-name denylist in validation).
+    // On a public deploy the well-known dev password MUST be overridden via
+    // ADMIN_PASSWORD (seeds only on first boot / empty users table).
+    const adminPassword = process.env.ADMIN_PASSWORD?.trim() || 'admin123';
     const raw: Array<{ username: string; password: string; role: Role }> = [
-      { username: 'admin', password: 'admin123', role: 'admin' },
+      { username: 'admin', password: adminPassword, role: 'admin' },
       { username: 'viewer', password: 'viewer123', role: 'user' },
     ];
     const now = new Date().toISOString();

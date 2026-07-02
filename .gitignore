@@ -10,3 +10,9 @@ CLAUDE.md
 *.db-journal
 *.db-wal
 *.db-shm
+
+# Legacy local account store (password hashes — never in a public repo)
+server/data/users.json
+
+# TypeScript incremental build state
+*.tsbuildinfo

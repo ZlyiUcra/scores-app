@@ -9,7 +9,8 @@ import { DatabaseSync } from 'node:sqlite';
 // API (emits one ExperimentalWarning on boot); no third-party dependency.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, '..', 'data');
+// Overridable so a host with a persistent disk can point it at the mount.
+const DATA_DIR = process.env.DATA_DIR ?? path.join(__dirname, '..', 'data');
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 /** Where the legacy JSON stores live — used once to import existing users. */
