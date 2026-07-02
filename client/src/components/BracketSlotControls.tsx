@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import type { BracketMatch, UpdateBracketRequest } from '../../../shared/types';
+import { useEffect, useMemo, useState } from 'react';
+import type { BracketMatch, BracketParticipant, UpdateBracketRequest } from '../../../shared/types';
 import { adminApi } from '../adminApi';
 import { ApiError } from '../api';
 import { participantName } from '../bracketLabels';
 import { useI18n } from '../i18n';
+import { useRosterStore } from '../rosterStore';
 
 /** ISO -> value for <input type="datetime-local"> in the local timezone. */
 function toLocalInput(iso: string | null): string {
@@ -21,12 +22,29 @@ function toLocalInput(iso: string | null): string {
  * Kick-off time is the one typed field; it commits on blur.
  * Rendered only for admins (UX) — the server's requireAdmin is the real gate.
  */
+/** The select shows the pinned team when a side is manual, "(auto)" otherwise. */
+function overrideValue(p: BracketParticipant): string {
+  return 'team' in p && p.manual ? p.team.id : '';
+}
+
 export function BracketSlotControls({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
   const ready = 'team' in m.home && 'team' in m.away;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [startsAt, setStartsAt] = useState(toLocalInput(m.startsAt));
+  const teams = useRosterStore((s) => s.teams);
+  // Rebuilt only when the roster changes, NOT on every bracket snapshot, so
+  // the option children stay reference-equal across score-click re-renders.
+  const teamOptions = useMemo(
+    () =>
+      teams.map((tm) => (
+        <option key={tm.id} value={tm.id}>
+          {tm.name}
+        </option>
+      )),
+    [teams],
+  );
 
   // Re-sync the time field when the authoritative slot changes (rev bump).
   useEffect(() => {
@@ -60,6 +78,15 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
       awayPens: (m.awayPens ?? 0) + (side === 'away' ? delta : 0),
     });
 
+  // Pin a side to a team ('' = back to auto/derived). Available regardless of
+  // readiness — pinning teams into a pending slot IS the walkover use case.
+  const setOverride = (side: 'home' | 'away', value: string) =>
+    patch(
+      side === 'home'
+        ? { homeOverrideId: value === '' ? null : value }
+        : { awayOverrideId: value === '' ? null : value },
+    );
+
   function commitTime() {
     const next = startsAt === '' ? null : new Date(startsAt).toISOString();
     if (next === m.startsAt) return;
@@ -78,6 +105,30 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
         <span className="slot-editor__names">
           {participantName(m.home, t)} <span className="muted">vs</span> {participantName(m.away, t)}
         </span>
+      </div>
+
+      {/* Participant pins live OUTSIDE the ready gate: pinning teams into a
+          slot that has none yet is exactly the walkover/override use case. */}
+      <div className="slot-editor__overrides">
+        <span className="muted">{t('adminBracket.override')}</span>
+        <select
+          className="input"
+          value={overrideValue(m.home)}
+          disabled={busy}
+          onChange={(e) => void setOverride('home', e.target.value)}
+        >
+          <option value="">{t('adminBracket.auto')}</option>
+          {teamOptions}
+        </select>
+        <select
+          className="input"
+          value={overrideValue(m.away)}
+          disabled={busy}
+          onChange={(e) => void setOverride('away', e.target.value)}
+        >
+          <option value="">{t('adminBracket.auto')}</option>
+          {teamOptions}
+        </select>
       </div>
 
       {ready ? (
@@ -132,12 +183,13 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
             <input className="input" type="datetime-local" value={startsAt}
               onChange={(e) => setStartsAt(e.target.value)} onBlur={commitTime} disabled={busy} />
           </label>
-
-          {err && <p className="admin__error">{err}</p>}
         </>
       ) : (
         <p className="muted slot-editor__hint">{t('adminBracket.notReady')}</p>
       )}
+
+      {/* Outside the ready gate so pin errors on a pending slot surface too. */}
+      {err && <p className="admin__error">{err}</p>}
     </div>
   );
 }

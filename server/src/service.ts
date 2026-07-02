@@ -26,10 +26,12 @@ import { AppError } from './errors.js';
 
 /**
  * Group results (and now group membership, since it drives seeding and bracket
- * size) feed the derived bracket. Once any knockout slot has a result, changing
- * a group match OR the group setup could silently change who qualified while the
- * entered knockout scores stay attached to their slots — a divergence. So those
- * mutations are blocked until the admin explicitly resets the knockout stage.
+ * size) feed the derived bracket. Once any knockout slot has a result OR a
+ * pinned participant (override), changing a group match OR the group setup
+ * could silently change who qualified — or delete/repoint the very team an
+ * override references — while the entered knockout state stays attached to its
+ * slots: a divergence. So those mutations are blocked until the admin
+ * explicitly resets the knockout stage.
  */
 function assertBracketNotStarted(): void {
   if (bracketRepository.hasStarted()) {
@@ -313,10 +315,13 @@ function assertSlot(slotRaw: string): BracketSlotId {
 }
 
 /**
- * Admin: set one knockout slot's result. Never touches teams (they are derived).
- * Enforces: the slot exists for the current bracket size; participants are known
- * before going live/finished; a finished match cannot end level without a
- * decisive penalty result. Returns the full knockout view.
+ * Admin: set one knockout slot's result and/or pin its participants. Enforces:
+ * the slot exists for the current bracket size; an override references an
+ * existing team and the two pins differ; participants are known (derived or
+ * pinned) and resolve to two DIFFERENT teams before going live/finished — the
+ * same team may sit in two slots' pins transiently during a correction, but a
+ * match can never start against itself; a finished match cannot end level
+ * without a decisive penalty result. Returns the full knockout view.
  */
 export function updateBracketSlot(slotRaw: string, input: UpdateBracketInput): BracketView {
   const slot = assertSlot(slotRaw);
@@ -337,14 +342,43 @@ export function updateBracketSlot(slotRaw: string, input: UpdateBracketInput): B
     status: input.status ?? current.status,
     field: input.field ?? current.field,
     startsAt: input.startsAt !== undefined ? input.startsAt : current.startsAt,
+    homeOverrideId: input.homeOverrideId !== undefined ? input.homeOverrideId : current.homeOverrideId,
+    awayOverrideId: input.awayOverrideId !== undefined ? input.awayOverrideId : current.awayOverrideId,
     rev: current.rev + 1,
   };
 
-  // A slot can only be played once its two teams are actually known.
+  // A pin must reference an existing team (team deletion is locked while any
+  // override exists — see hasStarted — so a stored pin can never dangle).
+  if (next.homeOverrideId != null && !teamRepository.get(next.homeOverrideId)) {
+    throw new AppError('NOT_FOUND', `Override team ${next.homeOverrideId} not found.`, 404);
+  }
+  if (next.awayOverrideId != null && !teamRepository.get(next.awayOverrideId)) {
+    throw new AppError('NOT_FOUND', `Override team ${next.awayOverrideId} not found.`, 404);
+  }
+  if (next.homeOverrideId != null && next.homeOverrideId === next.awayOverrideId) {
+    throw new AppError('INVALID', 'A team cannot play itself.', 400);
+  }
+
+  // A slot can only be played once its two sides resolve to two DIFFERENT
+  // teams. Resolve against the HYPOTHETICAL store including this write, so a
+  // patch that both pins a side and starts the match is judged on its outcome
+  // (this also catches the propagated duplicate: a pinned team meeting itself
+  // arriving as a derived winner of another slot).
   if (next.status !== 'scheduled') {
-    const bm = resolvedBracket().matches.find((b) => b.slot === slot);
+    const hypothetical = bracketRepository.results();
+    hypothetical[slot] = next;
+    const view = resolveBracket(
+      groupRepository.list(),
+      teamRepository.listSeed(),
+      matchRepository.list(),
+      hypothetical,
+    );
+    const bm = view.matches.find((b) => b.slot === slot);
     if (!bm || !('team' in bm.home) || !('team' in bm.away)) {
       throw new AppError('SLOT_NOT_READY', 'This knockout match has no teams yet.', 409);
+    }
+    if (bm.home.team.id === bm.away.team.id) {
+      throw new AppError('INVALID', 'Both sides of this match resolve to the same team.', 400);
     }
   }
 

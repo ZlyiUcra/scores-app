@@ -75,6 +75,8 @@ db.exec(`
     status TEXT NOT NULL,
     field TEXT NOT NULL,
     startsAt TEXT,
+    homeOverrideId TEXT,
+    awayOverrideId TEXT,
     rev INTEGER NOT NULL
   );
   CREATE TABLE IF NOT EXISTS players (
@@ -88,6 +90,14 @@ db.exec(`
   CREATE UNIQUE INDEX IF NOT EXISTS players_team_number
     ON players(teamId, number) WHERE number IS NOT NULL;
 `);
+
+// Schema evolution: bracket rows gained per-side admin override columns after
+// the first production deploy. CREATE IF NOT EXISTS won't touch an existing
+// table, so patch it in place (same PRAGMA-check pattern as the teams table).
+const bracketInfo = db.prepare('PRAGMA table_info(bracket)').all() as Array<{ name: string }>;
+if (bracketInfo.length > 0 && !bracketInfo.some((c) => c.name === 'homeOverrideId')) {
+  db.exec('ALTER TABLE bracket ADD COLUMN homeOverrideId TEXT; ALTER TABLE bracket ADD COLUMN awayOverrideId TEXT;');
+}
 
 /** Run `fn` inside a transaction; rolls back on throw so a partial write never
  * lands (mirrors the atomic temp-then-rename guarantee the JSON stores had). */

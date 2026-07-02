@@ -114,8 +114,9 @@ export type SeedRef =
   | { kind: 'winner'; slot: BracketSlotId } // winner of an earlier slot
   | { kind: 'loser'; slot: BracketSlotId }; // loser of an earlier slot
 
-/** A slot side is either a resolved team or a still-symbolic seed. */
-export type BracketParticipant = { team: Team } | { seed: SeedRef };
+/** A slot side is either a resolved team or a still-symbolic seed. `manual`
+ * marks a side pinned by an admin override rather than derived from results. */
+export type BracketParticipant = { team: Team; manual?: boolean } | { seed: SeedRef };
 
 /** Resolved knockout match DTO (participants embedded or left symbolic). */
 export interface BracketMatch {
@@ -235,9 +236,10 @@ export interface CreateMatchRequest {
   field: string;
 }
 
-/** Admin write to a single knockout slot. Never carries team ids — the two
- * participants of a slot are fixed by the bracket format / derived from
- * results, so a client can never inject arbitrary teams into the bracket. */
+/** Admin write to a single knockout slot. Participants are normally derived
+ * from the format/results; the override ids are the one sanctioned way to pin
+ * a side manually (walkover, disqualification, correction). Tri-state per
+ * side: string pins, null clears back to derived, absent keeps. */
 export interface UpdateBracketRequest {
   homeScore?: number;
   awayScore?: number;
@@ -247,6 +249,8 @@ export interface UpdateBracketRequest {
   status?: MatchStatus;
   field?: string;
   startsAt?: string | null;
+  homeOverrideId?: string | null;
+  awayOverrideId?: string | null;
   expectedRev?: number;
 }
 

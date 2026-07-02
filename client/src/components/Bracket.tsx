@@ -33,7 +33,12 @@ function Side({ m, side }: { m: BracketMatch; side: 'home' | 'away' }) {
   const showScore = m.status !== 'scheduled';
   return (
     <div className={`bcard__side ${won ? 'bcard__side--won' : ''} ${isTeam ? '' : 'bcard__side--seed'}`}>
-      <span className="bcard__name">{participantName(p, t)}</span>
+      <span className="bcard__name">
+        {participantName(p, t)}
+        {'team' in p && p.manual && (
+          <span className="bcard__manual" title={t('bracket.manual')}>*</span>
+        )}
+      </span>
       <span className="bcard__score">
         {showScore ? score : '—'}
         {pens != null && <sup className="bcard__pens">{pens}</sup>}

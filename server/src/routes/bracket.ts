@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { requireAdmin, requireAuth } from '../auth.js';
+import { audit } from '../audit.js';
 import { updateBracketSchema } from '../validation.js';
 import { listBracket, resetBracket, updateBracketSlot } from '../service.js';
 import { broadcastBracket } from '../socket.js';
@@ -20,8 +21,9 @@ bracketRouter.get('/', requireAuth, (_req, res) => {
   res.json({ bracket: listBracket() });
 });
 
-// Write one slot's result: admin only. The slot comes from the URL; the body
-// carries only scores/status/pens — never team ids.
+// Write one slot's result and/or participant pins: admin only. The slot comes
+// from the URL; override ids in the body are the one sanctioned way to place a
+// team manually (validated in the service).
 bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, (req, res, next) => {
   const parsed = updateBracketSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -30,6 +32,11 @@ bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, (req, res, n
   }
   try {
     const bracket = updateBracketSlot(req.params.slot, parsed.data);
+    // Rewiring who plays is the highest-impact bracket write — leave a trace.
+    if (parsed.data.homeOverrideId !== undefined || parsed.data.awayOverrideId !== undefined) {
+      const pins = { home: parsed.data.homeOverrideId, away: parsed.data.awayOverrideId };
+      audit(req.user!.id, `bracket.override(${JSON.stringify(pins)})`, req.params.slot);
+    }
     broadcastBracket(bracket);
     res.json({ bracket });
   } catch (err) {

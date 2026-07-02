@@ -191,9 +191,10 @@ export const createMatchSchema = z
   .strict()
   .refine((v) => v.homeId !== v.awayId, { path: ['awayId'], message: 'A team cannot play itself.' });
 
-// Admin write to one knockout slot. Note: NO team ids and NO slot in the body —
-// the two participants are fixed by the format, so the bracket cannot be
-// rewired through this path. The slot comes from the URL.
+// Admin write to one knockout slot. The slot comes from the URL. Participants
+// are derived from the format; the override ids are the one sanctioned way to
+// pin a side manually (existence and same-team rules enforced in the service).
+// Tri-state: string pins, null clears back to derived, absent keeps.
 export const updateBracketSchema = z
   .object({
     homeScore: scoreField.optional(),
@@ -203,6 +204,8 @@ export const updateBracketSchema = z
     status: z.enum(['scheduled', 'live', 'finished']).optional(),
     field: fieldLabel.optional(),
     startsAt: z.string().datetime().nullable().optional(),
+    homeOverrideId: z.string().min(1).max(64).nullable().optional(),
+    awayOverrideId: z.string().min(1).max(64).nullable().optional(),
     expectedRev: z.number().int().min(1).optional(),
   })
   .strict()

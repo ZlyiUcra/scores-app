@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Routes, Route, Navigate, Link, NavLink } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { api } from './api';
@@ -40,25 +40,59 @@ function LangSwitcher() {
 function Header() {
   const { user, isAdmin, logout } = useAuth();
   const { t } = useI18n();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+  const closeMenu = () => setMenuOpen(false);
+
+  // Escape closes the panel and returns focus to the burger so keyboard users
+  // are not left inside a hidden subtree. The listener exists only while open.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== 'Escape') return;
+      setMenuOpen(false);
+      burgerRef.current?.focus();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [menuOpen]);
+
   const link = ({ isActive }: { isActive: boolean }) =>
     `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`;
   return (
     <header className="header">
       <Link to="/" className="header__brand">{t('tournament.short')}</Link>
-      <nav className="header__nav">
-        <NavLink to="/" end className={link}>{t('nav.overview')}</NavLink>
-        <NavLink to="/results" className={link}>{t('nav.results')}</NavLink>
-        <NavLink to="/ko" className={link}>{t('nav.knockout')}</NavLink>
-        <NavLink to="/teams" className={link}>{t('nav.teams')}</NavLink>
-        {isAdmin && <NavLink to="/admin" className={link}>{t('nav.admin')}</NavLink>}
-      </nav>
-      <div className="header__right">
-        <LangSwitcher />
-        <span className="header__user">
-          {user?.username}
-          <span className={`chip chip--${user?.role}`}>{user?.role === 'admin' ? t('role.admin') : t('role.viewer')}</span>
-        </span>
-        <button className="btn btn--sm btn--ghost" onClick={() => void logout()}>{t('header.logout')}</button>
+      <button
+        ref={burgerRef}
+        type="button"
+        className="header__burger"
+        aria-expanded={menuOpen}
+        aria-controls="header-menu"
+        aria-label={t('header.menu')}
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        <span className="header__burger-bar" />
+      </button>
+      {/* Rendered ONCE for both layouts: desktop dissolves this wrapper via
+          display:contents; mobile shows it as the dropdown panel while open.
+          Links close the menu via onClick because a same-route click fires no
+          location change. */}
+      <div id="header-menu" className={`header__menu ${menuOpen ? 'header__menu--open' : ''}`}>
+        <nav className="header__nav">
+          <NavLink to="/" end className={link} onClick={closeMenu}>{t('nav.overview')}</NavLink>
+          <NavLink to="/results" className={link} onClick={closeMenu}>{t('nav.results')}</NavLink>
+          <NavLink to="/ko" className={link} onClick={closeMenu}>{t('nav.knockout')}</NavLink>
+          <NavLink to="/teams" className={link} onClick={closeMenu}>{t('nav.teams')}</NavLink>
+          {isAdmin && <NavLink to="/admin" className={link} onClick={closeMenu}>{t('nav.admin')}</NavLink>}
+        </nav>
+        <div className="header__right">
+          <LangSwitcher />
+          <span className="header__user">
+            {user?.username}
+            <span className={`chip chip--${user?.role}`}>{user?.role === 'admin' ? t('role.admin') : t('role.viewer')}</span>
+          </span>
+          <button className="btn btn--sm btn--ghost" onClick={() => void logout()}>{t('header.logout')}</button>
+        </div>
       </div>
     </header>
   );

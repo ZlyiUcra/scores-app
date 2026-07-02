@@ -1,5 +1,5 @@
 {
-  "header": { "adminPanel": "Admin panel", "logout": "Log out" },
+  "header": { "adminPanel": "Admin panel", "logout": "Log out", "menu": "Menu" },
   "app": { "loading": "Loading…" },
   "role": { "admin": "admin", "viewer": "viewer" },
   "login": {
@@ -172,6 +172,7 @@
     "finalShort": "Final",
     "thirdShort": "3rd/4th",
     "vs": "vs",
+    "manual": "Manually assigned",
     "empty": "The bracket appears once the group stage is set up.",
     "note": "The top two of every group qualify; the best third-placed teams fill the bracket up to a power of two. A level knockout match is decided on penalties.",
     "reason": {
@@ -197,6 +198,7 @@
     "pens": "Penalties",
     "notReady": "Teams for this match are not decided yet.",
     "homeScore": "Home score", "awayScore": "Away score",
-    "homePens": "Home penalties", "awayPens": "Away penalties"
+    "homePens": "Home penalties", "awayPens": "Away penalties",
+    "override": "Manual teams", "auto": "Auto"
   }
 }

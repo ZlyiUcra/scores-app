@@ -39,7 +39,10 @@ export interface SeedTeam extends Team {
   groupAddedAt: string | null;
 }
 
-/** Stored knockout slot result (teams are NEVER stored — always derived). */
+/** Stored knockout slot: a result plus optional per-side admin overrides.
+ * Participants are still derived by default; an override pins one side to a
+ * team id (walkover/disqualification/correction) and is the ONLY stored team
+ * reference in the knockout. */
 export interface BracketResult {
   homeScore: number;
   awayScore: number;
@@ -48,6 +51,9 @@ export interface BracketResult {
   status: MatchStatus;
   field: string;
   startsAt: string | null;
+  /** Admin-pinned participants; null = derived from seeds/results. */
+  homeOverrideId: string | null;
+  awayOverrideId: string | null;
   rev: number;
 }
 
@@ -60,6 +66,8 @@ export function emptyBracketResult(): BracketResult {
     status: 'scheduled',
     field: '',
     startsAt: null,
+    homeOverrideId: null,
+    awayOverrideId: null,
     rev: 1,
   };
 }
@@ -329,7 +337,9 @@ export function bracketSlotIds(size: number): BracketSlotId[] {
 /**
  * Resolve the whole knockout view: formability, size, and the resolved matches.
  * Qualifiers resolve to teams only when every group is complete; winners/losers
- * resolve lazily from stored results (no forward writes).
+ * resolve lazily from stored results (no forward writes). A side with a stored
+ * override resolves to that team (marked `manual`) instead of its seed, and the
+ * override flows downstream through winner/loser refs like any other outcome.
  */
 export function resolveBracket(
   groups: Group[],
@@ -348,6 +358,9 @@ export function resolveBracket(
   const bySlot = new Map<BracketSlotId, { round: Round; home: SeedRef; away: SeedRef }>();
   for (let i = 0; i < structure.length; i++) bySlot.set(structure[i].slot, structure[i]);
 
+  const teamById = new Map<string, Team>();
+  for (let i = 0; i < seedTeams.length; i++) teamById.set(seedTeams[i].id, seedTeams[i]);
+
   const outcomeMemo = new Map<BracketSlotId, { winner: Team; loser: Team } | null>();
 
   function resolveSeed(seed: SeedRef): BracketParticipant {
@@ -365,6 +378,19 @@ export function resolveBracket(
     }
   }
 
+  /** Override (if set and the team exists) beats the derived seed. A dangling
+   * id falls back to derived — writes guard against creating one, so this is
+   * defense-in-depth only, never a state the UI should reach. */
+  function resolveSide(slot: BracketSlotId, seed: SeedRef, side: 'home' | 'away'): BracketParticipant {
+    const res = results[slot];
+    const overrideId = res ? (side === 'home' ? res.homeOverrideId : res.awayOverrideId) : null;
+    if (overrideId != null) {
+      const team = teamById.get(overrideId);
+      if (team) return { team, manual: true };
+    }
+    return resolveSeed(seed);
+  }
+
   function slotOutcome(slot: BracketSlotId): { winner: Team; loser: Team } | null {
     const cached = outcomeMemo.get(slot);
     if (cached !== undefined) return cached;
@@ -374,8 +400,8 @@ export function resolveBracket(
     const fmt = bySlot.get(slot);
     let outcome: { winner: Team; loser: Team } | null = null;
     if (res && res.status === 'finished' && fmt) {
-      const home = resolveSeed(fmt.home);
-      const away = resolveSeed(fmt.away);
+      const home = resolveSide(slot, fmt.home, 'home');
+      const away = resolveSide(slot, fmt.away, 'away');
       if ('team' in home && 'team' in away) {
         let homeWins: boolean | null = null;
         if (res.homeScore > res.awayScore) homeWins = true;
@@ -399,8 +425,8 @@ export function resolveBracket(
     out.push({
       slot: s.slot,
       round: s.round,
-      home: resolveSeed(s.home),
-      away: resolveSeed(s.away),
+      home: resolveSide(s.slot, s.home, 'home'),
+      away: resolveSide(s.slot, s.away, 'away'),
       homeScore: res.homeScore,
       awayScore: res.awayScore,
       homePens: res.homePens,

@@ -3,19 +3,21 @@ import { emptyBracketResult, type BracketResult } from '../../shared/tournament.
 import { AppError } from './errors.js';
 import { db, transaction } from './db.js';
 
-/** Persisted knockout slot: a result only. Teams are NEVER stored here — they
- * are derived from group standings + earlier results (see resolveBracket).
- * Slot ids are dynamic (`R{roundSize}M{index}` / `THIRD`); the store keeps only
- * the slots that have actually been written, and the resolver fills the rest. */
+/** Persisted knockout slot: a result plus optional per-side admin overrides.
+ * Derived resolution stays the default — an override pins one side to a team
+ * id and is the only stored team reference here (see resolveBracket). Slot ids
+ * are dynamic (`R{roundSize}M{index}` / `THIRD`); the store keeps only the
+ * slots that have actually been written, and the resolver fills the rest. */
 interface StoredSlot extends BracketResult {
   slot: BracketSlotId;
 }
 
 /**
- * Bracket store — a partial map of slotId -> result. Deliberately narrow: it can
- * only set a slot's RESULT, never its teams, so the seed/format integrity can't
- * be bypassed here. Size is NOT this store's concern: which slots exist is a
- * pure function of the group setup, computed elsewhere.
+ * Bracket store — a partial map of slotId -> result. Deliberately narrow: aside
+ * from the sanctioned per-side overrides (validated in the service), it can
+ * only set a slot's RESULT, so the seed/format integrity can't be bypassed
+ * here. Size is NOT this store's concern: which slots exist is a pure function
+ * of the group setup, computed elsewhere.
  */
 export interface BracketRepository {
   /** All written slot results (partial), for the pure resolver. */
@@ -25,7 +27,9 @@ export interface BracketRepository {
   save(slot: BracketSlotId, result: BracketResult): void;
   /** Clear every slot (needed before the bracket size can change). */
   reset(): void;
-  /** True once any slot has moved off `scheduled` (a result was entered). */
+  /** True once the knockout was touched: any slot off `scheduled` OR any
+   * pinned participant. Both couple bracket state to the group setup, so both
+   * must lock group/team mutations until an explicit reset. */
   hasStarted(): boolean;
 }
 
@@ -38,7 +42,9 @@ class SqliteBracketRepository implements BracketRepository {
 
   private load(): void {
     const rows = db
-      .prepare('SELECT slot, homeScore, awayScore, homePens, awayPens, status, field, startsAt, rev FROM bracket')
+      .prepare(
+        'SELECT slot, homeScore, awayScore, homePens, awayPens, status, field, startsAt, homeOverrideId, awayOverrideId, rev FROM bracket',
+      )
       .all() as Array<{
       slot: string;
       homeScore: number;
@@ -48,6 +54,8 @@ class SqliteBracketRepository implements BracketRepository {
       status: string;
       field: string;
       startsAt: string | null;
+      homeOverrideId: string | null;
+      awayOverrideId: string | null;
       rev: number;
     }>;
     this.bySlot.clear();
@@ -61,6 +69,8 @@ class SqliteBracketRepository implements BracketRepository {
         status: r.status as MatchStatus,
         field: r.field,
         startsAt: r.startsAt,
+        homeOverrideId: r.homeOverrideId,
+        awayOverrideId: r.awayOverrideId,
         rev: r.rev,
       });
     }
@@ -70,10 +80,22 @@ class SqliteBracketRepository implements BracketRepository {
     transaction(() => {
       db.exec('DELETE FROM bracket');
       const ins = db.prepare(
-        'INSERT INTO bracket (slot, homeScore, awayScore, homePens, awayPens, status, field, startsAt, rev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO bracket (slot, homeScore, awayScore, homePens, awayPens, status, field, startsAt, homeOverrideId, awayOverrideId, rev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       );
       for (const [slot, r] of this.bySlot) {
-        ins.run(slot, r.homeScore, r.awayScore, r.homePens, r.awayPens, r.status, r.field, r.startsAt, r.rev);
+        ins.run(
+          slot,
+          r.homeScore,
+          r.awayScore,
+          r.homePens,
+          r.awayPens,
+          r.status,
+          r.field,
+          r.startsAt,
+          r.homeOverrideId,
+          r.awayOverrideId,
+          r.rev,
+        );
       }
     });
   }
@@ -114,7 +136,9 @@ class SqliteBracketRepository implements BracketRepository {
   }
 
   hasStarted(): boolean {
-    for (const r of this.bySlot.values()) if (r.status !== 'scheduled') return true;
+    for (const r of this.bySlot.values()) {
+      if (r.status !== 'scheduled' || r.homeOverrideId != null || r.awayOverrideId != null) return true;
+    }
     return false;
   }
 }

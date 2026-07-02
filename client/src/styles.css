@@ -78,8 +78,42 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.75rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line);
 }
-.header__brand { font-weight: 800; }
+.header__brand { font-weight: 800; white-space: nowrap; }
 .header__right { display: flex; align-items: center; gap: 0.75rem; }
+.header__burger { display: none; }
+/* The menu wrapper only exists as a box on mobile; on desktop it dissolves so
+ * nav and the right block stay direct flex children of the header row. */
+.header__menu { display: contents; }
+@media (max-width: 720px) {
+  .header__burger {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.25rem; height: 2.25rem; padding: 0; cursor: pointer;
+    background: transparent; border: 1px solid var(--line); border-radius: 8px; color: var(--text);
+  }
+  .header__burger-bar { position: relative; display: block; width: 1.1rem; height: 2px; background: currentColor; }
+  .header__burger-bar::before, .header__burger-bar::after {
+    content: ''; position: absolute; left: 0; width: 1.1rem; height: 2px; background: currentColor;
+  }
+  .header__burger-bar::before { top: -5px; }
+  .header__burger-bar::after { top: 5px; }
+
+  .header__menu { display: none; }
+  /* Overlay panel: absolute under the sticky bar so opening never reflows the
+   * page below it; content taller than the viewport scrolls inside. */
+  .header__menu--open {
+    display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 0.75rem 1rem; max-height: calc(100vh - 3.5rem); overflow-y: auto;
+  }
+  .header__menu--open .header__nav { flex-direction: column; gap: 0.25rem; margin: 0; }
+  .header__menu--open .header__nav-link { padding: 0.6rem 0.7rem; }
+  .header__menu--open .header__right {
+    flex-wrap: wrap; justify-content: space-between;
+    border-top: 1px solid var(--line); padding-top: 0.75rem;
+  }
+  .header__menu--open .header__user { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+}
 .header__user { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--muted); }
 .chip { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 700; }
 .chip--admin { background: rgba(63,185,80,0.15); color: var(--accent); }
@@ -240,8 +274,12 @@ body {
 
 /* ---------- Standings ---------- */
 /* Any number of groups: as many columns as fit the container, never wider
- * than it. A card whose table is still too tight scrolls inside .table-wrap. */
-.standings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 1rem; }
+ * than it. auto-fill keeps empty tracks so an orphan card on the last row
+ * stays the same width as its siblings instead of stretching. A lone group
+ * (no siblings at all) spans the row. A card whose table is still too tight
+ * scrolls inside .table-wrap. */
+.standings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 1rem; }
+.standings-grid > .standings:only-child { grid-column: 1 / -1; }
 .standings {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.75rem 1rem 1rem;
 }
@@ -338,6 +376,7 @@ body {
 .bcard__side--won .bcard__name { color: var(--accent); }
 .bcard__score { font-variant-numeric: tabular-nums; font-weight: 800; }
 .bcard__pens { font-size: 0.6rem; color: var(--muted); margin-left: 0.15rem; }
+.bcard__manual { color: var(--accent-2); font-weight: 800; margin-left: 0.15rem; cursor: help; }
 .ko-note { margin-top: 1rem; font-size: 0.8rem; }
 
 /* ---------- Admin bracket editor ---------- */
@@ -349,6 +388,8 @@ body {
 .slot-editor__slot { font-weight: 800; font-size: 0.8rem; color: var(--muted); }
 .slot-editor__names { font-weight: 600; font-size: 0.9rem; }
 .slot-editor__scores, .slot-editor__pens { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+.slot-editor__overrides { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; font-size: 0.85rem; }
+.slot-editor__overrides select { flex: 1; min-width: 0; }
 /* Pens sit under the centered goal panels — center them the same way. */
 .slot-editor__pens { justify-content: center; }
 .slot-editor__hint { margin: 0; font-size: 0.85rem; }

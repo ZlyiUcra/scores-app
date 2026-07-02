@@ -12,6 +12,7 @@ import {
   updateTeamSchema,
   updateUserSchema,
 } from '../validation.js';
+import { audit } from '../audit.js';
 import { deleteUser, listUsers, updateUser } from '../adminService.js';
 import {
   assignTeam,
@@ -55,11 +56,6 @@ const adminMutationLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: { code: 'RATE_LIMITED', message: 'Too many admin actions. Slow down.' } },
 });
-
-/** Minimal audit trail. A file/DB-backed log is a documented fast-follow. */
-function audit(actor: string, action: string, target: string): void {
-  console.log(`[audit] ${new Date().toISOString()} actor=${actor} action=${action} target=${target}`);
-}
 
 // ---- Users ----
 
