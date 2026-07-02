@@ -24,6 +24,7 @@
     "noGames": "No games yet."
   },
   "matchDetail": { "back": "← Back to results", "notFound": "Match not found." },
+  "knockoutDetail": { "back": "← Back to bracket", "notFound": "Game not found." },
   "match": { "group": "Group {group}", "vs": "{home} vs {away}" },
   "status": { "scheduled": "Scheduled", "live": "LIVE", "finished": "Finished" },
   "adminControls": {
@@ -145,10 +146,18 @@
     "knockout": "Knockouts",
     "viewBracket": "View bracket"
   },
+  "thirds": {
+    "title": "Best 3rd places",
+    "note": "Top {n} qualify",
+    "colGroup": "Group"
+  },
   "standings": {
     "group": "Group {group}",
     "team": "Team",
     "played": "P", "playedFull": "Played",
+    "won": "W", "wonFull": "Wins",
+    "drawn": "D", "drawnFull": "Draws",
+    "lost": "L", "lostFull": "Losses",
     "gf": "GF", "gfFull": "Goals for",
     "ga": "GA", "gaFull": "Goals against",
     "gd": "GD", "gdFull": "Goal difference",

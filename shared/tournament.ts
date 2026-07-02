@@ -87,8 +87,34 @@ export function roundName(roundSize: number): Round {
 }
 
 /**
- * Per-group standings from FINISHED matches only. No tiebreaks by request: sort
- * by points, then a deterministic teamId fallback so order never flickers.
+ * Points each of the two teams earned in their finished mutual meetings within
+ * the group. Returned as a sort delta (negative -> `a` ranks higher).
+ */
+function headToHeadDelta(aId: string, bId: string, groupId: string, matches: Match[]): number {
+  let aPts = 0;
+  let bPts = 0;
+  for (let i = 0; i < matches.length; i++) {
+    const m = matches[i];
+    if (m.status !== 'finished' || m.group !== groupId) continue;
+    const ab = m.home.id === aId && m.away.id === bId;
+    const ba = m.home.id === bId && m.away.id === aId;
+    if (!ab && !ba) continue;
+    const aScore = ab ? m.homeScore : m.awayScore;
+    const bScore = ab ? m.awayScore : m.homeScore;
+    if (aScore > bScore) aPts += TOURNAMENT_FORMAT.points.win;
+    else if (aScore < bScore) bPts += TOURNAMENT_FORMAT.points.win;
+    else {
+      aPts += TOURNAMENT_FORMAT.points.draw;
+      bPts += TOURNAMENT_FORMAT.points.draw;
+    }
+  }
+  return bPts - aPts;
+}
+
+/**
+ * Per-group standings from FINISHED matches only. Sort: points, then wins,
+ * then goals scored, then (only when all three are level) the head-to-head
+ * meetings, then a deterministic teamId fallback so order never flickers.
  */
 export function computeStandings(groups: Group[], teams: Team[], matches: Match[]): GroupTable[] {
   const tables: GroupTable[] = [];
@@ -147,7 +173,14 @@ export function computeStandings(groups: Group[], teams: Team[], matches: Match[
 
     const rows = Array.from(rowByTeam.values());
     for (let i = 0; i < rows.length; i++) rows[i].goalDiff = rows[i].goalsFor - rows[i].goalsAgainst;
-    rows.sort((a, b) => b.points - a.points || a.team.id.localeCompare(b.team.id));
+    rows.sort(
+      (a, b) =>
+        b.points - a.points ||
+        b.won - a.won ||
+        b.goalsFor - a.goalsFor ||
+        headToHeadDelta(a.team.id, b.team.id, group.id, matches) ||
+        a.team.id.localeCompare(b.team.id),
+    );
     for (let i = 0; i < rows.length; i++) rows[i].rank = i + 1;
 
     tables.push({ group, rows });
@@ -201,6 +234,20 @@ export function computeSize(
   return { formable: true, reason: null, size };
 }
 
+/**
+ * Third-placed rows across all groups in QUALIFICATION order — the exact
+ * comparator used to pick the best thirds for the bracket (points, then a
+ * deterministic teamId fallback). Also drives the public best-3rds table.
+ */
+export function computeThirdPlaces(tables: GroupTable[]): Array<{ group: Group; row: StandingRow }> {
+  const out: Array<{ group: Group; row: StandingRow }> = [];
+  for (let i = 0; i < tables.length; i++) {
+    if (tables[i].rows.length >= 3) out.push({ group: tables[i].group, row: tables[i].rows[2] });
+  }
+  out.sort((a, b) => b.row.points - a.row.points || a.row.team.id.localeCompare(b.row.team.id));
+  return out;
+}
+
 /** The seeded, ordered list of qualifiers (length = size) once every group is
  * complete; null while still in progress. Thirds are SELECTED by points, but the
  * whole pool is SEEDED by groupAddedAt (then teamId) per the tournament rules. */
@@ -217,17 +264,15 @@ function computeQualifiers(
   for (let i = 0; i < seedTeams.length; i++) seedByTeam.set(seedTeams[i].id, seedTeams[i].groupAddedAt);
 
   const direct: StandingRow[] = [];
-  const thirds: StandingRow[] = [];
   for (let i = 0; i < tables.length; i++) {
     const rows = tables[i].rows;
     if (rows.length >= 1) direct.push(rows[0]);
     if (rows.length >= 2) direct.push(rows[1]);
-    if (rows.length >= 3) thirds.push(rows[2]);
   }
+  const thirds = computeThirdPlaces(tables).map((t) => t.row);
 
   const directCount = TOURNAMENT_FORMAT.qualifiersPerGroup * groups.length;
   const thirdsNeeded = size - directCount;
-  thirds.sort((a, b) => b.points - a.points || a.team.id.localeCompare(b.team.id));
   const pool = direct.concat(thirds.slice(0, thirdsNeeded));
 
   // Seed the whole pool by (groupAddedAt, then teamId) — total order.

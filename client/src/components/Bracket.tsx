@@ -1,6 +1,16 @@
+import { Link } from 'react-router-dom';
 import type { BracketMatch, BracketView, Round } from '../../../shared/types';
 import { useI18n } from '../i18n';
 import { participantName, slotShort } from '../bracketLabels';
+
+/** "19h30" like the results list; empty when unset/invalid. */
+export function formatTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}h${mm}`;
+}
 
 /** Which side won a finished knockout match ('home' | 'away' | null). */
 function winnerSide(m: BracketMatch): 'home' | 'away' | null {
@@ -34,17 +44,20 @@ function Side({ m, side }: { m: BracketMatch; side: 'home' | 'away' }) {
 
 function BracketCard({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
+  // The whole card links to the game page (admins get the edit controls
+  // there), same as a row in the results list.
   return (
-    <div className={`bcard bcard--${m.status}`}>
+    <Link to={`/ko/${m.slot}`} className={`bcard-link bcard bcard--${m.status}`}>
       <div className="bcard__head">
         <span className="bcard__slot">{slotShort(m.slot, t)}</span>
+        {m.startsAt && <span className="bcard__field">{formatTime(m.startsAt)}</span>}
         {m.field && <span className="bcard__field">{m.field}</span>}
         <span className="bcard__status">{t(`status.${m.status}`)}</span>
       </div>
       <Side m={m} side="home" />
       <div className="bcard__vs">{t('bracket.vs')}</div>
       <Side m={m} side="away" />
-    </div>
+    </Link>
   );
 }
 

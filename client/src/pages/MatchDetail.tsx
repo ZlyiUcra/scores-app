@@ -16,7 +16,7 @@ export function MatchDetail() {
   if (!match) {
     return (
       <div className="detail">
-        <Link to="/resultados" className="back">{t('matchDetail.back')}</Link>
+        <Link to="/results" className="back">{t('matchDetail.back')}</Link>
         <p className="muted">{t('matchDetail.notFound')}</p>
       </div>
     );
@@ -24,7 +24,7 @@ export function MatchDetail() {
 
   return (
     <div className="detail">
-      <Link to="/resultados" className="back">{t('matchDetail.back')}</Link>
+      <Link to="/results" className="back">{t('matchDetail.back')}</Link>
 
       <div className="scoreboard">
         <div className="scoreboard__team">

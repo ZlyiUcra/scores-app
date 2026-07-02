@@ -24,6 +24,7 @@
     "noGames": "Ainda sem jogos."
   },
   "matchDetail": { "back": "← Voltar aos resultados", "notFound": "Jogo não encontrado." },
+  "knockoutDetail": { "back": "← Voltar ao bracket", "notFound": "Jogo não encontrado." },
   "match": { "group": "Grupo {group}", "vs": "{home} contra {away}" },
   "status": { "scheduled": "Agendado", "live": "AO VIVO", "finished": "Terminado" },
   "adminControls": {
@@ -145,10 +146,18 @@
     "knockout": "Eliminatórias",
     "viewBracket": "Ver bracket"
   },
+  "thirds": {
+    "title": "Melhores 3ºs",
+    "note": "Passam os {n} primeiros",
+    "colGroup": "Grupo"
+  },
   "standings": {
     "group": "Grupo {group}",
     "team": "Equipa",
     "played": "J", "playedFull": "Jogos",
+    "won": "V", "wonFull": "Vitórias",
+    "drawn": "E", "drawnFull": "Empates",
+    "lost": "D", "lostFull": "Derrotas",
     "gf": "GM", "gfFull": "Golos marcados",
     "ga": "GS", "gaFull": "Golos sofridos",
     "gd": "DG", "gdFull": "Diferença de golos",

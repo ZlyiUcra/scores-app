@@ -1,12 +1,25 @@
+import { computeSize, computeThirdPlaces, TOURNAMENT_FORMAT } from '../../../shared/tournament';
 import { useMatchStore } from '../store';
+import { useRosterStore } from '../rosterStore';
 import { useStandings } from '../standings';
 import { StandingsTable } from '../components/StandingsTable';
+import { ThirdPlacesTable } from '../components/ThirdPlacesTable';
 import { useI18n } from '../i18n';
 
 export function Overview() {
   const { t } = useI18n();
   const tables = useStandings();
   const byId = useMatchStore((s) => s.byId);
+  const groups = useRosterStore((s) => s.groups);
+  const teams = useRosterStore((s) => s.teams);
+
+  // Best-3rds table appears only when 2 qualifiers per group do not land on a
+  // power of two, i.e. some third places must fill the bracket.
+  const sizeInfo = computeSize(groups, teams);
+  const thirdsNeeded = sizeInfo.formable
+    ? sizeInfo.size - TOURNAMENT_FORMAT.qualifiersPerGroup * groups.length
+    : 0;
+  const thirds = thirdsNeeded > 0 ? computeThirdPlaces(tables) : [];
 
   let total = 0;
   let played = 0;
@@ -33,6 +46,12 @@ export function Overview() {
           ))}
         </div>
       </section>
+
+      {thirds.length > 0 && (
+        <section className="thirds-section">
+          <ThirdPlacesTable thirds={thirds} qualifyCount={thirdsNeeded} />
+        </section>
+      )}
     </div>
   );
 }

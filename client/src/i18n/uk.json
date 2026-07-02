@@ -24,6 +24,7 @@
     "noGames": "Ще немає ігор."
   },
   "matchDetail": { "back": "← До результатів", "notFound": "Матч не знайдено." },
+  "knockoutDetail": { "back": "← До сітки", "notFound": "Гру не знайдено." },
   "match": { "group": "Група {group}", "vs": "{home} проти {away}" },
   "status": { "scheduled": "Заплановано", "live": "НАЖИВО", "finished": "Завершено" },
   "adminControls": {
@@ -145,10 +146,18 @@
     "knockout": "Плей-оф",
     "viewBracket": "Дивитись сітку"
   },
+  "thirds": {
+    "title": "Найкращі треті місця",
+    "note": "Проходять перші {n}",
+    "colGroup": "Група"
+  },
   "standings": {
     "group": "Група {group}",
     "team": "Команда",
     "played": "І", "playedFull": "Зіграно",
+    "won": "В", "wonFull": "Виграші",
+    "drawn": "Н", "drawnFull": "Нічиї",
+    "lost": "П", "lostFull": "Програші",
     "gf": "ЗМ", "gfFull": "Забиті м'ячі",
     "ga": "ПМ", "gaFull": "Пропущені м'ячі",
     "gd": "РМ", "gdFull": "Різниця м'ячів",

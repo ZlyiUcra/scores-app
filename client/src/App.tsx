@@ -11,6 +11,7 @@ import { Login } from './pages/Login';
 import { Overview } from './pages/Overview';
 import { MatchList } from './pages/MatchList';
 import { Eliminatorias } from './pages/Eliminatorias';
+import { KnockoutDetail } from './pages/KnockoutDetail';
 import { Squads } from './pages/Squads';
 import { MatchDetail } from './pages/MatchDetail';
 import { AdminLayout } from './pages/admin/AdminLayout';
@@ -46,9 +47,9 @@ function Header() {
       <Link to="/" className="header__brand">{t('tournament.short')}</Link>
       <nav className="header__nav">
         <NavLink to="/" end className={link}>{t('nav.overview')}</NavLink>
-        <NavLink to="/resultados" className={link}>{t('nav.results')}</NavLink>
+        <NavLink to="/results" className={link}>{t('nav.results')}</NavLink>
         <NavLink to="/ko" className={link}>{t('nav.knockout')}</NavLink>
-        <NavLink to="/equipas" className={link}>{t('nav.teams')}</NavLink>
+        <NavLink to="/teams" className={link}>{t('nav.teams')}</NavLink>
         {isAdmin && <NavLink to="/admin" className={link}>{t('nav.admin')}</NavLink>}
       </nav>
       <div className="header__right">
@@ -100,9 +101,10 @@ export function App() {
       <main className="app__main">
         <Routes>
           <Route path="/" element={<Overview />} />
-          <Route path="/resultados" element={<MatchList />} />
+          <Route path="/results" element={<MatchList />} />
           <Route path="/ko" element={<Eliminatorias />} />
-          <Route path="/equipas" element={<Squads />} />
+          <Route path="/ko/:slot" element={<KnockoutDetail />} />
+          <Route path="/teams" element={<Squads />} />
           <Route path="/match/:id" element={<MatchDetail />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/matches" replace />} />

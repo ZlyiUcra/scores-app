@@ -250,6 +250,14 @@ body {
 .standings__table th.standings__pos, .standings__table td.standings__pos,
 .standings__table th.standings__team, .standings__table td.standings__team { text-align: left; }
 .standings__pos { width: 1.5rem; color: var(--muted); }
+/* Best-3rds card sits right under the group grid — same breathing room as the grid gap. */
+.thirds-section { margin-top: 1rem; }
+/* Inside a standings card the head aligns like a plain card title, not a page section. */
+.standings .section-head { margin: 0 0 0.5rem; }
+
+/* A bracket card is a link to its game page; keep it looking like the card. */
+.bcard-link { display: block; text-decoration: none; color: inherit; }
+.bcard-link:hover { border-color: var(--accent-2); }
 .standings__short { font-weight: 800; color: var(--muted); font-size: 0.75rem; margin-right: 0.15rem; }
 .standings__ptsval { font-weight: 800; }
 .standings__table td { font-variant-numeric: tabular-nums; }
@@ -341,6 +349,8 @@ body {
 .slot-editor__slot { font-weight: 800; font-size: 0.8rem; color: var(--muted); }
 .slot-editor__names { font-weight: 600; font-size: 0.9rem; }
 .slot-editor__scores, .slot-editor__pens { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+/* Pens sit under the centered goal panels — center them the same way. */
+.slot-editor__pens { justify-content: center; }
 .slot-editor__hint { margin: 0; font-size: 0.85rem; }
 .input--num { width: 3.5rem; text-align: center; }
 .input--short { width: 5rem; }

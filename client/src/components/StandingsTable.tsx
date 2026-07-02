@@ -15,6 +15,9 @@ export function StandingsTable({ table }: { table: GroupTable }) {
               <th className="standings__pos">#</th>
               <th className="standings__team">{t('standings.team')}</th>
               <th title={t('standings.playedFull')}>{t('standings.played')}</th>
+              <th title={t('standings.wonFull')}>{t('standings.won')}</th>
+              <th title={t('standings.drawnFull')}>{t('standings.drawn')}</th>
+              <th title={t('standings.lostFull')}>{t('standings.lost')}</th>
               <th title={t('standings.gfFull')}>{t('standings.gf')}</th>
               <th title={t('standings.gaFull')}>{t('standings.ga')}</th>
               <th title={t('standings.gdFull')}>{t('standings.gd')}</th>
@@ -31,6 +34,9 @@ export function StandingsTable({ table }: { table: GroupTable }) {
                     <span className="standings__short">{r.team.shortName}</span> {r.team.name}
                   </td>
                   <td>{r.played}</td>
+                  <td>{r.won}</td>
+                  <td>{r.drawn}</td>
+                  <td>{r.lost}</td>
                   <td>{r.goalsFor}</td>
                   <td>{r.goalsAgainst}</td>
                   <td>{r.goalDiff > 0 ? `+${r.goalDiff}` : r.goalDiff}</td>
