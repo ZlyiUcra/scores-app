@@ -62,13 +62,16 @@ export const registerSchema = z
 
 const scoreField = z.number().int().min(0).max(99);
 
-/** PATCH body for a full score/status set (admin editing a result). */
+/** PATCH body for a full score/status set (admin editing a result), plus the
+ * schedule bits (kick-off, court) so generated placeholder times are fixable. */
 export const updateMatchSchema = z
   .object({
     homeScore: scoreField.optional(),
     awayScore: scoreField.optional(),
     status: z.enum(['scheduled', 'live', 'finished']).optional(),
     minute: z.number().int().min(0).max(130).optional(),
+    startsAt: z.string().datetime({ message: 'startsAt must be an ISO datetime.' }).optional(),
+    field: fieldLabel.optional(),
     /** Optimistic-concurrency guard: reject if it doesn't match server rev. */
     expectedRev: z.number().int().min(1).optional(),
   })

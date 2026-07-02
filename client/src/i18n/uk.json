@@ -98,7 +98,12 @@
     "errorAssign": "Не вдалося змінити групу команди.",
     "errorCreateMatch": "Матч не створено.",
     "errorDeleteMatch": "Матч не видалено.",
-    "errorDeleteTeam": "Команду не видалено."
+    "errorDeleteTeam": "Команду не видалено.",
+    "generate": "Ігри ({n})",
+    "generateTitle": "Створити ігри кожен-з-кожним, яких бракує в групі. Час початку - заглушка.",
+    "errorGenerate": "Не вдалося згенерувати ігри.",
+    "colSchedule": "Початок",
+    "errorUpdateMatch": "Матч не оновлено."
   },
   "tournament": {
     "short": "Joyn 2026",

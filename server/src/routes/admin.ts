@@ -20,6 +20,7 @@ import {
   createMatch,
   createPlayer,
   createTeam,
+  generateGroupFixtures,
   getRoster,
   listBracket,
   listGroups,
@@ -145,6 +146,18 @@ adminRouter.delete('/groups/:id', adminMutationLimiter, (req, res, next) => {
     broadcastBracket(listBracket());
     audit(req.user!.id, 'group.delete', req.params.id);
     res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Generate the group's missing round-robin fixtures (idempotent top-up).
+adminRouter.post('/groups/:id/fixtures', adminMutationLimiter, (req, res, next) => {
+  try {
+    const created = generateGroupFixtures(req.params.id);
+    broadcastMatchSnapshot(listMatches()); // batch create -> one snapshot
+    audit(req.user!.id, `group.fixtures(created=${created.length})`, req.params.id);
+    res.json({ matches: created });
   } catch (err) {
     next(err);
   }

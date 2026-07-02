@@ -118,6 +118,11 @@ body {
 .chip { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 700; }
 .chip--admin { background: rgba(63,185,80,0.15); color: var(--accent); }
 .chip--user { background: rgba(47,129,247,0.15); color: var(--accent-2); }
+/* Match status in admin tables: finished = quiet grey pill, live = red pill,
+ * scheduled = blue pill. */
+.chip--finished { background: rgba(139,148,158,0.15); color: var(--muted); }
+.chip--live { background: rgba(248,81,73,0.15); color: var(--danger); }
+.chip--scheduled { background: rgba(47,129,247,0.15); color: var(--accent-2); }
 
 .app__main { max-width: 900px; margin: 0 auto; padding: 1rem; }
 
@@ -206,6 +211,11 @@ body {
 }
 .subnav__link--active { background: var(--accent-2); color: #fff; }
 
+/* Every admin page: uniform vertical rhythm between sections via the flex gap
+ * (no per-section margins to drift out of sync). Direct children lose their
+ * own vertical margins so legacy per-block spacing can't stack with the gap. */
+.admin-panel { display: flex; flex-direction: column; align-items: stretch; gap: 1rem; }
+.admin-panel > * { margin-top: 0; margin-bottom: 0; }
 .admin-panel__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .admin-panel__search {
   padding: 0.5rem 0.75rem; border-radius: 10px; border: 1px solid var(--line);
@@ -219,7 +229,7 @@ body {
 .input:focus { outline: 2px solid var(--accent-2); border-color: transparent; }
 .stack { display: flex; flex-direction: column; gap: 0.6rem; }
 
-.admin-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1rem; }
+.admin-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
 @media (min-width: 720px) { .admin-grid { grid-template-columns: 1fr 1fr; } }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem; }
 .card h3 { margin-top: 0; }
@@ -228,7 +238,23 @@ body {
 .table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .table th, .table td { text-align: left; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .table th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
-.table__actions { display: flex; gap: 0.35rem; justify-content: flex-end; }
+/* Stays a real table-cell (display:flex on a td/th breaks table layout: row
+ * borders split and columns drift). Buttons space out via margins instead.
+ * Element+class selector outranks the base `.table th/td` left alignment. */
+.table th.table__actions, .table td.table__actions { text-align: right; white-space: nowrap; }
+.table__actions .btn + .btn { margin-left: 0.35rem; }
+/* Forms want a full-width primary button; inside an actions cell it must stay
+ * inline-sized like its Edit/Delete neighbours. */
+.table__actions .btn { width: auto; }
+
+/* Group band inside a table: styled like the column headers with an accent
+ * spine, so the rows below read as one cluster. */
+.table .table__band td {
+  background: var(--bg); color: var(--muted); font-weight: 700; font-size: 0.78rem;
+  text-transform: uppercase; letter-spacing: 0.04em; padding: 0.4rem 0.6rem;
+  box-shadow: inset 3px 0 0 var(--accent-2);
+}
+.table__band-count { margin-left: 0.5rem; font-weight: 500; }
 .row--inactive { opacity: 0.5; }
 .tag { margin-left: 0.4rem; font-size: 0.65rem; background: var(--accent-2); color: #fff; padding: 0.05rem 0.35rem; border-radius: 999px; }
 

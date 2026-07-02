@@ -98,7 +98,12 @@
     "errorAssign": "Não foi possível alterar o grupo da equipa.",
     "errorCreateMatch": "Jogo não criado.",
     "errorDeleteMatch": "Jogo não eliminado.",
-    "errorDeleteTeam": "Equipa não eliminada."
+    "errorDeleteTeam": "Equipa não eliminada.",
+    "generate": "Jogos ({n})",
+    "generateTitle": "Criar os jogos em falta (todos contra todos) deste grupo. As horas são provisórias.",
+    "errorGenerate": "Não foi possível gerar os jogos.",
+    "colSchedule": "Hora",
+    "errorUpdateMatch": "Jogo não atualizado."
   },
   "tournament": {
     "short": "Joyn 2026",

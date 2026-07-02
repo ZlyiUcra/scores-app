@@ -98,7 +98,12 @@
     "errorAssign": "Could not change the team's group.",
     "errorCreateMatch": "Match not created.",
     "errorDeleteMatch": "Match not deleted.",
-    "errorDeleteTeam": "Team not deleted."
+    "errorDeleteTeam": "Team not deleted.",
+    "generate": "Games ({n})",
+    "generateTitle": "Create the missing round-robin games for this group. Kick-off times are placeholders.",
+    "errorGenerate": "Could not generate the games.",
+    "colSchedule": "Kick-off",
+    "errorUpdateMatch": "Match not updated."
   },
   "tournament": {
     "short": "Joyn 2026",

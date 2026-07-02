@@ -78,6 +78,10 @@ export const adminApi = {
   createMatch: (input: CreateMatchRequest) =>
     request<{ match: Match }>('/admin/matches', { method: 'POST', body: JSON.stringify(input) }),
 
+  // Round-robin top-up: creates only the group's missing pairings.
+  generateFixtures: (groupId: string) =>
+    request<{ matches: Match[] }>(`/admin/groups/${groupId}/fixtures`, { method: 'POST' }),
+
   deleteMatch: (id: string) =>
     request<{ ok: true }>(`/admin/matches/${id}`, { method: 'DELETE' }),
 

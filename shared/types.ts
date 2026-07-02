@@ -61,13 +61,16 @@ export interface Match {
   rev: number;
 }
 
-/** Compact diff broadcast over the socket on every mutation (not the full Match). */
+/** Compact diff broadcast over the socket on every mutation (not the full Match).
+ * Schedule fields ride along only when that edit actually changed them. */
 export interface MatchUpdate {
   matchId: string;
   homeScore: number;
   awayScore: number;
   status: MatchStatus;
   minute: number;
+  startsAt?: string;
+  field?: string;
   rev: number;
 }
 

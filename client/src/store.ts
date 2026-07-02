@@ -49,19 +49,21 @@ export const useMatchStore = create<MatchState>((set) => ({
       const current = state.byId[u.matchId];
       // Drop stale/out-of-order events: only move forward in rev.
       if (!current || u.rev <= current.rev) return state;
-      return {
-        byId: {
-          ...state.byId,
-          [u.matchId]: {
-            ...current,
-            homeScore: u.homeScore,
-            awayScore: u.awayScore,
-            status: u.status,
-            minute: u.minute,
-            rev: u.rev,
-          },
+      const byId = {
+        ...state.byId,
+        [u.matchId]: {
+          ...current,
+          homeScore: u.homeScore,
+          awayScore: u.awayScore,
+          status: u.status,
+          minute: u.minute,
+          startsAt: u.startsAt ?? current.startsAt,
+          field: u.field ?? current.field,
+          rev: u.rev,
         },
       };
+      // Display order sorts by kickoff, so a rescheduled match must re-sort.
+      return u.startsAt !== undefined ? { byId, order: deriveOrder(byId) } : { byId };
     }),
 
   addMatch: (m) =>
