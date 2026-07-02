@@ -239,9 +239,9 @@ body {
 }
 
 /* ---------- Standings ---------- */
-.standings-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-@media (min-width: 720px) { .standings-grid { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 1040px) { .standings-grid { grid-template-columns: 1fr 1fr 1fr; } }
+/* Any number of groups: as many columns as fit the container, never wider
+ * than it. A card whose table is still too tight scrolls inside .table-wrap. */
+.standings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 1rem; }
 .standings {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.75rem 1rem 1rem;
 }
