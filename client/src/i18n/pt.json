@@ -20,9 +20,10 @@
     "title": "Jogos do torneio",
     "live": "ao vivo",
     "offline": "offline",
-    "loading": "A carregar jogos…"
+    "loading": "A carregar jogos…",
+    "noGames": "Ainda sem jogos."
   },
-  "matchDetail": { "back": "← Voltar à lista", "notFound": "Jogo não encontrado." },
+  "matchDetail": { "back": "← Voltar aos resultados", "notFound": "Jogo não encontrado." },
   "match": { "group": "Grupo {group}", "vs": "{home} contra {away}" },
   "status": { "scheduled": "Agendado", "live": "AO VIVO", "finished": "Terminado" },
   "adminControls": {
@@ -33,7 +34,7 @@
     "reset": "Repor",
     "error": "Falha no pedido."
   },
-  "adminLayout": { "back": "← Voltar ao placar", "users": "Utilizadores", "matches": "Jogos" },
+  "adminLayout": { "back": "← Voltar ao placar", "users": "Utilizadores", "matches": "Jogos", "squads": "Plantéis", "bracket": "Eliminatórias" },
   "adminUsers": {
     "title": "Utilizadores",
     "search": "Procurar por utilizador…",
@@ -58,16 +59,24 @@
     "errorAction": "Ação não concluída."
   },
   "adminMatches": {
+    "groups": "Grupos",
+    "groupNamePlaceholder": "Nome do grupo (ex. Grupo A)",
+    "addGroup": "Adicionar grupo",
+    "deleteGroupTitle": "Eliminar grupo",
     "newTeam": "Nova equipa",
     "teamNamePlaceholder": "Nome (ex. FC Lions)",
     "teamShortPlaceholder": "Código (ex. LIO)",
     "addTeam": "Adicionar equipa",
-    "deleteTeamTitle": "Eliminar equipa",
+    "teamsTitle": "Equipas",
+    "colTeam": "Equipa",
+    "noGroup": "— sem grupo —",
     "newGame": "Novo jogo",
     "home": "Casa",
     "away": "Visitante",
     "selectTeam": "— selecione uma equipa —",
     "group": "Grupo",
+    "fieldLabel": "Campo",
+    "fieldPlaceholder": "ex. Campo 1",
     "start": "Início",
     "createGame": "Criar jogo",
     "matchesTitle": "Jogos do torneio",
@@ -77,10 +86,108 @@
     "colStatus": "Estado",
     "colActions": "Ações",
     "delete": "Eliminar",
-    "errorLoadTeams": "Falha ao carregar equipas.",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "errorUpdateTeam": "Equipa não atualizada.",
+    "errorCreateGroup": "Grupo não criado.",
+    "errorUpdateGroup": "Grupo não renomeado.",
+    "errorDeleteGroup": "Grupo não eliminado.",
     "errorCreateTeam": "Equipa não criada.",
+    "errorAssign": "Não foi possível alterar o grupo da equipa.",
     "errorCreateMatch": "Jogo não criado.",
     "errorDeleteMatch": "Jogo não eliminado.",
     "errorDeleteTeam": "Equipa não eliminada."
+  },
+  "tournament": {
+    "short": "Joyn 2026",
+    "name": "Torneio Joyn Consulting 2026",
+    "location": "Urban Soccer, Monsanto, Lisboa",
+    "window": "2 de Julho · 19h — 21h"
+  },
+  "nav": { "overview": "Overview", "results": "Resultados", "knockout": "Eliminatórias", "teams": "Equipas", "admin": "Admin" },
+  "adminSquads": {
+    "title": "Plantéis",
+    "team": "Equipa",
+    "selectTeam": "— selecione uma equipa —",
+    "pickTeam": "Selecione uma equipa para gerir o plantel.",
+    "newPlayer": "Novo jogador",
+    "namePlaceholder": "Nome do jogador",
+    "numberPlaceholder": "Número (opcional)",
+    "positionPlaceholder": "Posição, ex. GK (opcional)",
+    "addPlayer": "Adicionar jogador",
+    "playersTitle": "Jogadores",
+    "colNumber": "#",
+    "colName": "Nome",
+    "colPosition": "Posição",
+    "colActions": "Ações",
+    "empty": "Esta equipa ainda não tem jogadores.",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "errorCreate": "Jogador não adicionado.",
+    "errorUpdate": "Jogador não atualizado.",
+    "errorDelete": "Jogador não removido."
+  },
+  "squads": {
+    "title": "Equipas",
+    "selectTeam": "— selecione uma equipa —",
+    "pickTeam": "Selecione uma equipa para ver o plantel.",
+    "colNumber": "#",
+    "colName": "Nome",
+    "colPosition": "Posição",
+    "empty": "Esta equipa ainda não tem jogadores."
+  },
+  "overview": {
+    "played": "Jogos disputados {played} / {total}",
+    "groups": "Fase de grupos",
+    "knockout": "Eliminatórias",
+    "viewBracket": "Ver bracket"
+  },
+  "standings": {
+    "group": "Grupo {group}",
+    "team": "Equipa",
+    "played": "J", "playedFull": "Jogos",
+    "gf": "GM", "gfFull": "Golos marcados",
+    "ga": "GS", "gaFull": "Golos sofridos",
+    "gd": "DG", "gdFull": "Diferença de golos",
+    "pts": "Pts", "ptsFull": "Pontos"
+  },
+  "bracket": {
+    "r16": "Oitavos-de-final",
+    "qf": "Quartos-de-final",
+    "sf": "Meias-finais",
+    "final": "Final",
+    "third": "3º/4º lugar",
+    "finalShort": "Final",
+    "thirdShort": "3º/4º",
+    "vs": "vs",
+    "empty": "O bracket aparece assim que os grupos estiverem definidos.",
+    "note": "Os dois primeiros de cada grupo apuram-se; os melhores terceiros completam o bracket até uma potência de dois. Um jogo empatado é decidido nas grandes penalidades.",
+    "reason": {
+      "noGroups": "Crie pelo menos um grupo para formar o bracket.",
+      "groupTooSmall": "Cada grupo precisa de pelo menos 2 equipas.",
+      "notEnoughThirds": "Terceiros insuficientes para chegar a uma potência de dois. Ajuste os grupos.",
+      "tooManyGroups": "Grupos a mais — o bracket ultrapassaria 16 equipas."
+    }
+  },
+  "seed": {
+    "qualifier": "Cabeça {n}",
+    "winner": "Vencedor {slot}",
+    "loser": "Perdedor {slot}"
+  },
+  "adminBracket": {
+    "title": "Resultados das eliminatórias",
+    "hint": "As equipas são preenchidas automaticamente a partir das classificações dos grupos. Um jogo empatado precisa de resultado nas grandes penalidades.",
+    "reset": "Repor eliminatórias",
+    "resetConfirm": "Limpar todos os resultados das eliminatórias? Os jogos de grupo voltam a ser editáveis.",
+    "resetError": "Não foi possível repor o bracket.",
+    "save": "Guardar",
+    "saveError": "Não foi possível guardar o resultado.",
+    "pens": "Penáltis",
+    "notReady": "As equipas deste jogo ainda não estão decididas.",
+    "homeScore": "Golos casa", "awayScore": "Golos visitante",
+    "homePens": "Penáltis casa", "awayPens": "Penáltis visitante"
   }
 }

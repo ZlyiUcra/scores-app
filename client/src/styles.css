@@ -134,6 +134,9 @@ body {
 .scoreboard__name { font-weight: 700; }
 .scoreboard__short { color: var(--muted); font-size: 0.8rem; }
 .scoreboard__center { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+/* Center the LIVE/status badge under the score (its default align-self is
+   flex-start, which looks off-centre here — especially now the minute is gone). */
+.scoreboard__center .badge { align-self: center; }
 .scoreboard__score { font-size: 2.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .detail__meta { text-align: center; color: var(--muted); margin: 0.75rem 0; font-size: 0.85rem; }
 
@@ -204,3 +207,178 @@ body {
 }
 .team-chip__x { cursor: pointer; border: none; background: transparent; color: var(--muted); font-size: 1rem; line-height: 1; padding: 0 0.2rem; }
 .team-chip__x:hover { color: var(--danger); }
+.team-chip__group {
+  font-size: 0.65rem; font-weight: 800; background: var(--surface-2);
+  color: var(--muted); border-radius: 6px; padding: 0.05rem 0.35rem;
+}
+
+/* ---------- Header nav ---------- */
+.header__nav { display: flex; gap: 0.3rem; margin-right: auto; margin-left: 1.25rem; }
+.header__nav-link {
+  text-decoration: none; color: var(--muted); padding: 0.35rem 0.7rem; border-radius: 8px;
+  font-weight: 700; font-size: 0.9rem;
+}
+.header__nav-link:hover { color: var(--text); }
+.header__nav-link--active { background: var(--surface-2); color: var(--text); }
+
+/* ---------- Section headings ---------- */
+.section-title { font-size: 1.05rem; margin: 1.25rem 0 0.75rem; }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 1.25rem 0 0.75rem; }
+.section-head .section-title { margin: 0; }
+
+/* ---------- Tournament header ---------- */
+.tourney {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.25rem 1.25rem 1rem; margin-bottom: 0.5rem;
+}
+.tourney__name { margin: 0; font-size: 1.5rem; }
+.tourney__meta { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.9rem; }
+.tourney__progress {
+  margin: 0.75rem 0 0; font-weight: 700; font-size: 0.85rem;
+  display: inline-block; background: var(--bg); padding: 0.3rem 0.7rem; border-radius: 999px;
+}
+
+/* ---------- Standings ---------- */
+.standings-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 720px) { .standings-grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1040px) { .standings-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.standings {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.75rem 1rem 1rem;
+}
+.standings__title { margin: 0 0 0.5rem; font-size: 1rem; }
+.standings__table th, .standings__table td { text-align: right; padding: 0.4rem 0.5rem; }
+.standings__table th.standings__pos, .standings__table td.standings__pos,
+.standings__table th.standings__team, .standings__table td.standings__team { text-align: left; }
+.standings__pos { width: 1.5rem; color: var(--muted); }
+.standings__short { font-weight: 800; color: var(--muted); font-size: 0.75rem; margin-right: 0.15rem; }
+.standings__ptsval { font-weight: 800; }
+.standings__table td { font-variant-numeric: tabular-nums; }
+.standings__row--q1 td.standings__pos { color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.standings__row--q3 td.standings__pos { color: var(--accent-2); box-shadow: inset 3px 0 0 var(--accent-2); }
+
+/* ---------- Bracket (aligned columns + elbow connectors) ---------- */
+.bracket-wrap { margin-top: 0.5rem; }
+.bracket { display: flex; align-items: stretch; overflow-x: auto; padding-bottom: 0.5rem; }
+.bracket-round { display: flex; flex-direction: column; flex: 1 0 210px; min-width: 190px; }
+.bracket-round__title {
+  margin: 0 0 0.25rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); text-align: center;
+}
+/* Equal vertical slabs per match, card centered in its slab — so a later round's
+   card lands exactly between the two cards that feed it. */
+.bracket-round__matches { display: flex; flex-direction: column; justify-content: space-around; flex: 1; }
+.bracket-match {
+  flex: 1 1 0; display: flex; align-items: center; position: relative;
+  padding: 0.4rem 0.9rem;
+}
+
+/* Connector gutter width (must match the round horizontal padding). */
+/* Outgoing elbow from every feeding round: half-height vertical bar + a spur
+   into the card. Odd cards draw the lower half, even cards the upper half, so a
+   pair forms one continuous vertical bar whose midpoint faces the next round. */
+.bracket-round:not(:last-child) .bracket-match::after {
+  content: ''; position: absolute; left: 100%; width: 0.9rem;
+  border-right: 2px solid var(--line);
+}
+.bracket-round:not(:last-child) .bracket-match:nth-child(odd)::after {
+  top: 50%; height: 50%; border-top: 2px solid var(--line);
+}
+.bracket-round:not(:last-child) .bracket-match:nth-child(even)::after {
+  bottom: 50%; height: 50%; border-bottom: 2px solid var(--line);
+}
+/* Incoming spur into every round after the first, at the card's vertical centre. */
+.bracket-round:not(:first-child) .bracket-match::before {
+  content: ''; position: absolute; right: 100%; width: 0.9rem; top: 50%;
+  border-top: 2px solid var(--line);
+}
+
+/* Third-place: a separate centred block below the main bracket. */
+.bracket-third { max-width: 340px; margin: 1.25rem auto 0; }
+.bracket-third .bcard { margin-top: 0.35rem; }
+
+.bracket__empty { margin-top: 0.5rem; }
+
+/* Match card */
+.bcard {
+  width: 100%; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 10px; overflow: hidden;
+}
+.bcard--live { border-color: var(--danger); }
+.bcard__head {
+  display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem;
+  background: var(--bg); font-size: 0.66rem; color: var(--muted);
+}
+.bcard__slot { font-weight: 800; letter-spacing: 0.03em; color: var(--text); }
+.bcard__field { opacity: 0.8; }
+.bcard__status { margin-left: auto; text-transform: uppercase; }
+.bcard--live .bcard__status { color: var(--danger); }
+.bcard__side {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+}
+.bcard__vs {
+  text-align: center; font-size: 0.6rem; text-transform: uppercase; color: var(--muted);
+  letter-spacing: 0.08em; line-height: 0; height: 1px; position: relative;
+}
+.bcard__vs::before, .bcard__vs::after {
+  content: ''; position: absolute; top: 50%; width: calc(50% - 1.1rem); border-top: 1px solid var(--line);
+}
+.bcard__vs::before { left: 0.6rem; }
+.bcard__vs::after { right: 0.6rem; }
+.bcard__name { font-weight: 600; font-size: 0.9rem; }
+.bcard__side--seed .bcard__name { color: var(--muted); font-style: italic; font-weight: 500; }
+.bcard__side--won .bcard__name { color: var(--accent); }
+.bcard__score { font-variant-numeric: tabular-nums; font-weight: 800; }
+.bcard__pens { font-size: 0.6rem; color: var(--muted); margin-left: 0.15rem; }
+.ko-note { margin-top: 1rem; font-size: 0.8rem; }
+
+/* ---------- Admin bracket editor ---------- */
+.slot-editor-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-top: 1rem; }
+@media (min-width: 720px) { .slot-editor-grid { grid-template-columns: 1fr 1fr; } }
+.slot-editor { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem; }
+.slot-editor--pending { opacity: 0.7; }
+.slot-editor__head { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.6rem; }
+.slot-editor__slot { font-weight: 800; font-size: 0.8rem; color: var(--muted); }
+.slot-editor__names { font-weight: 600; font-size: 0.9rem; }
+.slot-editor__scores, .slot-editor__pens { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+.slot-editor__hint { margin: 0; font-size: 0.85rem; }
+.input--num { width: 3.5rem; text-align: center; }
+.input--short { width: 5rem; }
+.team-edit { display: flex; gap: 0.4rem; align-items: center; }
+.team-edit .input { min-width: 0; }
+
+.group-list { display: flex; flex-direction: column; margin-top: 0.75rem; }
+.group-row {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0;
+  border-top: 1px solid var(--line);
+}
+.group-row:first-child { border-top: none; }
+.group-row__name { flex: 1; font-weight: 600; font-size: 0.9rem; }
+.group-row .input { flex: 1; }
+.group-row__actions { display: flex; gap: 0.35rem; }
+
+/* ---------- Resultados (group cards) ---------- */
+.groups-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem; }
+@media (min-width: 700px) { .groups-grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1040px) { .groups-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.group-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.75rem 0.9rem 0.9rem; }
+.group-card__title { margin: 0 0 0.5rem; font-size: 1rem; }
+.group-card__matches { display: flex; flex-direction: column; }
+.group-card__empty { margin: 0.25rem 0; font-size: 0.85rem; }
+
+.rrow {
+  display: flex; flex-direction: column; gap: 0.3rem; text-decoration: none; color: inherit;
+  padding: 0.55rem 0.35rem; border-top: 1px solid var(--line);
+}
+.group-card__matches .rrow:first-child { border-top: none; }
+.rrow:hover { background: var(--surface-2); border-radius: 8px; }
+.rrow__meta { display: flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+.rrow__status { margin-left: auto; }
+.rrow--live .rrow__status { color: var(--danger); }
+.rrow__teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.5rem; }
+.rrow__team { font-weight: 600; font-size: 0.9rem; }
+.rrow__team--away { text-align: right; }
+.rrow__score {
+  font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap;
+  background: var(--bg); padding: 0.1rem 0.5rem; border-radius: 7px;
+}

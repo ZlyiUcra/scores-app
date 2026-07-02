@@ -21,6 +21,12 @@ export function AdminLayout() {
           <NavLink to="/admin/matches" className={({ isActive }) => `subnav__link ${isActive ? 'subnav__link--active' : ''}`}>
             {t('adminLayout.matches')}
           </NavLink>
+          <NavLink to="/admin/squads" className={({ isActive }) => `subnav__link ${isActive ? 'subnav__link--active' : ''}`}>
+            {t('adminLayout.squads')}
+          </NavLink>
+          <NavLink to="/admin/bracket" className={({ isActive }) => `subnav__link ${isActive ? 'subnav__link--active' : ''}`}>
+            {t('adminLayout.bracket')}
+          </NavLink>
         </nav>
       </div>
       <Outlet />

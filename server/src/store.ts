@@ -1,19 +1,13 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { Match, MatchStatus } from '../../shared/types.js';
 import { AppError } from './errors.js';
 import { teamRepository } from './teams.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_FILE = path.join(__dirname, '..', 'data', 'matches.json');
-const SCHEMA_VERSION = 1;
+import { db, transaction } from './db.js';
 
 /**
  * Persisted match shape: references teams by id (TeamRepository is the source
- * of truth). The public `Match` DTO embeds resolved Team objects, produced by
- * `resolve()` — so the wire/client contract is unchanged while storage stays
- * normalized.
+ * of truth). `group` is derived from the teams at creation. The public `Match`
+ * DTO embeds resolved Team objects, produced by `resolveMatch()` — so the
+ * wire/client contract stays consistent while storage stays normalized.
  */
 export interface StoredMatch {
   id: string;
@@ -25,12 +19,8 @@ export interface StoredMatch {
   status: MatchStatus;
   minute: number;
   startsAt: string;
+  field: string;
   rev: number;
-}
-
-interface MatchFile {
-  version: number;
-  matches: StoredMatch[];
 }
 
 export interface MatchRepository {
@@ -58,6 +48,7 @@ function seedMatches(): StoredMatch[] {
     awayScore: number,
     minute: number,
     offsetMin: number,
+    field: string,
   ): StoredMatch => ({
     id: `m${++n}`,
     group,
@@ -68,16 +59,26 @@ function seedMatches(): StoredMatch[] {
     status,
     minute,
     startsAt: iso(offsetMin),
+    field,
     rev: 1,
   });
 
+  // Round-robin within each of the 3 groups. Group A is fully played, B is in
+  // progress, C is upcoming — so both resolved and symbolic bracket slots show.
+  // `group` is the group id (see groups.ts / teams.ts seeds).
   return [
-    mk('A', 't1', 't2', 'live', 1, 0, 37, -37),
-    mk('A', 't3', 't4', 'live', 2, 2, 71, -71),
-    mk('A', 't1', 't3', 'scheduled', 0, 0, 0, 45),
-    mk('B', 't5', 't6', 'finished', 3, 1, 90, -120),
-    mk('B', 't2', 't4', 'scheduled', 0, 0, 0, 90),
-    mk('B', 't5', 't1', 'scheduled', 0, 0, 0, 150),
+    // Group A (all finished)
+    mk('gA', 't1', 't2', 'finished', 2, 1, 90, -220, 'Campo 1'),
+    mk('gA', 't1', 't3', 'finished', 1, 1, 90, -190, 'Campo 2'),
+    mk('gA', 't2', 't3', 'finished', 0, 3, 90, -160, 'Campo 1'),
+    // Group B (two finished, one live)
+    mk('gB', 't4', 't5', 'finished', 1, 0, 90, -130, 'Campo 2'),
+    mk('gB', 't4', 't6', 'finished', 2, 2, 90, -100, 'Campo 3'),
+    mk('gB', 't5', 't6', 'live', 1, 0, 54, -54, 'Campo 1'),
+    // Group C (one finished, two scheduled)
+    mk('gC', 't7', 't8', 'finished', 3, 2, 90, -70, 'Campo 3'),
+    mk('gC', 't7', 't9', 'scheduled', 0, 0, 0, 30, 'Campo 2'),
+    mk('gC', 't8', 't9', 'scheduled', 0, 0, 0, 60, 'Campo 3'),
   ];
 }
 
@@ -99,6 +100,7 @@ export function resolveMatch(m: StoredMatch): Match {
     status: m.status,
     minute: m.minute,
     startsAt: m.startsAt,
+    field: m.field,
     rev: m.rev,
   };
 }
@@ -116,29 +118,55 @@ class JsonFileRepository implements MatchRepository {
   }
 
   private load(): void {
-    if (!fs.existsSync(DATA_FILE)) {
+    const rows = db
+      .prepare(
+        'SELECT id, "group" AS grp, homeId, awayId, homeScore, awayScore, status, minute, startsAt, field, rev FROM matches',
+      )
+      .all() as Array<{
+      id: string;
+      grp: string;
+      homeId: string;
+      awayId: string;
+      homeScore: number;
+      awayScore: number;
+      status: string;
+      minute: number;
+      startsAt: string;
+      field: string;
+      rev: number;
+    }>;
+    if (rows.length === 0) {
       this.index(seedMatches());
       this.persist();
       return;
     }
-    let parsed: MatchFile;
-    try {
-      parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')) as MatchFile;
-    } catch (err) {
-      throw new Error(`[store] ${DATA_FILE} is corrupt and was NOT overwritten. (${String(err)})`);
-    }
-    if (!parsed || parsed.version !== SCHEMA_VERSION || !Array.isArray(parsed.matches)) {
-      throw new Error(`[store] ${DATA_FILE} has an unexpected schema. Refusing to start.`);
-    }
-    this.index(parsed.matches);
+    this.index(
+      rows.map((r) => ({
+        id: r.id,
+        group: r.grp,
+        homeId: r.homeId,
+        awayId: r.awayId,
+        homeScore: r.homeScore,
+        awayScore: r.awayScore,
+        status: r.status as MatchStatus,
+        minute: r.minute,
+        startsAt: r.startsAt,
+        field: r.field,
+        rev: r.rev,
+      })),
+    );
   }
 
   private persist(): void {
-    fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-    const payload: MatchFile = { version: SCHEMA_VERSION, matches: Array.from(this.matches.values()) };
-    const tmp = `${DATA_FILE}.tmp`;
-    fs.writeFileSync(tmp, JSON.stringify(payload, null, 2), 'utf8');
-    fs.renameSync(tmp, DATA_FILE);
+    transaction(() => {
+      db.exec('DELETE FROM matches');
+      const ins = db.prepare(
+        'INSERT INTO matches (id, "group", homeId, awayId, homeScore, awayScore, status, minute, startsAt, field, rev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      );
+      for (const m of this.matches.values()) {
+        ins.run(m.id, m.group, m.homeId, m.awayId, m.homeScore, m.awayScore, m.status, m.minute, m.startsAt, m.field, m.rev);
+      }
+    });
   }
 
   list(): Match[] {

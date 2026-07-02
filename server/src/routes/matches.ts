@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { requireAdmin, requireAuth } from '../auth.js';
 import { goalSchema, updateMatchSchema } from '../validation.js';
-import { applyGoal, applyUpdate, getMatch, listMatches } from '../service.js';
-import { broadcastMatchUpdate } from '../socket.js';
+import { applyGoal, applyUpdate, getMatch, listBracket, listMatches } from '../service.js';
+import { broadcastBracket, broadcastMatchUpdate } from '../socket.js';
 
 export const matchesRouter = Router();
 
@@ -30,6 +30,8 @@ matchesRouter.patch('/:id', requireAdmin, (req, res, next) => {
   try {
     const update = applyUpdate(req.params.id, parsed.data);
     broadcastMatchUpdate(update);
+    // A group result may complete a group and re-seed the bracket.
+    broadcastBracket(listBracket());
     res.json({ update });
   } catch (err) {
     next(err);
@@ -45,6 +47,7 @@ matchesRouter.post('/:id/goal', requireAdmin, (req, res, next) => {
   try {
     const update = applyGoal(req.params.id, parsed.data);
     broadcastMatchUpdate(update);
+    broadcastBracket(listBracket());
     res.json({ update });
   } catch (err) {
     next(err);

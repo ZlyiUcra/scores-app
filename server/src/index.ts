@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import { config } from './config.js';
 import { authRouter } from './routes/auth.js';
 import { matchesRouter } from './routes/matches.js';
+import { bracketRouter } from './routes/bracket.js';
+import { rosterRouter } from './routes/roster.js';
 import { adminRouter } from './routes/admin.js';
 import { AppError } from './errors.js';
 import { initSocket } from './socket.js';
@@ -29,6 +31,8 @@ if (config.isProd) {
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRouter);
 app.use('/api/matches', matchesRouter);
+app.use('/api/bracket', bracketRouter);
+app.use('/api/roster', rosterRouter);
 app.use('/api/admin', adminRouter);
 
 // Single typed error contract: { error: { code, message } }.

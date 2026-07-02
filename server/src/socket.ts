@@ -2,17 +2,19 @@ import type { Server as HttpServer } from 'node:http';
 import { Server } from 'socket.io';
 import cookie from 'cookie';
 import type {
+  BracketView,
   ClientToServerEvents,
   Match,
   MatchRemoved,
   MatchUpdate,
+  Roster,
   ServerToClientEvents,
 } from '../../shared/types.js';
 import { SOCKET_EVENTS } from '../../shared/types.js';
 import { config } from './config.js';
 import { verifyToken } from './auth.js';
 import { userRepository } from './users.js';
-import { listMatches } from './service.js';
+import { getRoster, listBracket, listMatches } from './service.js';
 
 let io: Server<ClientToServerEvents, ServerToClientEvents> | null = null;
 
@@ -52,6 +54,9 @@ export function initSocket(httpServer: HttpServer): void {
     // that missed events while offline is never left with a stale score.
     const snapshot: Match[] = listMatches();
     socket.emit(SOCKET_EVENTS.matchSnapshot, snapshot);
+    // Roster (groups + teams) drives client standings; the bracket is derived.
+    socket.emit(SOCKET_EVENTS.rosterSnapshot, getRoster());
+    socket.emit(SOCKET_EVENTS.bracketSnapshot, listBracket());
   });
 }
 
@@ -69,6 +74,24 @@ export function broadcastMatchCreated(match: Match): void {
 export function broadcastMatchRemoved(matchId: string): void {
   const payload: MatchRemoved = { matchId };
   io?.emit(SOCKET_EVENTS.matchRemoved, payload);
+}
+
+/** Broadcast the full knockout view. Sent whenever the bracket can change: a
+ * knockout result is entered, or a group result/roster change may re-seed it. */
+export function broadcastBracket(bracket: BracketView): void {
+  io?.emit(SOCKET_EVENTS.bracketSnapshot, bracket);
+}
+
+/** Broadcast the roster (groups + teams) after any team/group/membership change
+ * so client standings stay correct. */
+export function broadcastRoster(roster: Roster): void {
+  io?.emit(SOCKET_EVENTS.rosterSnapshot, roster);
+}
+
+/** Re-push the full match snapshot — used after a team rename so the team names
+ * embedded in every match DTO refresh for all clients. */
+export function broadcastMatchSnapshot(matches: Match[]): void {
+  io?.emit(SOCKET_EVENTS.matchSnapshot, matches);
 }
 
 /** Force-disconnect all live sockets of a user (revocation on deactivate/delete). */

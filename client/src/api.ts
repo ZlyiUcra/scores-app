@@ -1,4 +1,4 @@
-import type { AuthUser, Match, MatchUpdate } from '../../shared/types';
+import type { AuthUser, BracketView, Match, MatchUpdate, Roster } from '../../shared/types';
 
 /**
  * Thin REST client. All requests send the httpOnly cookie automatically via
@@ -47,6 +47,10 @@ export const api = {
   me: () => request<{ user: AuthUser }>('/auth/me'),
 
   listMatches: () => request<{ matches: Match[] }>('/matches'),
+
+  getBracket: () => request<{ bracket: BracketView }>('/bracket'),
+
+  getRoster: () => request<{ roster: Roster }>('/roster'),
 
   goal: (matchId: string, team: 'home' | 'away', delta: 1 | -1, expectedRev: number) =>
     request<{ update: MatchUpdate }>(`/matches/${matchId}/goal`, {

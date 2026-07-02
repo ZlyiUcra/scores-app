@@ -20,9 +20,10 @@
     "title": "Матчі турніру",
     "live": "наживо",
     "offline": "офлайн",
-    "loading": "Завантаження матчів…"
+    "loading": "Завантаження матчів…",
+    "noGames": "Ще немає ігор."
   },
-  "matchDetail": { "back": "← До списку", "notFound": "Матч не знайдено." },
+  "matchDetail": { "back": "← До результатів", "notFound": "Матч не знайдено." },
   "match": { "group": "Група {group}", "vs": "{home} проти {away}" },
   "status": { "scheduled": "Заплановано", "live": "НАЖИВО", "finished": "Завершено" },
   "adminControls": {
@@ -33,7 +34,7 @@
     "reset": "Скинути",
     "error": "Помилка запиту."
   },
-  "adminLayout": { "back": "← До табло", "users": "Користувачі", "matches": "Ігри" },
+  "adminLayout": { "back": "← До табло", "users": "Користувачі", "matches": "Ігри", "squads": "Склади", "bracket": "Плей-оф" },
   "adminUsers": {
     "title": "Користувачі",
     "search": "Пошук за логіном…",
@@ -58,16 +59,24 @@
     "errorAction": "Дію не виконано."
   },
   "adminMatches": {
+    "groups": "Групи",
+    "groupNamePlaceholder": "Назва групи (напр. Група A)",
+    "addGroup": "Додати групу",
+    "deleteGroupTitle": "Видалити групу",
     "newTeam": "Нова команда",
     "teamNamePlaceholder": "Назва (напр. FC Lions)",
     "teamShortPlaceholder": "Код (напр. LIO)",
     "addTeam": "Додати команду",
-    "deleteTeamTitle": "Видалити команду",
+    "teamsTitle": "Команди",
+    "colTeam": "Команда",
+    "noGroup": "— без групи —",
     "newGame": "Нова гра",
     "home": "Господарі",
     "away": "Гості",
     "selectTeam": "— оберіть команду —",
     "group": "Група",
+    "fieldLabel": "Поле",
+    "fieldPlaceholder": "напр. Campo 1",
     "start": "Початок",
     "createGame": "Створити гру",
     "matchesTitle": "Матчі турніру",
@@ -77,10 +86,108 @@
     "colStatus": "Статус",
     "colActions": "Дії",
     "delete": "Видалити",
-    "errorLoadTeams": "Не вдалося завантажити команди.",
+    "edit": "Редагувати",
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "errorUpdateTeam": "Команду не оновлено.",
+    "errorCreateGroup": "Групу не створено.",
+    "errorUpdateGroup": "Групу не перейменовано.",
+    "errorDeleteGroup": "Групу не видалено.",
     "errorCreateTeam": "Команду не створено.",
+    "errorAssign": "Не вдалося змінити групу команди.",
     "errorCreateMatch": "Матч не створено.",
     "errorDeleteMatch": "Матч не видалено.",
     "errorDeleteTeam": "Команду не видалено."
+  },
+  "tournament": {
+    "short": "Joyn 2026",
+    "name": "Турнір Joyn Consulting 2026",
+    "location": "Urban Soccer, Monsanto, Лісабон",
+    "window": "2 липня · 19h — 21h"
+  },
+  "nav": { "overview": "Огляд", "results": "Результати", "knockout": "Плей-оф", "teams": "Команди", "admin": "Адмін" },
+  "adminSquads": {
+    "title": "Склади",
+    "team": "Команда",
+    "selectTeam": "— оберіть команду —",
+    "pickTeam": "Оберіть команду, щоб керувати її складом.",
+    "newPlayer": "Новий гравець",
+    "namePlaceholder": "Ім'я гравця",
+    "numberPlaceholder": "Ігровий номер (необов'язково)",
+    "positionPlaceholder": "Позиція, напр. GK (необов'язково)",
+    "addPlayer": "Додати гравця",
+    "playersTitle": "Гравці",
+    "colNumber": "#",
+    "colName": "Ім'я",
+    "colPosition": "Позиція",
+    "colActions": "Дії",
+    "empty": "У цій команді ще немає гравців.",
+    "edit": "Редагувати",
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "delete": "Видалити",
+    "errorCreate": "Гравця не додано.",
+    "errorUpdate": "Гравця не оновлено.",
+    "errorDelete": "Гравця не видалено."
+  },
+  "squads": {
+    "title": "Команди",
+    "selectTeam": "— оберіть команду —",
+    "pickTeam": "Оберіть команду, щоб побачити її склад.",
+    "colNumber": "#",
+    "colName": "Ім'я",
+    "colPosition": "Позиція",
+    "empty": "У цій команді ще немає гравців."
+  },
+  "overview": {
+    "played": "Зіграно матчів {played} / {total}",
+    "groups": "Груповий етап",
+    "knockout": "Плей-оф",
+    "viewBracket": "Дивитись сітку"
+  },
+  "standings": {
+    "group": "Група {group}",
+    "team": "Команда",
+    "played": "І", "playedFull": "Зіграно",
+    "gf": "ЗМ", "gfFull": "Забиті м'ячі",
+    "ga": "ПМ", "gaFull": "Пропущені м'ячі",
+    "gd": "РМ", "gdFull": "Різниця м'ячів",
+    "pts": "О", "ptsFull": "Очки"
+  },
+  "bracket": {
+    "r16": "1/8 фіналу",
+    "qf": "Чвертьфінали",
+    "sf": "Півфінали",
+    "final": "Фінал",
+    "third": "Матч за 3тє місце",
+    "finalShort": "Фінал",
+    "thirdShort": "3-4",
+    "vs": "проти",
+    "empty": "Сітка з'явиться, коли налаштуєте групи.",
+    "note": "Перші дві команди кожної групи проходять; найкращі треті добивають сітку до степені двійки. Нічия в плей-оф вирішується пенальті.",
+    "reason": {
+      "noGroups": "Створіть хоча б одну групу, щоб сформувати сітку.",
+      "groupTooSmall": "У кожній групі має бути щонайменше 2 команди.",
+      "notEnoughThirds": "Бракує третіх місць, щоб дійти до степені двійки. Змініть групи.",
+      "tooManyGroups": "Забагато груп — сітка перевищила б 16 команд."
+    }
+  },
+  "seed": {
+    "qualifier": "Посів {n}",
+    "winner": "Переможець {slot}",
+    "loser": "Той, хто програв {slot}"
+  },
+  "adminBracket": {
+    "title": "Результати плей-оф",
+    "hint": "Команди підставляються автоматично з таблиць груп, щойно групу зіграно. Нічия потребує результату пенальті.",
+    "reset": "Скинути плей-оф",
+    "resetConfirm": "Очистити всі результати плей-оф? Групові матчі знову можна редагувати.",
+    "resetError": "Не вдалося скинути сітку.",
+    "save": "Зберегти",
+    "saveError": "Не вдалося зберегти результат.",
+    "pens": "Пенальті",
+    "notReady": "Команди для цього матчу ще не визначені.",
+    "homeScore": "Рахунок господарів", "awayScore": "Рахунок гостей",
+    "homePens": "Пенальті господарів", "awayPens": "Пенальті гостей"
   }
 }

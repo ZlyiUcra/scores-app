@@ -2,6 +2,8 @@ import { io, type Socket } from 'socket.io-client';
 import type { ServerToClientEvents } from '../../shared/types';
 import { SOCKET_EVENTS } from '../../shared/types';
 import { useMatchStore } from './store';
+import { useBracketStore } from './bracketStore';
+import { useRosterStore } from './rosterStore';
 
 let socket: Socket<ServerToClientEvents> | null = null;
 
@@ -30,6 +32,12 @@ export function connectSocket(): void {
   });
   socket.on(SOCKET_EVENTS.matchRemoved, ({ matchId }) => {
     useMatchStore.getState().removeMatch(matchId);
+  });
+  socket.on(SOCKET_EVENTS.bracketSnapshot, (bracket) => {
+    useBracketStore.getState().setBracket(bracket);
+  });
+  socket.on(SOCKET_EVENTS.rosterSnapshot, (roster) => {
+    useRosterStore.getState().setRoster(roster);
   });
 }
 

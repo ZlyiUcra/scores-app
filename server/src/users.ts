@@ -1,17 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { fileURLToPath } from 'node:url';
 import bcrypt from 'bcryptjs';
 import type { AdminUserView, AuthUser, Role } from '../../shared/types.js';
 import { AppError } from './errors.js';
+import { db, transaction, DATA_DIR_PATH } from './db.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_FILE = path.join(__dirname, '..', 'data', 'users.json');
-
-const SCHEMA_VERSION = 1;
+/** Pre-SQLite account store — imported ONCE into the DB on first boot. */
+const LEGACY_USERS_FILE = path.join(DATA_DIR_PATH, 'users.json');
 const BCRYPT_COST = 12;
-const MAX_USERS = 500; // global cap — blunts registration flooding of the flat file
+const MAX_USERS = 500; // global cap — blunts registration flooding
 
 /** Server-only shape: carries the password hash, NEVER leaves the server. */
 export interface StoredUser extends AuthUser {
@@ -103,37 +101,70 @@ class JsonFileUserRepository implements UserRepository {
   }
 
   private load(): void {
-    if (!fs.existsSync(DATA_FILE)) {
-      // First boot: seed and persist. This is the ONLY path that writes seeds.
-      const seeded = this.seed();
-      this.index(seeded);
+    const rows = db
+      .prepare('SELECT id, username, usernameLower, passwordHash, role, createdAt, active FROM users')
+      .all() as Array<{
+      id: string;
+      username: string;
+      usernameLower: string;
+      passwordHash: string;
+      role: string;
+      createdAt: string;
+      active: number;
+    }>;
+    if (rows.length === 0) {
+      // First boot on SQLite: bring over legacy accounts if present, else seed.
+      // This is the ONLY path that writes seeds.
+      const imported = this.importLegacyUsers();
+      this.index(imported ?? this.seed());
       this.persist();
       return;
     }
-    // File exists: parse it. Do NOT reseed-overwrite on failure — that would
-    // silently wipe every registered account. Fail closed instead.
+    this.index(
+      rows.map((r) => ({
+        id: r.id,
+        username: r.username,
+        usernameLower: r.usernameLower,
+        passwordHash: r.passwordHash,
+        role: r.role as Role,
+        createdAt: r.createdAt,
+        active: r.active !== 0,
+      })),
+    );
+  }
+
+  /** One-time import of accounts from the pre-SQLite users.json. Fails CLOSED on
+   * a corrupt legacy file (accounts could be in it) rather than seeding over it. */
+  private importLegacyUsers(): StoredUser[] | null {
+    if (!fs.existsSync(LEGACY_USERS_FILE)) return null;
     let parsed: UserFile;
     try {
-      parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')) as UserFile;
+      parsed = JSON.parse(fs.readFileSync(LEGACY_USERS_FILE, 'utf8')) as UserFile;
     } catch (err) {
       throw new Error(
-        `[users] ${DATA_FILE} is corrupt and was NOT overwritten. Fix or remove it. (${String(err)})`,
+        `[users] legacy ${LEGACY_USERS_FILE} is corrupt. Refusing to start so accounts are not lost. Fix or remove it. (${String(err)})`,
       );
     }
-    if (!parsed || parsed.version !== SCHEMA_VERSION || !Array.isArray(parsed.users)) {
-      throw new Error(`[users] ${DATA_FILE} has an unexpected schema (version ${parsed?.version}). Refusing to start.`);
+    if (!parsed || !Array.isArray(parsed.users)) {
+      throw new Error(`[users] legacy ${LEGACY_USERS_FILE} has an unexpected schema. Refusing to start.`);
     }
-    this.index(parsed.users);
+    if (parsed.users.length === 0) return null;
+    console.log(`[users] importing ${parsed.users.length} account(s) from legacy users.json into SQLite.`);
+    return parsed.users;
   }
 
   private persist(): void {
-    // Atomic temp-then-rename. THROWS on failure so a caller reports 5xx
-    // instead of returning a phantom account that never hit disk.
-    fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-    const payload: UserFile = { version: SCHEMA_VERSION, users: this.listAll() };
-    const tmp = `${DATA_FILE}.tmp`;
-    fs.writeFileSync(tmp, JSON.stringify(payload, null, 2), 'utf8');
-    fs.renameSync(tmp, DATA_FILE);
+    // Rewrite the whole table atomically. THROWS on failure so a caller reports
+    // 5xx instead of returning a phantom account that never hit the DB.
+    transaction(() => {
+      db.exec('DELETE FROM users');
+      const ins = db.prepare(
+        'INSERT INTO users (id, username, usernameLower, passwordHash, role, createdAt, active) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      );
+      for (const u of this.listAll()) {
+        ins.run(u.id, u.username, u.usernameLower, u.passwordHash, u.role, u.createdAt, u.active ? 1 : 0);
+      }
+    });
   }
 
   /** Count admins that could still log in — the last-admin invariant. */

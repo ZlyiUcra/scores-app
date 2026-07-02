@@ -4,3 +4,9 @@ dist/
 *.log
 .DS_Store
 CLAUDE.md
+
+# Local SQLite database (seeded/created at runtime)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

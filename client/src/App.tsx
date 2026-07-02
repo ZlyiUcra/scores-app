@@ -1,16 +1,23 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, NavLink } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { api } from './api';
 import { useMatchStore } from './store';
+import { useBracketStore } from './bracketStore';
+import { useRosterStore } from './rosterStore';
 import { connectSocket, disconnectSocket } from './socket';
 import { useI18n, LANGS } from './i18n';
 import { Login } from './pages/Login';
+import { Overview } from './pages/Overview';
 import { MatchList } from './pages/MatchList';
+import { Eliminatorias } from './pages/Eliminatorias';
+import { Squads } from './pages/Squads';
 import { MatchDetail } from './pages/MatchDetail';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminMatches } from './pages/admin/AdminMatches';
+import { AdminSquads } from './pages/admin/AdminSquads';
+import { AdminBracket } from './pages/admin/AdminBracket';
 
 function LangSwitcher() {
   const { lang, setLang } = useI18n();
@@ -32,12 +39,20 @@ function LangSwitcher() {
 function Header() {
   const { user, isAdmin, logout } = useAuth();
   const { t } = useI18n();
+  const link = ({ isActive }: { isActive: boolean }) =>
+    `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`;
   return (
     <header className="header">
-      <Link to="/" className="header__brand">⚽ Live Scores</Link>
+      <Link to="/" className="header__brand">{t('tournament.short')}</Link>
+      <nav className="header__nav">
+        <NavLink to="/" end className={link}>{t('nav.overview')}</NavLink>
+        <NavLink to="/resultados" className={link}>{t('nav.results')}</NavLink>
+        <NavLink to="/ko" className={link}>{t('nav.knockout')}</NavLink>
+        <NavLink to="/equipas" className={link}>{t('nav.teams')}</NavLink>
+        {isAdmin && <NavLink to="/admin" className={link}>{t('nav.admin')}</NavLink>}
+      </nav>
       <div className="header__right">
         <LangSwitcher />
-        {isAdmin && <Link to="/admin/matches" className="btn btn--sm">{t('header.adminPanel')}</Link>}
         <span className="header__user">
           {user?.username}
           <span className={`chip chip--${user?.role}`}>{user?.role === 'admin' ? t('role.admin') : t('role.viewer')}</span>
@@ -61,6 +76,14 @@ export function App() {
       .listMatches()
       .then(({ matches }) => alive && useMatchStore.getState().setSnapshot(matches))
       .catch((err) => console.error(err));
+    api
+      .getBracket()
+      .then(({ bracket }) => alive && useBracketStore.getState().setBracket(bracket))
+      .catch((err) => console.error(err));
+    api
+      .getRoster()
+      .then(({ roster }) => alive && useRosterStore.getState().setRoster(roster))
+      .catch((err) => console.error(err));
     connectSocket();
     return () => {
       alive = false;
@@ -76,12 +99,17 @@ export function App() {
       <Header />
       <main className="app__main">
         <Routes>
-          <Route path="/" element={<MatchList />} />
+          <Route path="/" element={<Overview />} />
+          <Route path="/resultados" element={<MatchList />} />
+          <Route path="/ko" element={<Eliminatorias />} />
+          <Route path="/equipas" element={<Squads />} />
           <Route path="/match/:id" element={<MatchDetail />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/matches" replace />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="matches" element={<AdminMatches />} />
+            <Route path="squads" element={<AdminSquads />} />
+            <Route path="bracket" element={<AdminBracket />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

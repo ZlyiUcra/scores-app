@@ -20,9 +20,10 @@
     "title": "Tournament matches",
     "live": "live",
     "offline": "offline",
-    "loading": "Loading matches…"
+    "loading": "Loading matches…",
+    "noGames": "No games yet."
   },
-  "matchDetail": { "back": "← Back to list", "notFound": "Match not found." },
+  "matchDetail": { "back": "← Back to results", "notFound": "Match not found." },
   "match": { "group": "Group {group}", "vs": "{home} vs {away}" },
   "status": { "scheduled": "Scheduled", "live": "LIVE", "finished": "Finished" },
   "adminControls": {
@@ -33,7 +34,7 @@
     "reset": "Reset",
     "error": "Request failed."
   },
-  "adminLayout": { "back": "← Back to scoreboard", "users": "Users", "matches": "Games" },
+  "adminLayout": { "back": "← Back to scoreboard", "users": "Users", "matches": "Games", "squads": "Squads", "bracket": "Knockout" },
   "adminUsers": {
     "title": "Users",
     "search": "Search by username…",
@@ -58,16 +59,24 @@
     "errorAction": "Action failed."
   },
   "adminMatches": {
+    "groups": "Groups",
+    "groupNamePlaceholder": "Group name (e.g. Group A)",
+    "addGroup": "Add group",
+    "deleteGroupTitle": "Delete group",
     "newTeam": "New team",
     "teamNamePlaceholder": "Name (e.g. FC Lions)",
     "teamShortPlaceholder": "Code (e.g. LIO)",
     "addTeam": "Add team",
-    "deleteTeamTitle": "Delete team",
+    "teamsTitle": "Teams",
+    "colTeam": "Team",
+    "noGroup": "— no group —",
     "newGame": "New game",
     "home": "Home",
     "away": "Away",
     "selectTeam": "— select a team —",
     "group": "Group",
+    "fieldLabel": "Field",
+    "fieldPlaceholder": "e.g. Campo 1",
     "start": "Kick-off",
     "createGame": "Create game",
     "matchesTitle": "Tournament matches",
@@ -77,10 +86,108 @@
     "colStatus": "Status",
     "colActions": "Actions",
     "delete": "Delete",
-    "errorLoadTeams": "Failed to load teams.",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "errorUpdateTeam": "Team not updated.",
+    "errorCreateGroup": "Group not created.",
+    "errorUpdateGroup": "Group not renamed.",
+    "errorDeleteGroup": "Group not deleted.",
     "errorCreateTeam": "Team not created.",
+    "errorAssign": "Could not change the team's group.",
     "errorCreateMatch": "Match not created.",
     "errorDeleteMatch": "Match not deleted.",
     "errorDeleteTeam": "Team not deleted."
+  },
+  "tournament": {
+    "short": "Joyn 2026",
+    "name": "Joyn Consulting Tournament 2026",
+    "location": "Urban Soccer, Monsanto, Lisbon",
+    "window": "2 July · 19h — 21h"
+  },
+  "nav": { "overview": "Overview", "results": "Results", "knockout": "Knockouts", "teams": "Teams", "admin": "Admin" },
+  "adminSquads": {
+    "title": "Squads",
+    "team": "Team",
+    "selectTeam": "— select a team —",
+    "pickTeam": "Pick a team to manage its squad.",
+    "newPlayer": "New player",
+    "namePlaceholder": "Player name",
+    "numberPlaceholder": "Jersey number (optional)",
+    "positionPlaceholder": "Position, e.g. GK (optional)",
+    "addPlayer": "Add player",
+    "playersTitle": "Players",
+    "colNumber": "#",
+    "colName": "Name",
+    "colPosition": "Position",
+    "colActions": "Actions",
+    "empty": "No players in this team yet.",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "errorCreate": "Player not added.",
+    "errorUpdate": "Player not updated.",
+    "errorDelete": "Player not removed."
+  },
+  "squads": {
+    "title": "Teams",
+    "selectTeam": "— select a team —",
+    "pickTeam": "Pick a team to see its squad.",
+    "colNumber": "#",
+    "colName": "Name",
+    "colPosition": "Position",
+    "empty": "No players in this team yet."
+  },
+  "overview": {
+    "played": "Matches played {played} / {total}",
+    "groups": "Group stage",
+    "knockout": "Knockouts",
+    "viewBracket": "View bracket"
+  },
+  "standings": {
+    "group": "Group {group}",
+    "team": "Team",
+    "played": "P", "playedFull": "Played",
+    "gf": "GF", "gfFull": "Goals for",
+    "ga": "GA", "gaFull": "Goals against",
+    "gd": "GD", "gdFull": "Goal difference",
+    "pts": "Pts", "ptsFull": "Points"
+  },
+  "bracket": {
+    "r16": "Round of 16",
+    "qf": "Quarterfinals",
+    "sf": "Semifinals",
+    "final": "Final",
+    "third": "Third place",
+    "finalShort": "Final",
+    "thirdShort": "3rd/4th",
+    "vs": "vs",
+    "empty": "The bracket appears once the group stage is set up.",
+    "note": "The top two of every group qualify; the best third-placed teams fill the bracket up to a power of two. A level knockout match is decided on penalties.",
+    "reason": {
+      "noGroups": "Create at least one group to form a bracket.",
+      "groupTooSmall": "Every group needs at least 2 teams.",
+      "notEnoughThirds": "Not enough third-placed teams to reach a power of two. Adjust the groups.",
+      "tooManyGroups": "Too many groups — the bracket would exceed 16 teams."
+    }
+  },
+  "seed": {
+    "qualifier": "Seed {n}",
+    "winner": "Winner {slot}",
+    "loser": "Loser {slot}"
+  },
+  "adminBracket": {
+    "title": "Knockout results",
+    "hint": "Teams fill in automatically from the group standings once each group is decided. A level match needs a penalty result.",
+    "reset": "Reset knockout",
+    "resetConfirm": "Clear all knockout results? Group matches become editable again.",
+    "resetError": "Could not reset the bracket.",
+    "save": "Save",
+    "saveError": "Could not save the result.",
+    "pens": "Penalties",
+    "notReady": "Teams for this match are not decided yet.",
+    "homeScore": "Home score", "awayScore": "Away score",
+    "homePens": "Home penalties", "awayPens": "Away penalties"
   }
 }
