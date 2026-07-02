@@ -25,7 +25,6 @@
   },
   "matchDetail": { "back": "← Voltar aos resultados", "notFound": "Jogo não encontrado." },
   "knockoutDetail": { "back": "← Voltar ao bracket", "notFound": "Jogo não encontrado." },
-  "match": { "vs": "{home} contra {away}" },
   "status": { "scheduled": "Agendado", "live": "AO VIVO", "finished": "Terminado" },
   "adminControls": {
     "title": "Controlo (administrador)",

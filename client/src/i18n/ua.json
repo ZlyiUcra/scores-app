@@ -25,7 +25,6 @@
   },
   "matchDetail": { "back": "← До результатів", "notFound": "Матч не знайдено." },
   "knockoutDetail": { "back": "← До сітки", "notFound": "Гру не знайдено." },
-  "match": { "vs": "{home} проти {away}" },
   "status": { "scheduled": "Заплановано", "live": "НАЖИВО", "finished": "Завершено" },
   "adminControls": {
     "title": "Керування (адмін)",

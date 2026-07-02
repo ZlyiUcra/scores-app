@@ -25,7 +25,6 @@
   },
   "matchDetail": { "back": "← Back to results", "notFound": "Match not found." },
   "knockoutDetail": { "back": "← Back to bracket", "notFound": "Game not found." },
-  "match": { "vs": "{home} vs {away}" },
   "status": { "scheduled": "Scheduled", "live": "LIVE", "finished": "Finished" },
   "adminControls": {
     "title": "Controls (admin)",
