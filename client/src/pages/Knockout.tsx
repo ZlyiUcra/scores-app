@@ -1,8 +1,8 @@
-import { useBracketStore, selectBracket } from '../bracketStore';
+import { useBracketStore, selectBracket } from '../stores/bracketStore';
 import { Bracket } from '../components/Bracket';
 import { useI18n } from '../i18n';
 
-export function Eliminatorias() {
+export function Knockout() {
   const { t } = useI18n();
   const view = useBracketStore(selectBracket);
 

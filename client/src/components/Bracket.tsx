@@ -1,16 +1,8 @@
 import { Link } from 'react-router-dom';
 import type { BracketMatch, BracketView, Round } from '../../../shared/types';
 import { useI18n } from '../i18n';
-import { participantName, slotShort } from '../bracketLabels';
-
-/** "19h30" like the results list; empty when unset/invalid. */
-export function formatTime(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${hh}h${mm}`;
-}
+import { participantName, slotShort } from '../lib/bracketLabels';
+import { formatTime } from '../lib/format';
 
 /** Which side won a finished knockout match ('home' | 'away' | null). */
 function winnerSide(m: BracketMatch): 'home' | 'away' | null {

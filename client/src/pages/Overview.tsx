@@ -1,7 +1,7 @@
 import { computeSize, computeThirdPlaces, TOURNAMENT_FORMAT } from '../../../shared/tournament';
-import { useMatchStore } from '../store';
-import { useRosterStore } from '../rosterStore';
-import { useStandings } from '../standings';
+import { useMatchStore } from '../stores/matchStore';
+import { useRosterStore } from '../stores/rosterStore';
+import { useStandings } from '../hooks/useStandings';
 import { StandingsTable } from '../components/StandingsTable';
 import { ThirdPlacesTable } from '../components/ThirdPlacesTable';
 import { useI18n } from '../i18n';

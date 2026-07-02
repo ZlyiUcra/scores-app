@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Match, MatchUpdate } from '../../shared/types';
+import type { Match, MatchUpdate } from '../../../shared/types';
 
 /**
  * Normalized match store keyed by id (a Record, not an array) so a single

@@ -16,8 +16,8 @@ import type {
   UpdateBracketRequest,
   UpdatePlayerRequest,
   UpdateUserRequest,
-} from '../../shared/types';
-import { request } from './api';
+} from '../../../shared/types';
+import { request } from './client';
 
 /** Admin-only endpoints (server enforces requireAdmin on the /api/admin router). */
 export const adminApi = {

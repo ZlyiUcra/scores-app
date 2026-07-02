@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { adminApi } from '../../adminApi';
-import { ApiError } from '../../api';
-import { useBracketStore, selectBracket } from '../../bracketStore';
+import { adminApi } from '../../api/admin';
+import { ApiError } from '../../api/client';
+import { useBracketStore, selectBracket } from '../../stores/bracketStore';
 import { BracketSlotControls } from '../../components/BracketSlotControls';
 import { useI18n } from '../../i18n';
 

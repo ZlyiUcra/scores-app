@@ -1,5 +1,5 @@
 {
-  "header": { "adminPanel": "Painel de administração", "logout": "Terminar sessão", "menu": "Menu" },
+  "header": { "logout": "Terminar sessão", "menu": "Menu" },
   "app": { "loading": "A carregar…" },
   "role": { "admin": "administrador", "viewer": "espectador" },
   "login": {
@@ -25,7 +25,7 @@
   },
   "matchDetail": { "back": "← Voltar aos resultados", "notFound": "Jogo não encontrado." },
   "knockoutDetail": { "back": "← Voltar ao bracket", "notFound": "Jogo não encontrado." },
-  "match": { "group": "Grupo {group}", "vs": "{home} contra {away}" },
+  "match": { "vs": "{home} contra {away}" },
   "status": { "scheduled": "Agendado", "live": "AO VIVO", "finished": "Terminado" },
   "adminControls": {
     "title": "Controlo (administrador)",
@@ -75,7 +75,6 @@
     "home": "Casa",
     "away": "Visitante",
     "selectTeam": "— selecione uma equipa —",
-    "group": "Grupo",
     "fieldLabel": "Campo",
     "fieldPlaceholder": "ex. Campo 1",
     "start": "Início",
@@ -95,7 +94,6 @@
     "errorUpdateGroup": "Grupo não renomeado.",
     "errorDeleteGroup": "Grupo não eliminado.",
     "errorCreateTeam": "Equipa não criada.",
-    "errorAssign": "Não foi possível alterar o grupo da equipa.",
     "errorCreateMatch": "Jogo não criado.",
     "errorDeleteMatch": "Jogo não eliminado.",
     "errorDeleteTeam": "Equipa não eliminada.",
@@ -147,9 +145,7 @@
   },
   "overview": {
     "played": "Jogos disputados {played} / {total}",
-    "groups": "Fase de grupos",
-    "knockout": "Eliminatórias",
-    "viewBracket": "Ver bracket"
+    "groups": "Fase de grupos"
   },
   "thirds": {
     "title": "Melhores 3ºs",
@@ -157,7 +153,6 @@
     "colGroup": "Grupo"
   },
   "standings": {
-    "group": "Grupo {group}",
     "team": "Equipa",
     "played": "J", "playedFull": "Jogos",
     "won": "V", "wonFull": "Vitórias",
@@ -198,12 +193,9 @@
     "reset": "Repor eliminatórias",
     "resetConfirm": "Limpar todos os resultados das eliminatórias? Os jogos de grupo voltam a ser editáveis.",
     "resetError": "Não foi possível repor o bracket.",
-    "save": "Guardar",
     "saveError": "Não foi possível guardar o resultado.",
     "pens": "Penáltis",
     "notReady": "As equipas deste jogo ainda não estão decididas.",
-    "homeScore": "Golos casa", "awayScore": "Golos visitante",
-    "homePens": "Penáltis casa", "awayPens": "Penáltis visitante",
     "override": "Equipas manuais", "auto": "Auto"
   }
 }

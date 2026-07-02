@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Match, MatchStatus } from '../../../shared/types';
-import { api, ApiError } from '../api';
+import { api, ApiError } from '../api/client';
 import { useI18n } from '../i18n';
 
 /**

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { ApiError } from '../api';
+import { ApiError } from '../api/client';
 import { useI18n, LANGS } from '../i18n';
 
 type Mode = 'login' | 'register';

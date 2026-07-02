@@ -1,9 +1,8 @@
 import { io, type Socket } from 'socket.io-client';
-import type { ServerToClientEvents } from '../../shared/types';
-import { SOCKET_EVENTS } from '../../shared/types';
-import { useMatchStore } from './store';
-import { useBracketStore } from './bracketStore';
-import { useRosterStore } from './rosterStore';
+import { SOCKET_EVENTS, type ServerToClientEvents } from '../../shared/types';
+import { useMatchStore } from './stores/matchStore';
+import { useBracketStore } from './stores/bracketStore';
+import { useRosterStore } from './stores/rosterStore';
 
 let socket: Socket<ServerToClientEvents> | null = null;
 
@@ -16,9 +15,7 @@ export function connectSocket(): void {
   if (socket) return;
   socket = io({ withCredentials: true });
 
-  const store = useMatchStore.getState();
-
-  socket.on('connect', () => store.setConnected(true));
+  socket.on('connect', () => useMatchStore.getState().setConnected(true));
   socket.on('disconnect', () => useMatchStore.getState().setConnected(false));
 
   socket.on(SOCKET_EVENTS.matchSnapshot, (matches) => {

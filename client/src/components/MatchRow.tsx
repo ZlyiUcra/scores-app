@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { useMatchStore, selectMatch } from '../store';
-import { useRosterStore } from '../rosterStore';
+import { useMatchStore, selectMatch } from '../stores/matchStore';
+import { useRosterStore } from '../stores/rosterStore';
 import { useI18n } from '../i18n';
 import { StatusBadge } from './StatusBadge';
 

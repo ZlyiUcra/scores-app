@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Group, Player, Roster, Team } from '../../shared/types';
+import type { Group, Player, Roster, Team } from '../../../shared/types';
 
 /**
  * Groups + teams (with membership) + players (squads). Server-authoritative,

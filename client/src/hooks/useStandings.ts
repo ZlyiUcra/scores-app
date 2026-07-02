@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import type { GroupTable, Group, Match, Team } from '../../shared/types';
-import { computeStandings } from '../../shared/tournament';
-import { useMatchStore } from './store';
-import { useRosterStore } from './rosterStore';
+import type { GroupTable, Group, Match, Team } from '../../../shared/types';
+import { computeStandings } from '../../../shared/tournament';
+import { useMatchStore } from '../stores/matchStore';
+import { useRosterStore } from '../stores/rosterStore';
 
 /** Signature over the fields standings depend on — EXCLUDES `minute`, so a live
  * clock tick does not trigger a recompute/re-render. */

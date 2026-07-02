@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AdminUserView, Paginated } from '../../../../shared/types';
-import { adminApi } from '../../adminApi';
-import { ApiError } from '../../api';
+import { adminApi } from '../../api/admin';
+import { ApiError } from '../../api/client';
 import { useAuth } from '../../auth/AuthContext';
 import { useI18n } from '../../i18n';
 

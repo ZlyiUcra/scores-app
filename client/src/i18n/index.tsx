@@ -1,14 +1,16 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import en from './en.json';
-import uk from './uk.json';
+import ua from './ua.json';
 import pt from './pt.json';
 
-export type Lang = 'en' | 'uk' | 'pt';
+// NOTE: 'ua' is used for Ukrainian by explicit project decision (ISO 639-1
+// would be 'uk', but it reads as "United Kingdom" in the UI).
+export type Lang = 'en' | 'ua' | 'pt';
 
-export const LANGS: Lang[] = ['en', 'uk', 'pt'];
+export const LANGS: Lang[] = ['en', 'ua', 'pt'];
 
 // English is the default and the fallback for any missing key.
-const DICTIONARIES: Record<Lang, unknown> = { en, uk, pt };
+const DICTIONARIES: Record<Lang, unknown> = { en, ua, pt };
 const STORAGE_KEY = 'lang';
 
 type Params = Record<string, string | number>;
@@ -43,7 +45,8 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 
 function initialLang(): Lang {
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored === 'uk' || stored === 'pt' || stored === 'en' ? stored : 'en';
+  if (stored === 'uk') return 'ua'; // migrate the pre-rename stored value
+  return stored === 'ua' || stored === 'pt' || stored === 'en' ? stored : 'en';
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {

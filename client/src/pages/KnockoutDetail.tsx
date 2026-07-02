@@ -1,11 +1,11 @@
 import { Link, useParams } from 'react-router-dom';
-import { useBracketStore, selectBracket } from '../bracketStore';
+import { useBracketStore, selectBracket } from '../stores/bracketStore';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
 import { StatusBadge } from '../components/StatusBadge';
 import { BracketSlotControls } from '../components/BracketSlotControls';
-import { formatTime } from '../components/Bracket';
-import { participantName, slotShort } from '../bracketLabels';
+import { formatTime } from '../lib/format';
+import { participantName, slotShort } from '../lib/bracketLabels';
 
 /** One knockout game, mirroring MatchDetail: scoreboard for everyone, the
  * click-driven slot controls for admins. Lives at /ko/:slot. */

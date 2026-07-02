@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { Routes, Route, Navigate, Link, NavLink } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
-import { api } from './api';
-import { useMatchStore } from './store';
-import { useBracketStore } from './bracketStore';
-import { useRosterStore } from './rosterStore';
+import { api } from './api/client';
+import { useMatchStore } from './stores/matchStore';
+import { useBracketStore } from './stores/bracketStore';
+import { useRosterStore } from './stores/rosterStore';
 import { connectSocket, disconnectSocket } from './socket';
 import { useI18n, LANGS } from './i18n';
 import { Login } from './pages/Login';
 import { Overview } from './pages/Overview';
 import { MatchList } from './pages/MatchList';
-import { Eliminatorias } from './pages/Eliminatorias';
+import { Knockout } from './pages/Knockout';
 import { KnockoutDetail } from './pages/KnockoutDetail';
 import { Squads } from './pages/Squads';
 import { MatchDetail } from './pages/MatchDetail';
@@ -136,7 +136,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<Overview />} />
           <Route path="/results" element={<MatchList />} />
-          <Route path="/ko" element={<Eliminatorias />} />
+          <Route path="/ko" element={<Knockout />} />
           <Route path="/ko/:slot" element={<KnockoutDetail />} />
           <Route path="/teams" element={<Squads />} />
           <Route path="/match/:id" element={<MatchDetail />} />

@@ -3,11 +3,11 @@
 // collides with it at runtime even though TypeScript is fine with it.
 import { Fragment as ReactFragment, useState, type FormEvent } from 'react';
 import { TOURNAMENT_FORMAT } from '../../../../shared/tournament';
-import { adminApi } from '../../adminApi';
-import { api, ApiError } from '../../api';
-import { formatTime } from '../../components/Bracket';
-import { useMatchStore, selectOrder } from '../../store';
-import { useRosterStore, selectGroups, selectTeams } from '../../rosterStore';
+import { adminApi } from '../../api/admin';
+import { api, ApiError } from '../../api/client';
+import { formatTime } from '../../lib/format';
+import { useMatchStore, selectOrder } from '../../stores/matchStore';
+import { useRosterStore, selectGroups, selectTeams } from '../../stores/rosterStore';
 import { useI18n } from '../../i18n';
 
 /** ISO -> value for <input type="datetime-local"> in the local timezone. */

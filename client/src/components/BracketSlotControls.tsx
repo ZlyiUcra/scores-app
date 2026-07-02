@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { BracketMatch, BracketParticipant, UpdateBracketRequest } from '../../../shared/types';
-import { adminApi } from '../adminApi';
-import { ApiError } from '../api';
-import { participantName } from '../bracketLabels';
+import { adminApi } from '../api/admin';
+import { ApiError } from '../api/client';
+import { participantName } from '../lib/bracketLabels';
 import { useI18n } from '../i18n';
-import { useRosterStore } from '../rosterStore';
+import { useRosterStore } from '../stores/rosterStore';
 
 /** ISO -> value for <input type="datetime-local"> in the local timezone. */
 function toLocalInput(iso: string | null): string {

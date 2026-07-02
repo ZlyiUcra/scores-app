@@ -1,8 +1,8 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import type { Player } from '../../../../shared/types';
-import { adminApi } from '../../adminApi';
-import { ApiError } from '../../api';
-import { useRosterStore, selectPlayers, selectTeams, bySquadOrder } from '../../rosterStore';
+import { adminApi } from '../../api/admin';
+import { ApiError } from '../../api/client';
+import { useRosterStore, selectPlayers, selectTeams, bySquadOrder } from '../../stores/rosterStore';
 import { useI18n } from '../../i18n';
 
 export function AdminSquads() {

@@ -1,5 +1,5 @@
 {
-  "header": { "adminPanel": "Адмін-панель", "logout": "Вийти", "menu": "Меню" },
+  "header": { "logout": "Вийти", "menu": "Меню" },
   "app": { "loading": "Завантаження…" },
   "role": { "admin": "адмін", "viewer": "глядач" },
   "login": {
@@ -25,7 +25,7 @@
   },
   "matchDetail": { "back": "← До результатів", "notFound": "Матч не знайдено." },
   "knockoutDetail": { "back": "← До сітки", "notFound": "Гру не знайдено." },
-  "match": { "group": "Група {group}", "vs": "{home} проти {away}" },
+  "match": { "vs": "{home} проти {away}" },
   "status": { "scheduled": "Заплановано", "live": "НАЖИВО", "finished": "Завершено" },
   "adminControls": {
     "title": "Керування (адмін)",
@@ -75,7 +75,6 @@
     "home": "Господарі",
     "away": "Гості",
     "selectTeam": "— оберіть команду —",
-    "group": "Група",
     "fieldLabel": "Поле",
     "fieldPlaceholder": "напр. Campo 1",
     "start": "Початок",
@@ -95,7 +94,6 @@
     "errorUpdateGroup": "Групу не перейменовано.",
     "errorDeleteGroup": "Групу не видалено.",
     "errorCreateTeam": "Команду не створено.",
-    "errorAssign": "Не вдалося змінити групу команди.",
     "errorCreateMatch": "Матч не створено.",
     "errorDeleteMatch": "Матч не видалено.",
     "errorDeleteTeam": "Команду не видалено.",
@@ -147,9 +145,7 @@
   },
   "overview": {
     "played": "Зіграно матчів {played} / {total}",
-    "groups": "Груповий етап",
-    "knockout": "Плей-оф",
-    "viewBracket": "Дивитись сітку"
+    "groups": "Груповий етап"
   },
   "thirds": {
     "title": "Найкращі треті місця",
@@ -157,7 +153,6 @@
     "colGroup": "Група"
   },
   "standings": {
-    "group": "Група {group}",
     "team": "Команда",
     "played": "І", "playedFull": "Зіграно",
     "won": "В", "wonFull": "Виграші",
@@ -198,12 +193,9 @@
     "reset": "Скинути плей-оф",
     "resetConfirm": "Очистити всі результати плей-оф? Групові матчі знову можна редагувати.",
     "resetError": "Не вдалося скинути сітку.",
-    "save": "Зберегти",
     "saveError": "Не вдалося зберегти результат.",
     "pens": "Пенальті",
     "notReady": "Команди для цього матчу ще не визначені.",
-    "homeScore": "Рахунок господарів", "awayScore": "Рахунок гостей",
-    "homePens": "Пенальті господарів", "awayPens": "Пенальті гостей",
     "override": "Ручне призначення", "auto": "Авто"
   }
 }

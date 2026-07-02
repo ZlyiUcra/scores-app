@@ -1,16 +1,9 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { useMatchStore, selectOrder, selectConnected, selectMatch } from '../store';
-import { useRosterStore, selectGroups } from '../rosterStore';
+import { useMatchStore, selectOrder, selectConnected, selectMatch } from '../stores/matchStore';
+import { useRosterStore, selectGroups } from '../stores/rosterStore';
 import { useI18n } from '../i18n';
-
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${hh}h${mm}`;
-}
+import { formatTime } from '../lib/format';
 
 /** Compact result row: time · field · status, then teams with score. Selects
  * its own match by id (memoized) so one update re-renders only this row. */

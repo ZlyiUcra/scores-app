@@ -7,10 +7,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    // Allow serving files from the monorepo root so `../shared/*` runtime
-    // imports (e.g. the pure tournament logic) resolve in dev. Type-only
-    // imports were erased at build time, but value imports are fetched.
-    fs: { allow: ['..'] },
+    // Allow serving `../shared/*` runtime imports (e.g. the pure tournament
+    // logic) in dev — and ONLY that dir, not the whole monorepo root, so the
+    // dev server can never be asked for server files. Type-only imports are
+    // erased at build time, but value imports are fetched.
+    fs: { allow: ['.', '../shared'] },
     proxy: {
       '/api': { target: 'http://localhost:3001', changeOrigin: true },
       '/socket.io': { target: 'http://localhost:3001', ws: true, changeOrigin: true },

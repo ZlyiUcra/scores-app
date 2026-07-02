@@ -1,5 +1,5 @@
 {
-  "header": { "adminPanel": "Admin panel", "logout": "Log out", "menu": "Menu" },
+  "header": { "logout": "Log out", "menu": "Menu" },
   "app": { "loading": "Loading…" },
   "role": { "admin": "admin", "viewer": "viewer" },
   "login": {
@@ -25,7 +25,7 @@
   },
   "matchDetail": { "back": "← Back to results", "notFound": "Match not found." },
   "knockoutDetail": { "back": "← Back to bracket", "notFound": "Game not found." },
-  "match": { "group": "Group {group}", "vs": "{home} vs {away}" },
+  "match": { "vs": "{home} vs {away}" },
   "status": { "scheduled": "Scheduled", "live": "LIVE", "finished": "Finished" },
   "adminControls": {
     "title": "Controls (admin)",
@@ -75,7 +75,6 @@
     "home": "Home",
     "away": "Away",
     "selectTeam": "— select a team —",
-    "group": "Group",
     "fieldLabel": "Field",
     "fieldPlaceholder": "e.g. Campo 1",
     "start": "Kick-off",
@@ -95,7 +94,6 @@
     "errorUpdateGroup": "Group not renamed.",
     "errorDeleteGroup": "Group not deleted.",
     "errorCreateTeam": "Team not created.",
-    "errorAssign": "Could not change the team's group.",
     "errorCreateMatch": "Match not created.",
     "errorDeleteMatch": "Match not deleted.",
     "errorDeleteTeam": "Team not deleted.",
@@ -147,9 +145,7 @@
   },
   "overview": {
     "played": "Matches played {played} / {total}",
-    "groups": "Group stage",
-    "knockout": "Knockouts",
-    "viewBracket": "View bracket"
+    "groups": "Group stage"
   },
   "thirds": {
     "title": "Best 3rd places",
@@ -157,7 +153,6 @@
     "colGroup": "Group"
   },
   "standings": {
-    "group": "Group {group}",
     "team": "Team",
     "played": "P", "playedFull": "Played",
     "won": "W", "wonFull": "Wins",
@@ -198,12 +193,9 @@
     "reset": "Reset knockout",
     "resetConfirm": "Clear all knockout results? Group matches become editable again.",
     "resetError": "Could not reset the bracket.",
-    "save": "Save",
     "saveError": "Could not save the result.",
     "pens": "Penalties",
     "notReady": "Teams for this match are not decided yet.",
-    "homeScore": "Home score", "awayScore": "Away score",
-    "homePens": "Home penalties", "awayPens": "Away penalties",
     "override": "Manual teams", "auto": "Auto"
   }
 }

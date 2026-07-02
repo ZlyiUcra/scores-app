@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { AuthUser } from '../../../shared/types';
-import { api, ApiError } from '../api';
+import { api, ApiError } from '../api/client';
 
 interface AuthContextValue {
   user: AuthUser | null;

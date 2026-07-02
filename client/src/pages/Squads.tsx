@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useRosterStore, selectGroups, selectPlayers, selectTeams, bySquadOrder } from '../rosterStore';
+import { useRosterStore, selectGroups, selectPlayers, selectTeams, bySquadOrder } from '../stores/rosterStore';
 import { useI18n } from '../i18n';
 
 /** Public read-only squads: pick a team, see who plays in it. */

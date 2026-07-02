@@ -1,4 +1,4 @@
-import type { AuthUser, BracketView, Match, MatchUpdate, Roster } from '../../shared/types';
+import type { AuthUser, BracketView, Match, MatchUpdate, Roster } from '../../../shared/types';
 
 /**
  * Thin REST client. All requests send the httpOnly cookie automatically via

@@ -1,5 +1,5 @@
-import type { BracketParticipant, SeedRef } from '../../shared/types';
-import { roundName } from '../../shared/tournament';
+import type { BracketParticipant, SeedRef } from '../../../shared/types';
+import { roundName } from '../../../shared/tournament';
 
 type Translate = (key: string, params?: Record<string, string | number>) => string;
 
@@ -20,7 +20,7 @@ export function slotShort(slot: string, t: Translate): string {
 
 /** Turn a structured seed reference into a localized label (never parse a
  * display string — the ref is the machine key, this is the human text). */
-export function seedLabel(seed: SeedRef, t: Translate): string {
+function seedLabel(seed: SeedRef, t: Translate): string {
   switch (seed.kind) {
     case 'qualifier':
       return t('seed.qualifier', { n: seed.index + 1 });

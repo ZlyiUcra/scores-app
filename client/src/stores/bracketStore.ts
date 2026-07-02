@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { BracketView } from '../../shared/types';
+import type { BracketView } from '../../../shared/types';
 
 /**
  * The knockout view is authoritative on the server (group setup + results). The
