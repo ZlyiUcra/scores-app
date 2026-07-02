@@ -118,8 +118,11 @@ export type SeedRef =
   | { kind: 'loser'; slot: BracketSlotId }; // loser of an earlier slot
 
 /** A slot side is either a resolved team or a still-symbolic seed. `manual`
- * marks a side pinned by an admin override rather than derived from results. */
-export type BracketParticipant = { team: Team; manual?: boolean } | { seed: SeedRef };
+ * marks a side pinned by an admin override rather than derived from results.
+ * A symbolic seed may carry `projected` — the team CURRENTLY holding that
+ * position per the live group standings (preview views only); it disappears
+ * once the side resolves for real. */
+export type BracketParticipant = { team: Team; manual?: boolean } | { seed: SeedRef; projected?: Team };
 
 /** Resolved knockout match DTO (participants embedded or left symbolic). */
 export interface BracketMatch {
@@ -146,8 +149,9 @@ export type BracketUnformableReason =
 
 /**
  * The whole knockout view: whether a bracket can be formed at all, its size,
- * and the resolved matches (empty when not formable). Sides stay symbolic until
- * every group is complete.
+ * and the resolved matches (empty when not formable). Sides resolve for real
+ * only when every group is complete; before that a view built with the preview
+ * option annotates the symbolic seeds with `projected` teams.
  */
 export interface BracketView {
   formable: boolean;

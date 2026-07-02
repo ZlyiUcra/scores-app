@@ -15,12 +15,17 @@ import { AppError } from '../errors.js';
 // Deliberately NOT guarded by assertBracketNotStarted: these writes are what
 // that lock protects everything else from, plus its escape hatch (reset).
 
+// includePreview here is DISPLAY-ONLY: while the groups are unfinished the
+// view annotates symbolic seeds with `projected` teams from the current
+// (live) standings. Write validation below resolves STRICTLY — never copy
+// this option into the hypothetical check in updateBracketSlot.
 function resolvedBracket(): BracketView {
   return resolveBracket(
     groupRepository.list(),
     teamRepository.listSeed(),
     matchRepository.list(),
     bracketRepository.results(),
+    { includePreview: true },
   );
 }
 

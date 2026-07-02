@@ -31,6 +31,12 @@ function seedLabel(seed: SeedRef, t: Translate): string {
   }
 }
 
+/** Resolved team name; a symbolic seed renders its position label, with the
+ * currently-projected team in parentheses while the groups are unfinished:
+ * "Seed 1 (FC Lions)". The parentheses disappearing IS the "now it's final"
+ * signal. */
 export function participantName(p: BracketParticipant, t: Translate): string {
-  return 'team' in p ? p.team.name : seedLabel(p.seed, t);
+  if ('team' in p) return p.team.name;
+  const label = seedLabel(p.seed, t);
+  return p.projected ? `${label} (${p.projected.name})` : label;
 }

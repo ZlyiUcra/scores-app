@@ -286,16 +286,21 @@ export function computeThirdPlaces(tables: GroupTable[]): Array<{ group: Group; 
 
 /** The seeded, ordered list of qualifiers (length = size) once every group is
  * complete; null while still in progress. Thirds are SELECTED by points, but the
- * whole pool is SEEDED by groupAddedAt (then teamId) per the tournament rules. */
+ * whole pool is SEEDED by groupAddedAt (then teamId) per the tournament rules.
+ * `preview` skips the completeness gate and projects from the CURRENT standings
+ * (live scores included) — "as if the groups ended right now". */
 function computeQualifiers(
   groups: Group[],
   seedTeams: SeedTeam[],
   matches: Match[],
   size: number,
+  preview = false,
 ): SeedTeam[] | null {
-  for (let g = 0; g < groups.length; g++) if (!isGroupComplete(groups[g].id, matches)) return null;
+  if (!preview) {
+    for (let g = 0; g < groups.length; g++) if (!isGroupComplete(groups[g].id, matches)) return null;
+  }
 
-  const tables = computeStandings(groups, seedTeams, matches);
+  const tables = computeStandings(groups, seedTeams, matches, { includeLive: preview });
   const seedByTeam = new Map<string, string | null>();
   for (let i = 0; i < seedTeams.length; i++) seedByTeam.set(seedTeams[i].id, seedTeams[i].groupAddedAt);
 
@@ -368,12 +373,18 @@ export function bracketSlotIds(size: number): BracketSlotId[] {
  * resolve lazily from stored results (no forward writes). A side with a stored
  * override resolves to that team (marked `manual`) instead of its seed, and the
  * override flows downstream through winner/loser refs like any other outcome.
+ *
+ * `includePreview` (display only — NEVER for write validation): while the
+ * groups are unfinished, first-round sides stay symbolic seeds but carry a
+ * `projected` team from the current standings. A projected side is not a
+ * resolved team, so it can never produce a winner/loser or start a match.
  */
 export function resolveBracket(
   groups: Group[],
   seedTeams: SeedTeam[],
   matches: Match[],
   results: Partial<Record<BracketSlotId, BracketResult>>,
+  opts?: { includePreview?: boolean },
 ): BracketView {
   const sizeInfo = computeSize(groups, seedTeams);
   if (!sizeInfo.formable) {
@@ -382,6 +393,10 @@ export function resolveBracket(
   const size = sizeInfo.size;
   const structure = generateBracket(size);
   const qualifiers = computeQualifiers(groups, seedTeams, matches, size);
+  const previewQualifiers =
+    qualifiers === null && opts?.includePreview
+      ? computeQualifiers(groups, seedTeams, matches, size, true)
+      : null;
 
   const bySlot = new Map<BracketSlotId, { round: Round; home: SeedRef; away: SeedRef }>();
   for (let i = 0; i < structure.length; i++) bySlot.set(structure[i].slot, structure[i]);
@@ -394,7 +409,9 @@ export function resolveBracket(
   function resolveSeed(seed: SeedRef): BracketParticipant {
     switch (seed.kind) {
       case 'qualifier':
-        return qualifiers ? { team: qualifiers[seed.index] } : { seed };
+        if (qualifiers) return { team: qualifiers[seed.index] };
+        if (previewQualifiers) return { seed, projected: previewQualifiers[seed.index] };
+        return { seed };
       case 'winner': {
         const out = slotOutcome(seed.slot);
         return out ? { team: out.winner } : { seed };

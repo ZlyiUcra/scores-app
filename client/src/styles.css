@@ -386,6 +386,7 @@ body {
 .bcard__pens { font-size: 0.6rem; color: var(--muted); margin-left: 0.15rem; }
 .bcard__manual { color: var(--accent-2); font-weight: 800; margin-left: 0.15rem; cursor: help; }
 .ko-note { margin-top: 1rem; font-size: 0.8rem; }
+.ko-preview-note { color: var(--muted); font-style: italic; font-size: 0.85rem; margin-bottom: 0.75rem; }
 
 /* ---------- Admin bracket editor ---------- */
 .slot-editor-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-top: 1rem; }

@@ -29,10 +29,14 @@ export function KnockoutDetail() {
   const homeShort = 'team' in m.home ? m.home.team.shortName : slotShort(m.slot, t);
   const awayShort = 'team' in m.away ? m.away.team.shortName : slotShort(m.slot, t);
   const showScore = m.status !== 'scheduled';
+  const preview =
+    ('seed' in m.home && m.home.projected) || ('seed' in m.away && m.away.projected);
 
   return (
     <div className="detail">
       <Link to="/ko" className="back">{t('knockoutDetail.back')}</Link>
+
+      {preview && <p className="ko-preview-note">{t('bracket.previewNote')}</p>}
 
       <div className="scoreboard">
         <div className="scoreboard__team">
