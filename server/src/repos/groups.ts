@@ -13,11 +13,15 @@ interface StoredGroup extends Group {
  * id (see teams.ts). Kept deliberately small: create / list / remove.
  */
 export interface GroupRepository {
+  /** All groups in stable creation order (createdAt, then id). */
   list(): Group[];
+  /** Group by id, or undefined. */
   get(id: string): Group | undefined;
+  /** Create a group with a fresh uuid; name arrives pre-validated. */
   create(name: string): Group;
   /** Rename a group (cosmetic — id-based references stay valid). */
   update(id: string, name: string): Group;
+  /** Delete a group. Emptiness (no member teams) is the SERVICE's guard. */
   remove(id: string): void;
 }
 

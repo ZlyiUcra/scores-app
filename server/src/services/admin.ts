@@ -1,6 +1,7 @@
 import type { AdminUserView, Paginated, Role } from '../../../shared/types.js';
 import { toAdminView, userRepository } from '../repos/users.js';
 
+/** Validated query for the paginated admin user list (q = username filter). */
 export interface ListUsersQuery {
   q?: string;
   page: number;
@@ -28,6 +29,8 @@ export function listUsers(query: ListUsersQuery): Paginated<AdminUserView> {
   return { items, total, page: query.page, pageSize: query.pageSize };
 }
 
+/** Admin: patch a user's active/role. Self-lockout and last-admin guards live
+ * in the repository, atomically with the write. */
 export function updateUser(
   id: string,
   actorId: string,
@@ -36,6 +39,7 @@ export function updateUser(
   return toAdminView(userRepository.update(id, actorId, patch));
 }
 
+/** Admin: delete a user (guards as in updateUser; cannot delete yourself). */
 export function deleteUser(id: string, actorId: string): void {
   userRepository.remove(id, actorId);
 }

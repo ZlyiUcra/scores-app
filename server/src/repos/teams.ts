@@ -25,14 +25,20 @@ export interface TeamRepository {
   list(): Team[];
   /** Server-only view carrying the seeding key, for bracket resolution. */
   listSeed(): SeedTeam[];
+  /** Public DTO by id, or undefined. */
   get(id: string): Team | undefined;
+  /** Raw stored form (incl. seeding key) for service-side mutation logic. */
   getStored(id: string): StoredTeam | undefined;
+  /** How many teams currently sit in a group (max-per-group guard). */
   countInGroup(groupId: string): number;
+  /** Create an UNASSIGNED team (groupId/groupAddedAt start null). */
   create(input: { name: string; shortName: string }): Team;
   /** Rename a team (name and/or code). Membership is untouched. */
   update(id: string, patch: { name?: string; shortName?: string }): Team;
   /** Set/clear a team's group. `groupAddedAt` is server-set here (null clears). */
   assign(id: string, groupId: string | null, groupAddedAt: string | null): Team;
+  /** Delete a team. Referential integrity (matches/players) is the SERVICE's
+   * job — this is a plain store removal with persist-or-rollback. */
   remove(id: string): void;
 }
 

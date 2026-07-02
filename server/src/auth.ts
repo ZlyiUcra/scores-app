@@ -10,6 +10,12 @@ import { BCRYPT_COST, toPublic, userRepository } from './repos/users.js';
 // path taking the same time as a real compare (anti user-enumeration).
 const DUMMY_HASH = bcrypt.hashSync('unused-timing-defense', BCRYPT_COST);
 
+/**
+ * Check a username/password pair. Returns the public user on success, null on
+ * a wrong username OR password (indistinguishable on purpose), and throws
+ * ACCOUNT_DISABLED when the password is right but an admin deactivated the
+ * account. Timing-safe against user enumeration (see DUMMY_HASH).
+ */
 export async function verifyCredentials(username: string, password: string): Promise<AuthUser | null> {
   const found = userRepository.findByUsername(username); // O(1) Map lookup
   // Always run a compare (even on unknown user) so timing doesn't reveal
@@ -34,8 +40,11 @@ export async function createUser(username: string, password: string): Promise<Au
   return toPublic(created);
 }
 
+/** What goes inside the JWT: identity only. Role/active are RE-CHECKED against
+ * the store on every request (see readUserFromCookies), never trusted from here. */
 interface TokenClaims extends AuthUser {}
 
+/** Sign a short-lived (8h) JWT for the user with the pinned HS256 algorithm. */
 export function signToken(user: AuthUser): string {
   const claims: TokenClaims = { id: user.id, username: user.username, role: user.role };
   return jwt.sign(claims, config.jwtSecret, {
@@ -44,6 +53,8 @@ export function signToken(user: AuthUser): string {
   });
 }
 
+/** Verify a JWT and extract its claims. Returns null on ANY failure (expired,
+ * tampered, malformed, wrong algorithm) — callers treat null as "not logged in". */
 export function verifyToken(token: string): AuthUser | null {
   try {
     // Pin the algorithm to block alg=none / algorithm-confusion attacks.
@@ -57,6 +68,8 @@ export function verifyToken(token: string): AuthUser | null {
   }
 }
 
+/** Attach the session JWT as an httpOnly cookie (the ONLY place the token
+ * lives — clients never see it, so XSS cannot exfiltrate a session). */
 export function setAuthCookie(res: Response, token: string): void {
   res.cookie(config.cookieName, token, {
     httpOnly: true, // JS can't read it -> XSS can't steal the token
@@ -67,6 +80,7 @@ export function setAuthCookie(res: Response, token: string): void {
   });
 }
 
+/** Logout: drop the session cookie. The JWT itself simply expires later. */
 export function clearAuthCookie(res: Response): void {
   res.clearCookie(config.cookieName, { path: '/' });
 }
@@ -99,6 +113,7 @@ export function readUserFromCookies(cookies: Record<string, string> | undefined)
   return toPublic(fresh); // role reflects the store, not the (possibly stale) token
 }
 
+/** Middleware: any logged-in, active user. Populates req.user or answers 401. */
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const user = readUserFromCookies(req.cookies);
   if (!user) {
@@ -109,6 +124,9 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   next();
 }
 
+/** Middleware: admin role required — THE server-side gate for every mutation
+ * under /api/admin (and any route that mounts it). 401 unauthenticated, 403
+ * for a non-admin. Role comes from the store, not the token. */
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   const user = req.user ?? readUserFromCookies(req.cookies);
   if (!user) {

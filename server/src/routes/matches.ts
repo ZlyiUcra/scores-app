@@ -5,6 +5,9 @@ import { applyGoal, applyUpdate, getMatch, listMatches } from '../services/match
 import { listBracket } from '../services/bracket.js';
 import { broadcastBracket, broadcastMatchUpdate } from '../socket.js';
 
+/** /api/matches — reads for any logged-in user; live score/status edits are
+ * admin-only and each write broadcasts a compact diff plus a bracket refresh
+ * (a group result can re-seed the knockout). */
 export const matchesRouter = Router();
 
 // Reads require a logged-in user (any role).

@@ -24,6 +24,7 @@ export interface BracketRepository {
   results(): Partial<Record<BracketSlotId, BracketResult>>;
   /** Stored result for a slot, or an empty scheduled result. */
   get(slot: BracketSlotId): BracketResult;
+  /** Insert-or-replace one slot's result (slot validity is the service's check). */
   save(slot: BracketSlotId, result: BracketResult): void;
   /** Clear every slot (needed before the bracket size can change). */
   reset(): void;

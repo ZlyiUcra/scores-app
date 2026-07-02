@@ -26,10 +26,13 @@ export interface StoredMatch {
 export interface MatchRepository {
   /** Resolved matches (teams embedded) for read/broadcast. */
   list(): Match[];
+  /** One resolved match, or undefined. */
   get(id: string): Match | undefined;
   /** Raw stored form for mutation logic. */
   getStored(id: string): StoredMatch | undefined;
+  /** Insert-or-replace by id (rev bumping is the service's responsibility). */
   save(match: StoredMatch): void;
+  /** Delete a match; throws NOT_FOUND for an unknown id. */
   remove(id: string): void;
   /** How many stored matches reference a given team (referential-integrity guard). */
   countByTeam(teamId: string): number;

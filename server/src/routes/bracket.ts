@@ -6,6 +6,8 @@ import { updateBracketSchema } from '../validation.js';
 import { listBracket, resetBracket, updateBracketSlot } from '../services/bracket.js';
 import { broadcastBracket } from '../socket.js';
 
+/** /api/bracket — knockout view for any logged-in user; slot writes and the
+ * full reset are admin-only and re-broadcast the resolved bracket. */
 export const bracketRouter = Router();
 
 const bracketMutationLimiter = rateLimit({

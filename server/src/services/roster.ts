@@ -12,10 +12,12 @@ import { assertBracketNotStarted } from './bracketLock.js';
 // group removal checks its teams), with Team as the hub that also reaches
 // into players (cascade) and matches (integrity check) — via repos only.
 
+/** All teams as public DTOs (no seeding key). */
 export function listTeams(): Team[] {
   return teamRepository.list();
 }
 
+/** All groups in stable creation order. */
 export function listGroups(): Group[] {
   return groupRepository.list();
 }

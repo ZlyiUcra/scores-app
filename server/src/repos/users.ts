@@ -34,6 +34,7 @@ function toAdminView(u: StoredUser): AdminUserView {
   return { id: u.id, username: u.username, role: u.role, active: u.active, createdAt: u.createdAt };
 }
 
+/** Canonical form for uniqueness checks: usernames are case-insensitive. */
 export function normalizeUsername(raw: string): string {
   return raw.trim().toLowerCase();
 }
@@ -44,14 +45,19 @@ export function normalizeUsername(raw: string): string {
  * mutating methods do an atomic (await-free) check-and-write here.
  */
 export interface UserRepository {
+  /** Case-insensitive lookup (login path); O(1) map hit. */
   findByUsername(username: string): StoredUser | undefined;
+  /** Lookup by id (per-request re-load that makes revocation instant). */
   getById(id: string): StoredUser | undefined;
+  /** Every stored user, server-only shape — callers project before responding. */
   listAll(): StoredUser[];
+  /** Atomic check-and-insert: unique username, global cap, uuid id. */
   create(input: { username: string; passwordHash: string; role: Role }): StoredUser;
   /** Atomic patch of active/role with self-lockout & last-admin guards. */
   update(id: string, actorId: string, patch: { active?: boolean; role?: Role }): StoredUser;
   /** Atomic delete with self & last-admin guards. */
   remove(id: string, actorId: string): void;
+  /** Total stored accounts (registration-cap check). */
   count(): number;
 }
 

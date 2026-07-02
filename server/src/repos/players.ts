@@ -8,14 +8,21 @@ import { db, transaction } from '../db.js';
  * on standings/seeding). Jersey number is unique within a team when present.
  */
 export interface PlayerRepository {
+  /** Every player across all teams (rides the roster snapshot). */
   list(): Player[];
+  /** Player by id, or undefined. */
   get(id: string): Player | undefined;
+  /** All players of one team (a squad), unordered — display sorting is client-side. */
   listByTeam(teamId: string): Player[];
+  /** Squad size of a team. */
   countInTeam(teamId: string): number;
   /** Is a jersey number already taken in a team (optionally ignoring one player)? */
   numberInUse(teamId: string, number: number, exceptId?: string): boolean;
+  /** Insert a player with a fresh uuid. Number uniqueness is the SERVICE's check. */
   create(input: { teamId: string; name: string; number: number | null; position: string | null }): Player;
+  /** Patch name/number/position; team membership is immutable (delete + re-add). */
   update(id: string, patch: { name?: string; number?: number | null; position?: string | null }): Player;
+  /** Delete one player; throws NOT_FOUND for an unknown id. */
   remove(id: string): void;
   /** Cascade: drop all players of a team (used when the team is deleted). */
   removeByTeam(teamId: string): void;

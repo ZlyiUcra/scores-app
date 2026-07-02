@@ -20,10 +20,17 @@ import { listBracket } from './services/bracket.js';
 
 let io: Server<ClientToServerEvents, ServerToClientEvents> | null = null;
 
+/** Room per user id, so admin actions can target one user's live sockets. */
 function userRoom(userId: string): string {
   return `user:${userId}`;
 }
 
+/**
+ * Attach Socket.IO to the HTTP server. Sockets are READ-ONLY broadcast: the
+ * handshake is authenticated from the httpOnly cookie, every connection gets
+ * a full state snapshot (resync), and all subsequent traffic is server-pushed
+ * diffs/snapshots — clients never mutate anything over the socket.
+ */
 export function initSocket(httpServer: HttpServer): void {
   io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
     cors: config.isProd

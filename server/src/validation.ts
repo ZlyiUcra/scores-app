@@ -11,6 +11,7 @@ const fieldLabel = z
   .max(40, 'Field name is too long.')
   .regex(/^[\p{L}\p{N} .'\-]*$/u, 'Field contains invalid characters.');
 
+/** Login body. Bounds only — no format hints that would aid enumeration. */
 export const loginSchema = z
   .object({
     username: z.string().min(1).max(64),
@@ -130,6 +131,7 @@ export const updateTeamSchema = z
   .strict()
   .refine((v) => v.name !== undefined || v.shortName !== undefined, { message: 'Nothing to update.' });
 
+/** Create/rename-group body: just a bounded, charset-limited name. */
 export const createGroupSchema = z
   .object({
     name: z
@@ -163,6 +165,7 @@ const playerPosition = z
   .regex(/^[\p{L}\p{N} .\-/]*$/u, 'Position contains invalid characters.')
   .nullable();
 
+/** Add-player body. The owning team comes from the URL, never from here. */
 export const createPlayerSchema = z
   .object({
     name: playerName,
@@ -171,6 +174,7 @@ export const createPlayerSchema = z
   })
   .strict();
 
+/** Edit-player body: any subset of name/number/position, but not empty. */
 export const updatePlayerSchema = z
   .object({
     name: playerName.optional(),
@@ -198,6 +202,8 @@ export const createMatchSchema = z
 // are derived from the format; the override ids are the one sanctioned way to
 // pin a side manually (existence and same-team rules enforced in the service).
 // Tri-state: string pins, null clears back to derived, absent keeps.
+/** Knockout-slot PATCH: partial result fields, schedule bits, per-side team
+ * pins (overrides) and the optimistic-concurrency rev. The slot id is URL-only. */
 export const updateBracketSchema = z
   .object({
     homeScore: scoreField.optional(),
@@ -228,6 +234,7 @@ export const updateUserSchema = z
     message: 'Nothing to update.',
   });
 
+/** Admin user-list query: optional username filter + bounded pagination. */
 export const listUsersQuerySchema = z.object({
   q: z.string().trim().max(64).optional(),
   page: z.coerce.number().int().min(1).default(1),

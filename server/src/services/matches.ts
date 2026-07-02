@@ -34,10 +34,12 @@ function getStored(id: string): StoredMatch {
   return m;
 }
 
+/** All matches as resolved DTOs (teams embedded) — the read/broadcast shape. */
 export function listMatches(): Match[] {
   return matchRepository.list();
 }
 
+/** One match as a resolved DTO. Throws NOT_FOUND for an unknown id. */
 export function getMatch(id: string): Match {
   return resolveMatch(getStored(id));
 }

@@ -11,6 +11,8 @@ import {
   verifyCredentials,
 } from '../auth.js';
 
+/** /api/auth — login/register/logout/me. Sessions live in an httpOnly cookie;
+ * registration always creates the read-only viewer role. */
 export const authRouter = Router();
 
 // Throttle auth writes to blunt online password guessing & registration spam.
