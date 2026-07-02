@@ -9,7 +9,7 @@ import { authRouter } from './routes/auth.js';
 import { matchesRouter } from './routes/matches.js';
 import { bracketRouter } from './routes/bracket.js';
 import { rosterRouter } from './routes/roster.js';
-import { adminRouter } from './routes/admin.js';
+import { adminRouter } from './routes/admin/index.js';
 import { AppError } from './errors.js';
 import { initSocket } from './socket.js';
 
