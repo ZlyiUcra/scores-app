@@ -28,14 +28,18 @@ function rosterSignature(groups: Group[], teams: Team[]): string {
 
 /**
  * Group standings derived from the roster (groups + teams) and the live match
- * store. Memoized by a signature so it recomputes only when a result or the
- * roster actually changes.
+ * store. LIVE matches count with their current score, so tables shift with
+ * every goal, not only at full time. Memoized by a signature so it recomputes
+ * only when a score/status or the roster actually changes.
  */
 export function useStandings(): GroupTable[] {
   const byId = useMatchStore((s) => s.byId);
   const groups = useRosterStore((s) => s.groups);
   const teams = useRosterStore((s) => s.teams);
   const sig = `${matchSignature(byId)}##${rosterSignature(groups, teams)}`;
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by `sig` on purpose
-  return useMemo(() => computeStandings(groups, teams, Object.values(byId)), [sig]);
+  return useMemo(
+    () => computeStandings(groups, teams, Object.values(byId), { includeLive: true }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by `sig` on purpose
+    [sig],
+  );
 }

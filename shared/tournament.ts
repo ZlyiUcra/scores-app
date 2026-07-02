@@ -94,16 +94,27 @@ export function roundName(roundSize: number): Round {
   }
 }
 
+/** Whether a match contributes to standings: finished always, live only when opted in. */
+function countsForStandings(m: Match, includeLive: boolean): boolean {
+  return m.status === 'finished' || (includeLive && m.status === 'live');
+}
+
 /**
- * Points each of the two teams earned in their finished mutual meetings within
+ * Points each of the two teams earned in their counted mutual meetings within
  * the group. Returned as a sort delta (negative -> `a` ranks higher).
  */
-function headToHeadDelta(aId: string, bId: string, groupId: string, matches: Match[]): number {
+function headToHeadDelta(
+  aId: string,
+  bId: string,
+  groupId: string,
+  matches: Match[],
+  includeLive: boolean,
+): number {
   let aPts = 0;
   let bPts = 0;
   for (let i = 0; i < matches.length; i++) {
     const m = matches[i];
-    if (m.status !== 'finished' || m.group !== groupId) continue;
+    if (!countsForStandings(m, includeLive) || m.group !== groupId) continue;
     const ab = m.home.id === aId && m.away.id === bId;
     const ba = m.home.id === bId && m.away.id === aId;
     if (!ab && !ba) continue;
@@ -120,12 +131,19 @@ function headToHeadDelta(aId: string, bId: string, groupId: string, matches: Mat
 }
 
 /**
- * Per-group standings from FINISHED matches only. Sort: points, then wins,
- * then goal difference, then goals scored, then (only when all four are level)
- * the head-to-head meetings, then a deterministic teamId fallback so order
- * never flickers.
+ * Per-group standings. Counts FINISHED matches; `includeLive` also counts the
+ * current score of LIVE matches (provisional live tables — a just-started game
+ * is a provisional draw). Sort: points, then wins, then goal difference, then
+ * goals scored, then (only when all four are level) the head-to-head meetings,
+ * then a deterministic teamId fallback so order never flickers.
  */
-export function computeStandings(groups: Group[], teams: Team[], matches: Match[]): GroupTable[] {
+export function computeStandings(
+  groups: Group[],
+  teams: Team[],
+  matches: Match[],
+  opts?: { includeLive?: boolean },
+): GroupTable[] {
+  const includeLive = opts?.includeLive ?? false;
   const tables: GroupTable[] = [];
 
   for (let g = 0; g < groups.length; g++) {
@@ -152,7 +170,7 @@ export function computeStandings(groups: Group[], teams: Team[], matches: Match[
 
     for (let i = 0; i < matches.length; i++) {
       const m = matches[i];
-      if (m.status !== 'finished' || m.group !== group.id) continue;
+      if (!countsForStandings(m, includeLive) || m.group !== group.id) continue;
       const home = rowByTeam.get(m.home.id);
       const away = rowByTeam.get(m.away.id);
       if (!home || !away) continue;
@@ -188,7 +206,7 @@ export function computeStandings(groups: Group[], teams: Team[], matches: Match[
         b.won - a.won ||
         b.goalDiff - a.goalDiff ||
         b.goalsFor - a.goalsFor ||
-        headToHeadDelta(a.team.id, b.team.id, group.id, matches) ||
+        headToHeadDelta(a.team.id, b.team.id, group.id, matches, includeLive) ||
         a.team.id.localeCompare(b.team.id),
     );
     for (let i = 0; i < rows.length; i++) rows[i].rank = i + 1;
