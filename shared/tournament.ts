@@ -224,15 +224,32 @@ function teamsInGroup(groupId: string, teams: Team[]): number {
   return n;
 }
 
-/** A group is decided once it has at least one match and every one is finished. */
-function isGroupComplete(groupId: string, matches: Match[]): boolean {
-  let any = false;
+/** A group is decided once the FULL round-robin is played: every unordered
+ * pair of its teams has a finished match and no match is still pending. The
+ * coverage check matters when a team joins an already-played group — until its
+ * fixtures exist, the old "all matches finished" test would call the group
+ * complete and let a team with zero games into the real (non-preview) seeds. */
+function isGroupComplete(groupId: string, teams: Team[], matches: Match[]): boolean {
+  const finishedPairs = new Set<string>();
   for (let i = 0; i < matches.length; i++) {
-    if (matches[i].group !== groupId) continue;
-    any = true;
-    if (matches[i].status !== 'finished') return false;
+    const m = matches[i];
+    if (m.group !== groupId) continue;
+    if (m.status !== 'finished') return false;
+    const a = m.home.id;
+    const b = m.away.id;
+    finishedPairs.add(a < b ? `${a}|${b}` : `${b}|${a}`);
   }
-  return any;
+  const members: string[] = [];
+  for (let i = 0; i < teams.length; i++) if (teams[i].groupId === groupId) members.push(teams[i].id);
+  if (members.length < 2) return false;
+  for (let i = 0; i < members.length; i++) {
+    for (let j = i + 1; j < members.length; j++) {
+      const a = members[i];
+      const b = members[j];
+      if (!finishedPairs.has(a < b ? `${a}|${b}` : `${b}|${a}`)) return false;
+    }
+  }
+  return true;
 }
 
 /** Can a bracket be formed from the current groups, and at what size? Depends
@@ -297,7 +314,9 @@ function computeQualifiers(
   preview = false,
 ): SeedTeam[] | null {
   if (!preview) {
-    for (let g = 0; g < groups.length; g++) if (!isGroupComplete(groups[g].id, matches)) return null;
+    for (let g = 0; g < groups.length; g++) {
+      if (!isGroupComplete(groups[g].id, seedTeams, matches)) return null;
+    }
   }
 
   const tables = computeStandings(groups, seedTeams, matches, { includeLive: preview });
