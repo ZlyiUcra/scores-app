@@ -103,7 +103,8 @@ export function Login() {
           {busy ? t('login.submitBusy') : isRegister ? t('login.submitRegister') : t('login.submitLogin')}
         </button>
 
-        {!isRegister && (
+        {/* Dev-only seed credentials — never shown in a production build. */}
+        {import.meta.env.DEV && !isRegister && (
           <div className="login__hint">
             <div><b>{t('login.hintAdminLabel')}</b> admin / admin123</div>
             <div><b>{t('login.hintViewerLabel')}</b> viewer / viewer123</div>
