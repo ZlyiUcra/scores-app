@@ -376,7 +376,9 @@ export function bracketSlotIds(size: number): BracketSlotId[] {
  *
  * `includePreview` (display only — NEVER for write validation): while the
  * groups are unfinished, first-round sides stay symbolic seeds but carry a
- * `projected` team from the current standings. A projected side is not a
+ * `projected` team from the current standings. Likewise a winner/loser ref of
+ * an UNFINISHED knockout slot carries the team currently leading it (score,
+ * then pens); a level game projects nothing. A projected side is not a
  * resolved team, so it can never produce a winner/loser or start a match.
  */
 export function resolveBracket(
@@ -414,11 +416,15 @@ export function resolveBracket(
         return { seed };
       case 'winner': {
         const out = slotOutcome(seed.slot);
-        return out ? { team: out.winner } : { seed };
+        if (out) return { team: out.winner };
+        const lead = opts?.includePreview ? currentLeader(seed.slot) : null;
+        return lead ? { seed, projected: lead.winner } : { seed };
       }
       case 'loser': {
         const out = slotOutcome(seed.slot);
-        return out ? { team: out.loser } : { seed };
+        if (out) return { team: out.loser };
+        const lead = opts?.includePreview ? currentLeader(seed.slot) : null;
+        return lead ? { seed, projected: lead.loser } : { seed };
       }
     }
   }
@@ -436,6 +442,17 @@ export function resolveBracket(
     return resolveSeed(seed);
   }
 
+  /** Who is ahead on the stored result: score first, then a decisive shootout.
+   * Null when level — nothing can be said about the slot yet. */
+  function homeWinsBy(res: BracketResult): boolean | null {
+    if (res.homeScore > res.awayScore) return true;
+    if (res.homeScore < res.awayScore) return false;
+    if (res.homePens != null && res.awayPens != null && res.homePens !== res.awayPens) {
+      return res.homePens > res.awayPens;
+    }
+    return null;
+  }
+
   function slotOutcome(slot: BracketSlotId): { winner: Team; loser: Team } | null {
     const cached = outcomeMemo.get(slot);
     if (cached !== undefined) return cached;
@@ -448,12 +465,7 @@ export function resolveBracket(
       const home = resolveSide(slot, fmt.home, 'home');
       const away = resolveSide(slot, fmt.away, 'away');
       if ('team' in home && 'team' in away) {
-        let homeWins: boolean | null = null;
-        if (res.homeScore > res.awayScore) homeWins = true;
-        else if (res.homeScore < res.awayScore) homeWins = false;
-        else if (res.homePens != null && res.awayPens != null && res.homePens !== res.awayPens) {
-          homeWins = res.homePens > res.awayPens;
-        }
+        const homeWins = homeWinsBy(res);
         if (homeWins !== null) {
           outcome = homeWins ? { winner: home.team, loser: away.team } : { winner: away.team, loser: home.team };
         }
@@ -461,6 +473,22 @@ export function resolveBracket(
     }
     outcomeMemo.set(slot, outcome);
     return outcome;
+  }
+
+  /** Preview only: the team currently AHEAD in an unfinished slot (a live game,
+   * or one frozen back to scheduled with its score kept). Requires both sides
+   * to be real resolved teams — a projected side never chains a projection —
+   * and a decisive current result; a level game projects nothing. */
+  function currentLeader(slot: BracketSlotId): { winner: Team; loser: Team } | null {
+    const res = results[slot];
+    const fmt = bySlot.get(slot);
+    if (!res || !fmt || res.status === 'finished') return null;
+    const home = resolveSide(slot, fmt.home, 'home');
+    const away = resolveSide(slot, fmt.away, 'away');
+    if (!('team' in home) || !('team' in away)) return null;
+    const homeWins = homeWinsBy(res);
+    if (homeWins === null) return null;
+    return homeWins ? { winner: home.team, loser: away.team } : { winner: away.team, loser: home.team };
   }
 
   const out: BracketMatch[] = [];

@@ -67,8 +67,12 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
   const patch = (p: Omit<UpdateBracketRequest, 'expectedRev'>) =>
     run(() => adminApi.updateBracketSlot(m.slot, { ...p, expectedRev: m.rev }));
 
+  // Scoring a scheduled game also starts it — one click instead of two.
   const goal = (side: 'home' | 'away', delta: 1 | -1) =>
-    patch(side === 'home' ? { homeScore: m.homeScore + delta } : { awayScore: m.awayScore + delta });
+    patch({
+      ...(side === 'home' ? { homeScore: m.homeScore + delta } : { awayScore: m.awayScore + delta }),
+      ...(delta === 1 && m.status === 'scheduled' ? { status: 'live' as const } : null),
+    });
 
   // A decisive shootout needs BOTH pens set, so a click also pins the other
   // side to 0 when it is still null — otherwise Final would keep rejecting.
@@ -95,8 +99,9 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
 
   const homeShort = 'team' in m.home ? m.home.team.shortName : '?';
   const awayShort = 'team' in m.away ? m.away.team.shortName : '?';
-  // Pens decide a level knockout; only offer them once the game is underway.
-  const showPens = m.status !== 'scheduled' && m.homeScore === m.awayScore;
+  // Pens decide a level knockout. Offered whenever the score is level — a
+  // frozen (scheduled) game keeps its score, so pens must stay editable too.
+  const showPens = m.homeScore === m.awayScore;
 
   return (
     <div className={`slot-editor ${ready ? '' : 'slot-editor--pending'}`}>
@@ -175,7 +180,20 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
           <div className="admin__status">
             <button disabled={busy || m.status === 'live'} onClick={() => void patch({ status: 'live' })} className="btn btn--sm">{t('adminControls.start')}</button>
             <button disabled={busy || m.status === 'finished'} onClick={() => void patch({ status: 'finished' })} className="btn btn--sm">{t('adminControls.final')}</button>
-            <button disabled={busy || m.status === 'scheduled'} onClick={() => void patch({ status: 'scheduled', homeScore: 0, awayScore: 0, homePens: null, awayPens: null })} className="btn btn--sm btn--ghost">{t('adminControls.reset')}</button>
+            {/* Freezes the game back to scheduled KEEPING the score (still
+                editable) — clearing everything is what the bracket-wide reset
+                is for. A 0:0 reset IS the pristine state, so pens go too. */}
+            <button
+              disabled={busy || m.status === 'scheduled'}
+              onClick={() =>
+                void patch(
+                  m.homeScore === 0 && m.awayScore === 0
+                    ? { status: 'scheduled', homePens: null, awayPens: null }
+                    : { status: 'scheduled' },
+                )
+              }
+              className="btn btn--sm btn--ghost"
+            >{t('adminControls.reset')}</button>
           </div>
 
           <label className="field">

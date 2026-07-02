@@ -22,7 +22,14 @@ function Side({ m, side }: { m: BracketMatch; side: 'home' | 'away' }) {
   const pens = side === 'home' ? m.homePens : m.awayPens;
   const isTeam = 'team' in p;
   const won = winnerSide(m) === side;
-  const showScore = m.status !== 'scheduled';
+  // A frozen (reset) game keeps its score (and possibly pens) and viewers must
+  // still see it, so only a pristine scheduled slot hides the counter.
+  const showScore =
+    m.status !== 'scheduled' ||
+    m.homeScore !== 0 ||
+    m.awayScore !== 0 ||
+    m.homePens != null ||
+    m.awayPens != null;
   return (
     <div className={`bcard__side ${won ? 'bcard__side--won' : ''} ${isTeam ? '' : 'bcard__side--seed'}`}>
       <span className="bcard__name">

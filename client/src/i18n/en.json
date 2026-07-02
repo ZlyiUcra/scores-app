@@ -172,7 +172,7 @@
     "thirdShort": "3rd/4th",
     "vs": "vs",
     "manual": "Manually assigned",
-    "previewNote": "Preview: the group stage is not finished yet — teams in parentheses hold that position in the current standings and may still change.",
+    "previewNote": "Preview: teams in parentheses are projected from the current results and may still change.",
     "empty": "The bracket appears once the group stage is set up.",
     "note": "The top two of every group qualify; the best third-placed teams fill the bracket up to a power of two. A level knockout match is decided on penalties.",
     "reason": {

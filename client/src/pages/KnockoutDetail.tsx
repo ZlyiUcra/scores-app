@@ -28,7 +28,6 @@ export function KnockoutDetail() {
 
   const homeShort = 'team' in m.home ? m.home.team.shortName : slotShort(m.slot, t);
   const awayShort = 'team' in m.away ? m.away.team.shortName : slotShort(m.slot, t);
-  const showScore = m.status !== 'scheduled';
   const preview =
     ('seed' in m.home && m.home.projected) || ('seed' in m.away && m.away.projected);
 
@@ -44,9 +43,9 @@ export function KnockoutDetail() {
           <div className="scoreboard__short">{homeShort}</div>
         </div>
         <div className="scoreboard__center">
-          <div className="scoreboard__score">
-            {showScore ? `${m.homeScore} : ${m.awayScore}` : '- : -'}
-          </div>
+          {/* Always show the live counter — a frozen (scheduled) knockout game
+              keeps its score, and the admin edits it right below. */}
+          <div className="scoreboard__score">{`${m.homeScore} : ${m.awayScore}`}</div>
           {m.homePens != null && m.awayPens != null && (
             <div className="muted">{t('adminBracket.pens')} {m.homePens} : {m.awayPens}</div>
           )}
