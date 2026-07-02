@@ -105,8 +105,7 @@
   "tournament": {
     "short": "Joyn 2026",
     "name": "Torneio Joyn Consulting 2026",
-    "location": "Urban Soccer, Monsanto, Lisboa",
-    "window": "2 de Julho · 19h — 21h"
+    "location": "Urban Soccer, Monsanto, Lisboa"
   },
   "nav": { "overview": "Overview", "results": "Resultados", "knockout": "Eliminatórias", "teams": "Equipas", "admin": "Admin" },
   "adminSquads": {

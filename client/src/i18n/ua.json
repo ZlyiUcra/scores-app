@@ -105,8 +105,7 @@
   "tournament": {
     "short": "Joyn 2026",
     "name": "Турнір Joyn Consulting 2026",
-    "location": "Urban Soccer, Monsanto, Лісабон",
-    "window": "2 липня · 19h — 21h"
+    "location": "Urban Soccer, Monsanto, Лісабон"
   },
   "nav": { "overview": "Огляд", "results": "Результати", "knockout": "Плей-оф", "teams": "Команди", "admin": "Адмін" },
   "adminSquads": {

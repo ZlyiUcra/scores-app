@@ -32,9 +32,7 @@ export function Overview() {
     <div className="overview">
       <header className="tourney">
         <h1 className="tourney__name">{t('tournament.name')}</h1>
-        <p className="tourney__meta">
-          {t('tournament.location')} · {t('tournament.window')}
-        </p>
+        <p className="tourney__meta">{t('tournament.location')}</p>
         <p className="tourney__progress">{t('overview.played', { played, total })}</p>
       </header>
 
