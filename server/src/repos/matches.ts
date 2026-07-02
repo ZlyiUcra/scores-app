@@ -1,7 +1,7 @@
-import type { Match, MatchStatus } from '../../shared/types.js';
-import { AppError } from './errors.js';
+import type { Match, MatchStatus } from '../../../shared/types.js';
+import { AppError } from '../errors.js';
 import { teamRepository } from './teams.js';
-import { db, transaction } from './db.js';
+import { db, transaction } from '../db.js';
 
 /**
  * Persisted match shape: references teams by id (TeamRepository is the source

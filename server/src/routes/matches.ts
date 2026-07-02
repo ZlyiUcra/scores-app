@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { requireAdmin, requireAuth } from '../auth.js';
 import { goalSchema, updateMatchSchema } from '../validation.js';
-import { applyGoal, applyUpdate, getMatch, listBracket, listMatches } from '../service.js';
+import { applyGoal, applyUpdate, getMatch, listBracket, listMatches } from '../services/tournament.js';
 import { broadcastBracket, broadcastMatchUpdate } from '../socket.js';
 
 export const matchesRouter = Router();

@@ -2,9 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
-import type { AdminUserView, AuthUser, Role } from '../../shared/types.js';
-import { AppError } from './errors.js';
-import { db, transaction, DATA_DIR_PATH } from './db.js';
+import type { AdminUserView, AuthUser, Role } from '../../../shared/types.js';
+import { AppError } from '../errors.js';
+import { db, transaction, DATA_DIR_PATH } from '../db.js';
 
 /** Pre-SQLite account store — imported ONCE into the DB on first boot. */
 const LEGACY_USERS_FILE = path.join(DATA_DIR_PATH, 'users.json');

@@ -4,7 +4,7 @@ import type { NextFunction, Request, Response } from 'express';
 import type { AuthUser } from '../../shared/types.js';
 import { config } from './config.js';
 import { AppError } from './errors.js';
-import { BCRYPT_COST, toPublic, userRepository } from './users.js';
+import { BCRYPT_COST, toPublic, userRepository } from './repos/users.js';
 
 // A valid bcrypt hash of a random value, used to keep the "unknown user" login
 // path taking the same time as a real compare (anti user-enumeration).

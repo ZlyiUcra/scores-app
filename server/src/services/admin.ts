@@ -1,5 +1,5 @@
-import type { AdminUserView, Paginated, Role } from '../../shared/types.js';
-import { toAdminView, userRepository } from './users.js';
+import type { AdminUserView, Paginated, Role } from '../../../shared/types.js';
+import { toAdminView, userRepository } from '../repos/users.js';
 
 export interface ListUsersQuery {
   q?: string;

@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
-import type { Team } from '../../shared/types.js';
-import type { SeedTeam } from '../../shared/tournament.js';
-import { AppError } from './errors.js';
-import { db, transaction } from './db.js';
+import type { Team } from '../../../shared/types.js';
+import type { SeedTeam } from '../../../shared/tournament.js';
+import { AppError } from '../errors.js';
+import { db, transaction } from '../db.js';
 
 /** Stored team: identity + membership FK + the server-only seeding key. */
 interface StoredTeam {

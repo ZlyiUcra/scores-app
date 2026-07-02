@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
-import type { Group } from '../../shared/types.js';
-import { AppError } from './errors.js';
-import { db, transaction } from './db.js';
+import type { Group } from '../../../shared/types.js';
+import { AppError } from '../errors.js';
+import { db, transaction } from '../db.js';
 
 /** Stored group carries a creation timestamp (for stable list ordering). */
 interface StoredGroup extends Group {

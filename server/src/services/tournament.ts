@@ -1,18 +1,18 @@
 import crypto from 'node:crypto';
-import type { BracketSlotId, BracketView, Group, Match, MatchUpdate, Roster, Team } from '../../shared/types.js';
+import type { BracketSlotId, BracketView, Group, Match, MatchUpdate, Roster, Team } from '../../../shared/types.js';
 import {
   computeSize,
   generateBracket,
   resolveBracket,
   TOURNAMENT_FORMAT,
   type BracketResult,
-} from '../../shared/tournament.js';
-import type { Player } from '../../shared/types.js';
-import { matchRepository, resolveMatch, type StoredMatch } from './store.js';
-import { teamRepository } from './teams.js';
-import { groupRepository } from './groups.js';
-import { playerRepository } from './players.js';
-import { bracketRepository } from './bracket.js';
+} from '../../../shared/tournament.js';
+import type { Player } from '../../../shared/types.js';
+import { matchRepository, resolveMatch, type StoredMatch } from '../repos/matches.js';
+import { teamRepository } from '../repos/teams.js';
+import { groupRepository } from '../repos/groups.js';
+import { playerRepository } from '../repos/players.js';
+import { bracketRepository } from '../repos/bracket.js';
 import type {
   AssignTeamInput,
   CreateMatchInput,
@@ -21,8 +21,8 @@ import type {
   UpdateBracketInput,
   UpdateMatchInput,
   UpdatePlayerInput,
-} from './validation.js';
-import { AppError } from './errors.js';
+} from '../validation.js';
+import { AppError } from '../errors.js';
 
 /**
  * Group results (and now group membership, since it drives seeding and bracket

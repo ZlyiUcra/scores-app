@@ -13,7 +13,7 @@ import {
   updateUserSchema,
 } from '../validation.js';
 import { audit } from '../audit.js';
-import { deleteUser, listUsers, updateUser } from '../adminService.js';
+import { deleteUser, listUsers, updateUser } from '../services/admin.js';
 import {
   assignTeam,
   createGroup,
@@ -33,7 +33,7 @@ import {
   updateGroup,
   updatePlayer,
   updateTeam,
-} from '../service.js';
+} from '../services/tournament.js';
 import {
   broadcastBracket,
   broadcastMatchCreated,

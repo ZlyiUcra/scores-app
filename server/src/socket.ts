@@ -13,8 +13,8 @@ import type {
 import { SOCKET_EVENTS } from '../../shared/types.js';
 import { config } from './config.js';
 import { verifyToken } from './auth.js';
-import { userRepository } from './users.js';
-import { getRoster, listBracket, listMatches } from './service.js';
+import { userRepository } from './repos/users.js';
+import { getRoster, listBracket, listMatches } from './services/tournament.js';
 
 let io: Server<ClientToServerEvents, ServerToClientEvents> | null = null;
 
