@@ -52,7 +52,6 @@ db.exec(`
     homeScore INTEGER NOT NULL,
     awayScore INTEGER NOT NULL,
     status TEXT NOT NULL,
-    minute INTEGER NOT NULL,
     startsAt TEXT NOT NULL,
     field TEXT NOT NULL,
     rev INTEGER NOT NULL
@@ -97,6 +96,14 @@ db.exec(`
 const bracketInfo = db.prepare('PRAGMA table_info(bracket)').all() as Array<{ name: string }>;
 if (bracketInfo.length > 0 && !bracketInfo.some((c) => c.name === 'homeOverrideId')) {
   db.exec('ALTER TABLE bracket ADD COLUMN homeOverrideId TEXT; ALTER TABLE bracket ADD COLUMN awayOverrideId TEXT;');
+}
+
+// Schema evolution: the dead `minute` column (a live-clock idea that never got
+// UI) was dropped from the model. An existing table still has it as NOT NULL,
+// which would reject the column-less inserts — drop it in place.
+const matchesInfo = db.prepare('PRAGMA table_info(matches)').all() as Array<{ name: string }>;
+if (matchesInfo.some((c) => c.name === 'minute')) {
+  db.exec('ALTER TABLE matches DROP COLUMN minute;');
 }
 
 /** Run `fn` inside a transaction; rolls back on throw so a partial write never

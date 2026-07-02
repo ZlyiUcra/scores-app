@@ -13,7 +13,6 @@ function toUpdate(m: StoredMatch): MatchUpdate {
     homeScore: m.homeScore,
     awayScore: m.awayScore,
     status: m.status,
-    minute: m.minute,
     rev: m.rev,
   };
 }
@@ -44,7 +43,7 @@ export function getMatch(id: string): Match {
   return resolveMatch(getStored(id));
 }
 
-/** Apply a partial edit (scores/status/minute/schedule) with optimistic
+/** Apply a partial edit (scores/status/schedule) with optimistic
  * concurrency. Schedule fields join the wire diff only when actually sent. */
 export function applyUpdate(id: string, input: UpdateMatchInput): MatchUpdate {
   assertBracketNotStarted();
@@ -56,7 +55,6 @@ export function applyUpdate(id: string, input: UpdateMatchInput): MatchUpdate {
     homeScore: input.homeScore ?? current.homeScore,
     awayScore: input.awayScore ?? current.awayScore,
     status: input.status ?? current.status,
-    minute: input.minute ?? current.minute,
     startsAt: input.startsAt ?? current.startsAt,
     field: input.field ?? current.field,
     rev: current.rev + 1,
@@ -117,7 +115,6 @@ export function createMatch(input: CreateMatchInput): Match {
     homeScore: 0,
     awayScore: 0,
     status: 'scheduled',
-    minute: 0,
     startsAt: input.startsAt,
     field: input.field,
     rev: 1,

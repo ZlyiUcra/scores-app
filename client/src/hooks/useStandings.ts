@@ -4,8 +4,8 @@ import { computeStandings } from '../../../shared/tournament';
 import { useMatchStore } from '../stores/matchStore';
 import { useRosterStore } from '../stores/rosterStore';
 
-/** Signature over the fields standings depend on — EXCLUDES `minute`, so a live
- * clock tick does not trigger a recompute/re-render. */
+/** Signature over the fields standings depend on, so unrelated match edits
+ * (e.g. a rescheduled kickoff) do not trigger a recompute/re-render. */
 function matchSignature(byId: Record<string, Match>): string {
   const parts: string[] = [];
   const matches = Object.values(byId);

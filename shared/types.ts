@@ -51,8 +51,6 @@ export interface Match {
   homeScore: number;
   awayScore: number;
   status: MatchStatus;
-  /** Match clock in minutes (0..120). Only meaningful while `live`. */
-  minute: number;
   /** ISO timestamp of scheduled kickoff. */
   startsAt: string;
   /** Court/pitch label, e.g. "Campo 1". */
@@ -68,7 +66,6 @@ export interface MatchUpdate {
   homeScore: number;
   awayScore: number;
   status: MatchStatus;
-  minute: number;
   startsAt?: string;
   field?: string;
   rev: number;

@@ -56,7 +56,6 @@ export const useMatchStore = create<MatchState>((set) => ({
           homeScore: u.homeScore,
           awayScore: u.awayScore,
           status: u.status,
-          minute: u.minute,
           startsAt: u.startsAt ?? current.startsAt,
           field: u.field ?? current.field,
           rev: u.rev,

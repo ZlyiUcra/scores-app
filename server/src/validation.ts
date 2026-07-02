@@ -70,7 +70,6 @@ export const updateMatchSchema = z
     homeScore: scoreField.optional(),
     awayScore: scoreField.optional(),
     status: z.enum(['scheduled', 'live', 'finished']).optional(),
-    minute: z.number().int().min(0).max(130).optional(),
     startsAt: z.string().datetime({ message: 'startsAt must be an ISO datetime.' }).optional(),
     field: fieldLabel.optional(),
     /** Optimistic-concurrency guard: reject if it doesn't match server rev. */

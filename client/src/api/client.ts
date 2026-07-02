@@ -60,7 +60,7 @@ export const api = {
 
   updateMatch: (
     matchId: string,
-    patch: Partial<Pick<Match, 'homeScore' | 'awayScore' | 'status' | 'minute' | 'startsAt' | 'field'>> & {
+    patch: Partial<Pick<Match, 'homeScore' | 'awayScore' | 'status' | 'startsAt' | 'field'>> & {
       expectedRev: number;
     },
   ) =>

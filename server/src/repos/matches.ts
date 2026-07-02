@@ -17,7 +17,6 @@ export interface StoredMatch {
   homeScore: number;
   awayScore: number;
   status: MatchStatus;
-  minute: number;
   startsAt: string;
   field: string;
   rev: number;
@@ -49,7 +48,6 @@ function seedMatches(): StoredMatch[] {
     status: MatchStatus,
     homeScore: number,
     awayScore: number,
-    minute: number,
     offsetMin: number,
     field: string,
   ): StoredMatch => ({
@@ -60,7 +58,6 @@ function seedMatches(): StoredMatch[] {
     homeScore,
     awayScore,
     status,
-    minute,
     startsAt: iso(offsetMin),
     field,
     rev: 1,
@@ -71,17 +68,17 @@ function seedMatches(): StoredMatch[] {
   // `group` is the group id (see groups.ts / teams.ts seeds).
   return [
     // Group A (all finished)
-    mk('gA', 't1', 't2', 'finished', 2, 1, 90, -220, 'Campo 1'),
-    mk('gA', 't1', 't3', 'finished', 1, 1, 90, -190, 'Campo 2'),
-    mk('gA', 't2', 't3', 'finished', 0, 3, 90, -160, 'Campo 1'),
+    mk('gA', 't1', 't2', 'finished', 2, 1, -220, 'Campo 1'),
+    mk('gA', 't1', 't3', 'finished', 1, 1, -190, 'Campo 2'),
+    mk('gA', 't2', 't3', 'finished', 0, 3, -160, 'Campo 1'),
     // Group B (two finished, one live)
-    mk('gB', 't4', 't5', 'finished', 1, 0, 90, -130, 'Campo 2'),
-    mk('gB', 't4', 't6', 'finished', 2, 2, 90, -100, 'Campo 3'),
-    mk('gB', 't5', 't6', 'live', 1, 0, 54, -54, 'Campo 1'),
+    mk('gB', 't4', 't5', 'finished', 1, 0, -130, 'Campo 2'),
+    mk('gB', 't4', 't6', 'finished', 2, 2, -100, 'Campo 3'),
+    mk('gB', 't5', 't6', 'live', 1, 0, -54, 'Campo 1'),
     // Group C (one finished, two scheduled)
-    mk('gC', 't7', 't8', 'finished', 3, 2, 90, -70, 'Campo 3'),
-    mk('gC', 't7', 't9', 'scheduled', 0, 0, 0, 30, 'Campo 2'),
-    mk('gC', 't8', 't9', 'scheduled', 0, 0, 0, 60, 'Campo 3'),
+    mk('gC', 't7', 't8', 'finished', 3, 2, -70, 'Campo 3'),
+    mk('gC', 't7', 't9', 'scheduled', 0, 0, 30, 'Campo 2'),
+    mk('gC', 't8', 't9', 'scheduled', 0, 0, 60, 'Campo 3'),
   ];
 }
 
@@ -101,7 +98,6 @@ export function resolveMatch(m: StoredMatch): Match {
     homeScore: m.homeScore,
     awayScore: m.awayScore,
     status: m.status,
-    minute: m.minute,
     startsAt: m.startsAt,
     field: m.field,
     rev: m.rev,
@@ -123,7 +119,7 @@ class JsonFileRepository implements MatchRepository {
   private load(): void {
     const rows = db
       .prepare(
-        'SELECT id, "group" AS grp, homeId, awayId, homeScore, awayScore, status, minute, startsAt, field, rev FROM matches',
+        'SELECT id, "group" AS grp, homeId, awayId, homeScore, awayScore, status, startsAt, field, rev FROM matches',
       )
       .all() as Array<{
       id: string;
@@ -133,7 +129,6 @@ class JsonFileRepository implements MatchRepository {
       homeScore: number;
       awayScore: number;
       status: string;
-      minute: number;
       startsAt: string;
       field: string;
       rev: number;
@@ -152,7 +147,6 @@ class JsonFileRepository implements MatchRepository {
         homeScore: r.homeScore,
         awayScore: r.awayScore,
         status: r.status as MatchStatus,
-        minute: r.minute,
         startsAt: r.startsAt,
         field: r.field,
         rev: r.rev,
@@ -164,10 +158,10 @@ class JsonFileRepository implements MatchRepository {
     transaction(() => {
       db.exec('DELETE FROM matches');
       const ins = db.prepare(
-        'INSERT INTO matches (id, "group", homeId, awayId, homeScore, awayScore, status, minute, startsAt, field, rev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO matches (id, "group", homeId, awayId, homeScore, awayScore, status, startsAt, field, rev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       );
       for (const m of this.matches.values()) {
-        ins.run(m.id, m.group, m.homeId, m.awayId, m.homeScore, m.awayScore, m.status, m.minute, m.startsAt, m.field, m.rev);
+        ins.run(m.id, m.group, m.homeId, m.awayId, m.homeScore, m.awayScore, m.status, m.startsAt, m.field, m.rev);
       }
     });
   }
