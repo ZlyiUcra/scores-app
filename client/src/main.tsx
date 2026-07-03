@@ -10,7 +10,9 @@ import './styles.css';
 // screen is translatable.
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    {/* Opt in to the v7 behaviors early — silences the future-flag warnings
+        and makes the eventual react-router upgrade a no-op here. */}
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <I18nProvider>
         <AuthProvider>
           <App />
