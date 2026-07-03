@@ -394,6 +394,16 @@ body {
 .ko-note { margin-top: 1rem; font-size: 0.8rem; }
 .ko-preview-note { color: var(--muted); font-style: italic; font-size: 0.85rem; margin-bottom: 0.75rem; }
 
+/* ---------- Help (user guide) ---------- */
+.help { display: flex; flex-direction: column; gap: 0.75rem; }
+.help .card h3 { margin: 0 0 0.5rem; }
+.help p { margin: 0 0 0.6rem; line-height: 1.5; }
+.help p:last-child { margin-bottom: 0; }
+.help ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; line-height: 1.45; }
+.help__mark { font-weight: 700; }
+.help__mark--green { color: var(--accent); }
+.help__mark--blue { color: var(--accent-2); }
+
 /* ---------- Knockout slot editor ---------- */
 .slot-editor { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem; }
 .slot-editor--pending { opacity: 0.7; }

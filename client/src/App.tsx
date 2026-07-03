@@ -13,6 +13,7 @@ import { MatchList } from './pages/MatchList';
 import { Knockout } from './pages/Knockout';
 import { KnockoutDetail } from './pages/KnockoutDetail';
 import { Squads } from './pages/Squads';
+import { Help } from './pages/Help';
 import { MatchDetail } from './pages/MatchDetail';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminUsers } from './pages/admin/AdminUsers';
@@ -82,6 +83,7 @@ function Header() {
           <NavLink to="/results" className={link} onClick={closeMenu}>{t('nav.results')}</NavLink>
           <NavLink to="/ko" className={link} onClick={closeMenu}>{t('nav.knockout')}</NavLink>
           <NavLink to="/teams" className={link} onClick={closeMenu}>{t('nav.teams')}</NavLink>
+          <NavLink to="/help" className={link} onClick={closeMenu}>{t('nav.help')}</NavLink>
           {isAdmin && <NavLink to="/admin" className={link} onClick={closeMenu}>{t('nav.admin')}</NavLink>}
         </nav>
         <div className="header__right">
@@ -97,6 +99,8 @@ function Header() {
   );
 }
 
+/** Root: gates everything behind login, wires the live data feed and lays out
+ * the header + routes. */
 export function App() {
   const { user, loading } = useAuth();
   const { t } = useI18n();
@@ -138,6 +142,7 @@ export function App() {
           <Route path="/ko" element={<Knockout />} />
           <Route path="/ko/:slot" element={<KnockoutDetail />} />
           <Route path="/teams" element={<Squads />} />
+          <Route path="/help" element={<Help />} />
           <Route path="/match/:id" element={<MatchDetail />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/matches" replace />} />

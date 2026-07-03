@@ -107,7 +107,7 @@
     "name": "Турнір Joyn Consulting 2026",
     "location": "Urban Soccer, Monsanto, Лісабон"
   },
-  "nav": { "overview": "Огляд", "results": "Результати", "knockout": "Плей-оф", "teams": "Команди", "admin": "Адмін" },
+  "nav": { "overview": "Огляд", "results": "Результати", "knockout": "Плей-оф", "teams": "Команди", "help": "Довідка", "admin": "Адмін" },
   "adminSquads": {
     "title": "Склади",
     "team": "Команда",
