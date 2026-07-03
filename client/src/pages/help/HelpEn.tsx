@@ -64,6 +64,11 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
         </p>
         <ul>
           <li>
+            First-round pairings keep teams of the same group apart whenever possible;
+            a same-group meeting can only happen when one group supplies more than half
+            of the bracket.
+          </li>
+          <li>
             While the groups are still being played, names in parentheses - like
             "Seed 1 (FC Lions)" - are a live projection of the current standings. The
             parentheses disappear once the pairing is final.

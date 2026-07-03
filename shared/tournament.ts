@@ -313,8 +313,12 @@ export function computeQualificationOrder(tables: GroupTable[]): Array<{ group: 
 
 /** The seeded, ordered list of qualifiers (length = size) once every group is
  * complete; null while still in progress. Qualifiers are SELECTED by place
- * tier + quality (the first `size` of computeQualificationOrder), but the
- * whole pool is SEEDED by groupAddedAt (then teamId) per the tournament rules.
+ * tier + quality (the first `size` of computeQualificationOrder), then laid
+ * out group-by-group (larger groups first, ties by the group's earliest
+ * groupAddedAt/teamId member; groupAddedAt then teamId within a group). The
+ * first round pairs opposite halves of this list, so contiguous group blocks
+ * keep same-group teams apart whenever a group supplies at most size/2
+ * qualifiers — a same-group first-round pair happens only when unavoidable.
  * `preview` skips the completeness gate and projects from the CURRENT standings
  * (live scores included) — "as if the groups ended right now". */
 function computeQualifiers(
@@ -338,8 +342,8 @@ function computeQualifiers(
     .map((t) => t.row)
     .slice(0, size);
 
-  // Seed the whole pool by (groupAddedAt, then teamId) — total order.
-  const ordered = pool
+  // Base deterministic order: (groupAddedAt, then teamId) — total order.
+  const base = pool
     .map((r) => r.team as SeedTeam)
     .sort((a, b) => {
       const at = seedByTeam.get(a.id) ?? '';
@@ -347,15 +351,33 @@ function computeQualifiers(
       return at.localeCompare(bt) || a.id.localeCompare(b.id);
     });
 
+  // Group-contiguous layout: teams of one group stay adjacent, blocks ordered
+  // by size (desc). Map keeps first-appearance (base) order and sort is
+  // stable, so equal-sized blocks keep their base order — fully deterministic.
+  const blocks = new Map<string, SeedTeam[]>();
+  for (let i = 0; i < base.length; i++) {
+    const gid = base[i].groupId ?? '';
+    const block = blocks.get(gid);
+    if (block) block.push(base[i]);
+    else blocks.set(gid, [base[i]]);
+  }
+  const ordered: SeedTeam[] = [];
+  const blockList = Array.from(blocks.values()).sort((a, b) => b.length - a.length);
+  for (let i = 0; i < blockList.length; i++) {
+    for (let j = 0; j < blockList[i].length; j++) ordered.push(blockList[i][j]);
+  }
+
   return ordered.length === size ? ordered : null;
 }
 
 /**
  * The bracket STRUCTURE for a given size: which seed feeds each slot. Slot ids
  * encode the round's team-count (`R{roundSize}M{index}`) so they stay stable as
- * size changes. First round pairs qualifiers mirror-style (i vs N-1-i); later
- * rounds take winners of adjacent matches; a 3rd-place match (when size >= 4)
- * takes the two semifinal losers.
+ * size changes. First round pairs opposite halves of the qualifier list
+ * (i vs i + size/2) — combined with the group-contiguous qualifier order this
+ * keeps same-group teams apart whenever possible; later rounds take winners of
+ * adjacent matches; a 3rd-place match (when size >= 4) takes the two semifinal
+ * losers.
  */
 export function generateBracket(size: number): Array<{ slot: BracketSlotId; round: Round; home: SeedRef; away: SeedRef }> {
   const out: Array<{ slot: BracketSlotId; round: Round; home: SeedRef; away: SeedRef }> = [];
@@ -366,7 +388,7 @@ export function generateBracket(size: number): Array<{ slot: BracketSlotId; roun
     for (let i = 0; i < matchCount; i++) {
       const slot = `R${roundSize}M${i}`;
       if (roundSize === size) {
-        out.push({ slot, round: roundName(roundSize), home: { kind: 'qualifier', index: i }, away: { kind: 'qualifier', index: size - 1 - i } });
+        out.push({ slot, round: roundName(roundSize), home: { kind: 'qualifier', index: i }, away: { kind: 'qualifier', index: i + size / 2 } });
       } else {
         const prev = roundSize * 2;
         out.push({

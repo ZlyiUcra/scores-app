@@ -67,6 +67,11 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
         </p>
         <ul>
           <li>
+            Os confrontos da primeira ronda mantêm separadas as equipas do mesmo grupo
+            sempre que possível; um duelo do mesmo grupo só acontece quando um grupo
+            fornece mais de metade do bracket.
+          </li>
+          <li>
             Enquanto os grupos ainda se jogam, os nomes entre parênteses - como
             «Cabeça 1 (FC Lions)» - são uma projeção ao vivo da classificação atual. Os
             parênteses desaparecem quando o confronto fica definitivo.
