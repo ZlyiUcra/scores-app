@@ -146,7 +146,11 @@
     "groups": "Fase de grupos"
   },
   "thirds": {
-    "title": "Melhores 3ºs",
+    "title1": "Melhores vencedores de grupo",
+    "title2": "Melhores 2ºs",
+    "title3": "Melhores 3ºs",
+    "title4": "Melhores 4ºs",
+    "title5": "Melhores 5ºs",
     "note": "Passam os {n} primeiros",
     "colGroup": "Grupo"
   },
@@ -162,6 +166,7 @@
     "pts": "Pts", "ptsFull": "Pontos"
   },
   "bracket": {
+    "r32": "Dezasseis avos de final",
     "r16": "Oitavos-de-final",
     "qf": "Quartos-de-final",
     "sf": "Meias-finais",
@@ -173,12 +178,11 @@
     "manual": "Atribuído manualmente",
     "previewNote": "Previsão: as equipas entre parênteses são projeções dos resultados atuais e ainda podem mudar.",
     "empty": "O bracket aparece assim que os grupos estiverem definidos.",
-    "note": "Os dois primeiros de cada grupo apuram-se; os melhores terceiros completam o bracket até uma potência de dois. Um jogo empatado é decidido nas grandes penalidades.",
+    "note": "O bracket comporta a maior potência de dois que o número de equipas preenche. As posições apuram-se por ordem (todos os 1ºs, todos os 2ºs, ...); as últimas vagas disputam-se dentro de uma única posição entre grupos. Um jogo empatado é decidido nas grandes penalidades.",
     "reason": {
       "noGroups": "Crie pelo menos um grupo para formar o bracket.",
       "groupTooSmall": "Cada grupo precisa de pelo menos 2 equipas.",
-      "notEnoughThirds": "Terceiros insuficientes para chegar a uma potência de dois. Ajuste os grupos.",
-      "tooManyGroups": "Grupos a mais — o bracket ultrapassaria 16 equipas."
+      "tooManyGroups": "Equipas a mais — o bracket ultrapassaria 32."
     }
   },
   "seed": {

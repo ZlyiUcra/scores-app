@@ -1,9 +1,14 @@
 import type { GroupTable } from '../../../shared/types';
 import { useI18n } from '../i18n';
 
-/** One group's standings table. Top-2 rows are highlighted as direct qualifiers;
- * a 3rd row is marked as a possible best-third qualifier. */
-export function StandingsTable({ table }: { table: GroupTable }) {
+/** One group's standings table. Rows up to `autoRank` (places that qualify
+ * wholesale) are green; the `contestedRank` place — where the leftover bracket
+ * spots are fought over cross-group — is blue. */
+export function StandingsTable({ table, autoRank, contestedRank }: {
+  table: GroupTable;
+  autoRank: number;
+  contestedRank: number | null;
+}) {
   const { t } = useI18n();
   return (
     <div className="standings">
@@ -26,7 +31,7 @@ export function StandingsTable({ table }: { table: GroupTable }) {
           </thead>
           <tbody>
             {table.rows.map((r) => {
-              const cls = r.rank <= 2 ? 'standings__row--q1' : r.rank === 3 ? 'standings__row--q3' : '';
+              const cls = r.rank <= autoRank ? 'standings__row--q1' : r.rank === contestedRank ? 'standings__row--q3' : '';
               return (
                 <tr key={r.team.id} className={cls}>
                   <td className="standings__pos">{r.rank}</td>

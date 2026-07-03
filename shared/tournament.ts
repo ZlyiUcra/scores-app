@@ -26,10 +26,8 @@ export const TOURNAMENT_FORMAT = {
   minPerGroup: 2,
   /** Hard cap on group size. */
   maxPerGroup: 5,
-  /** Direct qualifiers taken from every group (top-2). */
-  qualifiersPerGroup: 2,
-  /** Largest supported knockout (16 -> round of 16). */
-  maxBracketSize: 16,
+  /** Largest supported knockout (32 -> round of 32). */
+  maxBracketSize: 32,
   points: { win: 3, draw: 1, loss: 0 },
 } as const;
 
@@ -72,10 +70,10 @@ export function emptyBracketResult(): BracketResult {
   };
 }
 
-/** Smallest power of 2 >= n (n >= 1). */
-function nextPow2(n: number): number {
+/** Largest power of 2 <= n (n >= 1). */
+function floorPow2(n: number): number {
   let p = 1;
-  while (p < n) p *= 2;
+  while (p * 2 <= n) p *= 2;
   return p;
 }
 
@@ -89,8 +87,10 @@ export function roundName(roundSize: number): Round {
       return 'sf';
     case 8:
       return 'qf';
-    default:
+    case 16:
       return 'r16';
+    default:
+      return 'r32';
   }
 }
 
@@ -252,8 +252,10 @@ function isGroupComplete(groupId: string, teams: Team[], matches: Match[]): bool
   return true;
 }
 
-/** Can a bracket be formed from the current groups, and at what size? Depends
- * only on group count and team counts (NOT results). */
+/** Can a bracket be formed from the current groups, and at what size? The
+ * bracket holds the LARGEST power of two that the total team count can fill
+ * (35 teams -> 32 qualify, 3 are eliminated). Depends only on group count and
+ * team counts (NOT results). */
 export function computeSize(
   groups: Group[],
   teams: Team[],
@@ -261,37 +263,40 @@ export function computeSize(
   const G = groups.length;
   if (G === 0) return { formable: false, reason: 'noGroups', size: 0 };
 
+  let total = 0;
   for (let g = 0; g < G; g++) {
-    if (teamsInGroup(groups[g].id, teams) < TOURNAMENT_FORMAT.minPerGroup) {
+    const n = teamsInGroup(groups[g].id, teams);
+    if (n < TOURNAMENT_FORMAT.minPerGroup) {
       return { formable: false, reason: 'groupTooSmall', size: 0 };
     }
+    total += n;
   }
 
-  const directCount = TOURNAMENT_FORMAT.qualifiersPerGroup * G;
-  const size = nextPow2(directCount);
+  const size = floorPow2(total);
   if (size > TOURNAMENT_FORMAT.maxBracketSize) return { formable: false, reason: 'tooManyGroups', size };
-
-  const thirdsNeeded = size - directCount;
-  let thirdsPool = 0;
-  for (let g = 0; g < G; g++) if (teamsInGroup(groups[g].id, teams) >= 3) thirdsPool++;
-  if (thirdsNeeded > thirdsPool) return { formable: false, reason: 'notEnoughThirds', size };
 
   return { formable: true, reason: null, size };
 }
 
 /**
- * Third-placed rows across all groups in QUALIFICATION order — the exact
- * comparator used to pick the best thirds for the bracket (points, wins,
- * goal difference, goals for — no head-to-head across groups — then a
- * deterministic teamId fallback). Also drives the public best-3rds table.
+ * Every group row in QUALIFICATION order: strictly by group place first —
+ * every 1st outranks every 2nd, every 2nd outranks every 3rd, and so on —
+ * then within a place tier by the quality comparator (points, wins, goal
+ * difference, goals for — no head-to-head across groups — then a
+ * deterministic teamId fallback). The bracket takes the first `size` entries,
+ * so whole tiers qualify wholesale until the one CONTESTED tier where the
+ * comparator decides the leftover spots. Each entry's place is `row.rank`.
  */
-export function computeThirdPlaces(tables: GroupTable[]): Array<{ group: Group; row: StandingRow }> {
+export function computeQualificationOrder(tables: GroupTable[]): Array<{ group: Group; row: StandingRow }> {
   const out: Array<{ group: Group; row: StandingRow }> = [];
   for (let i = 0; i < tables.length; i++) {
-    if (tables[i].rows.length >= 3) out.push({ group: tables[i].group, row: tables[i].rows[2] });
+    for (let r = 0; r < tables[i].rows.length; r++) {
+      out.push({ group: tables[i].group, row: tables[i].rows[r] });
+    }
   }
   out.sort(
     (a, b) =>
+      a.row.rank - b.row.rank ||
       b.row.points - a.row.points ||
       b.row.won - a.row.won ||
       b.row.goalDiff - a.row.goalDiff ||
@@ -302,7 +307,8 @@ export function computeThirdPlaces(tables: GroupTable[]): Array<{ group: Group; 
 }
 
 /** The seeded, ordered list of qualifiers (length = size) once every group is
- * complete; null while still in progress. Thirds are SELECTED by points, but the
+ * complete; null while still in progress. Qualifiers are SELECTED by place
+ * tier + quality (the first `size` of computeQualificationOrder), but the
  * whole pool is SEEDED by groupAddedAt (then teamId) per the tournament rules.
  * `preview` skips the completeness gate and projects from the CURRENT standings
  * (live scores included) — "as if the groups ended right now". */
@@ -323,17 +329,9 @@ function computeQualifiers(
   const seedByTeam = new Map<string, string | null>();
   for (let i = 0; i < seedTeams.length; i++) seedByTeam.set(seedTeams[i].id, seedTeams[i].groupAddedAt);
 
-  const direct: StandingRow[] = [];
-  for (let i = 0; i < tables.length; i++) {
-    const rows = tables[i].rows;
-    if (rows.length >= 1) direct.push(rows[0]);
-    if (rows.length >= 2) direct.push(rows[1]);
-  }
-  const thirds = computeThirdPlaces(tables).map((t) => t.row);
-
-  const directCount = TOURNAMENT_FORMAT.qualifiersPerGroup * groups.length;
-  const thirdsNeeded = size - directCount;
-  const pool = direct.concat(thirds.slice(0, thirdsNeeded));
+  const pool = computeQualificationOrder(tables)
+    .map((t) => t.row)
+    .slice(0, size);
 
   // Seed the whole pool by (groupAddedAt, then teamId) — total order.
   const ordered = pool

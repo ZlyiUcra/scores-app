@@ -2,19 +2,21 @@ import type { Group, StandingRow } from '../../../shared/types';
 import { useI18n } from '../i18n';
 
 /**
- * Cross-group best-3rds table, shown when third places are needed to fill the
- * bracket up to a power of two. Rows arrive pre-sorted in qualification order
- * (same comparator the bracket seeding uses); the first `qualifyCount` advance.
+ * The CONTESTED filler tier: teams of one group place (3rd, 4th or 5th)
+ * fighting cross-group for the leftover bracket spots — tiers that qualify
+ * wholesale are not shown at all. Rows arrive pre-sorted in qualification
+ * order (same comparator the bracket seeding uses); the first `qualifyCount`
+ * advance. All rows share one place, so the title names it (`row.rank`).
  */
-export function ThirdPlacesTable({ thirds, qualifyCount }: {
-  thirds: Array<{ group: Group; row: StandingRow }>;
+export function ThirdPlacesTable({ fillers, qualifyCount }: {
+  fillers: Array<{ group: Group; row: StandingRow }>;
   qualifyCount: number;
 }) {
   const { t } = useI18n();
   return (
     <div className="standings">
       <div className="section-head">
-        <h3 className="standings__title">{t('thirds.title')}</h3>
+        <h3 className="standings__title">{t(`thirds.title${fillers[0].row.rank}`)}</h3>
         <span className="muted">{t('thirds.note', { n: qualifyCount })}</span>
       </div>
       <div className="table-wrap">
@@ -32,7 +34,7 @@ export function ThirdPlacesTable({ thirds, qualifyCount }: {
             </tr>
           </thead>
           <tbody>
-            {thirds.map(({ group, row }, i) => (
+            {fillers.map(({ group, row }, i) => (
               <tr key={row.team.id} className={i < qualifyCount ? 'standings__row--q1' : ''}>
                 <td className="standings__pos">{i + 1}</td>
                 <td className="standings__team">

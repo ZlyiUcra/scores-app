@@ -146,7 +146,11 @@
     "groups": "Group stage"
   },
   "thirds": {
-    "title": "Best 3rd places",
+    "title1": "Best group winners",
+    "title2": "Best 2nd places",
+    "title3": "Best 3rd places",
+    "title4": "Best 4th places",
+    "title5": "Best 5th places",
     "note": "Top {n} qualify",
     "colGroup": "Group"
   },
@@ -162,6 +166,7 @@
     "pts": "Pts", "ptsFull": "Points"
   },
   "bracket": {
+    "r32": "Round of 32",
     "r16": "Round of 16",
     "qf": "Quarterfinals",
     "sf": "Semifinals",
@@ -173,12 +178,11 @@
     "manual": "Manually assigned",
     "previewNote": "Preview: teams in parentheses are projected from the current results and may still change.",
     "empty": "The bracket appears once the group stage is set up.",
-    "note": "The top two of every group qualify; the best third-placed teams fill the bracket up to a power of two. A level knockout match is decided on penalties.",
+    "note": "The bracket holds the largest power of two the team count can fill. Group places qualify in order (all 1sts, all 2nds, ...); the last spots are contested within a single place across groups. A level knockout match is decided on penalties.",
     "reason": {
       "noGroups": "Create at least one group to form a bracket.",
       "groupTooSmall": "Every group needs at least 2 teams.",
-      "notEnoughThirds": "Not enough third-placed teams to reach a power of two. Adjust the groups.",
-      "tooManyGroups": "Too many groups — the bracket would exceed 16 teams."
+      "tooManyGroups": "Too many teams — the bracket would exceed 32."
     }
   },
   "seed": {

@@ -32,7 +32,8 @@ function Side({ m, side }: { m: BracketMatch; side: 'home' | 'away' }) {
     m.awayPens != null;
   return (
     <div className={`bcard__side ${won ? 'bcard__side--won' : ''} ${isTeam ? '' : 'bcard__side--seed'}`}>
-      <span className="bcard__name">
+      {/* Narrow columns ellipsize the label; the title keeps it readable. */}
+      <span className="bcard__name" title={participantName(p, t)}>
         {participantName(p, t)}
         {'team' in p && p.manual && (
           <span className="bcard__manual" title={t('bracket.manual')}>*</span>
@@ -66,7 +67,7 @@ function BracketCard({ m }: { m: BracketMatch }) {
 }
 
 // Column order for the group-stage rounds (biggest first).
-const COLUMN_ROUNDS: Round[] = ['r16', 'qf', 'sf', 'final'];
+const COLUMN_ROUNDS: Round[] = ['r32', 'r16', 'qf', 'sf', 'final'];
 
 export function Bracket({ view }: { view: BracketView }) {
   const { t } = useI18n();

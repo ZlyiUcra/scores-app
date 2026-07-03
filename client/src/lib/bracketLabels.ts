@@ -14,7 +14,7 @@ export function slotShort(slot: string, t: Translate): string {
   const index = Number(m[2]);
   const r = roundName(size);
   if (r === 'final') return t('bracket.finalShort');
-  const prefix = r === 'sf' ? 'SF' : r === 'qf' ? 'QF' : 'R16-';
+  const prefix = r === 'sf' ? 'SF' : r === 'qf' ? 'QF' : r === 'r16' ? 'R16-' : 'R32-';
   return `${prefix}${index + 1}`;
 }
 

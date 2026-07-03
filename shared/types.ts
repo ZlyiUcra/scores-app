@@ -12,8 +12,8 @@ export type Stage = 'group' | 'knockout';
 
 /** Knockout round. String-union (consistent with `MatchStatus`/`Role`); the
  * label is DERIVED from a round's team-count by `roundName()` — no numeric enum
- * on the wire. `r16` is the largest supported (bracket size capped at 16). */
-export type Round = 'r16' | 'qf' | 'sf' | 'final' | 'third';
+ * on the wire. `r32` is the largest supported (bracket size capped at 32). */
+export type Round = 'r32' | 'r16' | 'qf' | 'sf' | 'final' | 'third';
 
 /** A tournament group — first-class entity now (admin-created). */
 export interface Group {
@@ -141,8 +141,7 @@ export interface BracketMatch {
 export type BracketUnformableReason =
   | 'noGroups'
   | 'groupTooSmall' // a group has fewer than 2 teams
-  | 'notEnoughThirds' // can't reach a power of 2 with available third places
-  | 'tooManyGroups'; // computed size would exceed the supported cap (16)
+  | 'tooManyGroups'; // computed size would exceed the supported cap (32)
 
 /**
  * The whole knockout view: whether a bracket can be formed at all, its size,

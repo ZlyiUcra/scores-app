@@ -312,8 +312,11 @@ body {
 
 /* ---------- Bracket (aligned columns + elbow connectors) ---------- */
 .bracket-wrap { margin-top: 0.5rem; }
+/* All rounds share the container width so the whole path to the final is
+   visible at once; columns shrink evenly and long names ellipsize. The
+   min-width only matters on phones, where horizontal scroll is the fallback. */
 .bracket { display: flex; align-items: stretch; overflow-x: auto; padding-bottom: 0.5rem; }
-.bracket-round { display: flex; flex-direction: column; flex: 1 0 210px; min-width: 190px; }
+.bracket-round { display: flex; flex-direction: column; flex: 1 1 0; min-width: 120px; }
 .bracket-round__title {
   margin: 0 0 0.25rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
   color: var(--muted); text-align: center;
@@ -379,7 +382,10 @@ body {
 }
 .bcard__vs::before { left: 0.6rem; }
 .bcard__vs::after { right: 0.6rem; }
-.bcard__name { font-weight: 600; font-size: 0.9rem; }
+.bcard__name {
+  font-weight: 600; font-size: 0.9rem;
+  flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .bcard__side--seed .bcard__name { color: var(--muted); font-style: italic; font-weight: 500; }
 .bcard__side--won .bcard__name { color: var(--accent); }
 .bcard__score { font-variant-numeric: tabular-nums; font-weight: 800; }
