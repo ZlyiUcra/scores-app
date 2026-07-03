@@ -17,7 +17,8 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
       <div className="rrow__meta">
         <span>{formatTime(m.startsAt)}</span>
         {m.field && <span>· {m.field}</span>}
-        <span className="rrow__status">{t(`status.${m.status}`)}</span>
+        {/* Same colored status pill as the admin games table. */}
+        <span className={`rrow__status chip chip--${m.status}`}>{t(`status.${m.status}`)}</span>
       </div>
       <div className="rrow__teams">
         <span className="rrow__team">{m.home.name}</span>
