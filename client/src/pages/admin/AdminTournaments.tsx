@@ -2,14 +2,19 @@ import { useState, type FormEvent } from 'react';
 import type { Tournament, TournamentStatus } from '../../../../shared/types';
 import { adminApi } from '../../api/admin';
 import { api, ApiError } from '../../api/client';
+import { formatDay, parseDay } from '../../lib/format';
 import { useTournamentStore } from '../../stores/tournamentStore';
 import { useI18n } from '../../i18n';
 
 const STATUSES: TournamentStatus[] = ['upcoming', 'active', 'finished'];
 
-/** '' <-> null seam between date inputs and the wire (dates are optional). */
-function toDate(raw: string): string | null {
-  return raw === '' ? null : raw;
+/** dd.mm.yyyy input -> wire date ('' -> null, dates are optional); a typed
+ * but unparseable value aborts the whole submit with `invalidMsg`. */
+function toDate(raw: string, invalidMsg: string): string | null {
+  if (raw.trim() === '') return null;
+  const day = parseDay(raw);
+  if (day === null) throw new ApiError(0, 'INVALID', invalidMsg);
+  return day;
 }
 
 /**
@@ -55,7 +60,8 @@ export function AdminTournaments() {
   async function onCreate(e: FormEvent) {
     e.preventDefault();
     await run(async () => {
-      await adminApi.createTournament({ name: name.trim(), startsAt: toDate(startsAt), endsAt: toDate(endsAt), status });
+      const invalid = t('date.invalid');
+      await adminApi.createTournament({ name: name.trim(), startsAt: toDate(startsAt, invalid), endsAt: toDate(endsAt, invalid), status });
       setName('');
       setStartsAt('');
       setEndsAt('');
@@ -66,8 +72,8 @@ export function AdminTournaments() {
   function startEdit(x: Tournament) {
     setEditId(x.id);
     setEditName(x.name);
-    setEditStartsAt(x.startsAt ?? '');
-    setEditEndsAt(x.endsAt ?? '');
+    setEditStartsAt(x.startsAt ? formatDay(x.startsAt) : '');
+    setEditEndsAt(x.endsAt ? formatDay(x.endsAt) : '');
     setEditStatus(x.status);
   }
 
@@ -85,11 +91,13 @@ export function AdminTournaments() {
           </label>
           <label className="field">
             <span>{t('adminTournaments.start')}</span>
-            <input className="input" type="date" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+            <input className="input" value={startsAt} onChange={(e) => setStartsAt(e.target.value)}
+              placeholder={t('date.hint')} maxLength={10} />
           </label>
           <label className="field">
             <span>{t('adminTournaments.end')}</span>
-            <input className="input" type="date" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+            <input className="input" value={endsAt} onChange={(e) => setEndsAt(e.target.value)}
+              placeholder={t('date.hint')} maxLength={10} />
           </label>
           <label className="field">
             <span>{t('adminTournaments.status')}</span>
@@ -129,13 +137,17 @@ export function AdminTournaments() {
                     <td>
                       {editing ? (
                         <div className="team-edit team-edit--stack">
-                          <input className="input" type="date" value={editStartsAt}
+                          <input className="input" value={editStartsAt} placeholder={t('date.hint')} maxLength={10}
                             onChange={(e) => setEditStartsAt(e.target.value)} aria-label={t('adminTournaments.start')} />
-                          <input className="input" type="date" value={editEndsAt}
+                          <input className="input" value={editEndsAt} placeholder={t('date.hint')} maxLength={10}
                             onChange={(e) => setEditEndsAt(e.target.value)} aria-label={t('adminTournaments.end')} />
                         </div>
                       ) : (
-                        <span>{x.startsAt || x.endsAt ? `${x.startsAt ?? '…'} - ${x.endsAt ?? '…'}` : '—'}</span>
+                        <span>
+                          {x.startsAt || x.endsAt
+                            ? `${x.startsAt ? formatDay(x.startsAt) : '…'} - ${x.endsAt ? formatDay(x.endsAt) : '…'}`
+                            : '—'}
+                        </span>
                       )}
                     </td>
                     <td>
@@ -153,10 +165,11 @@ export function AdminTournaments() {
                         <>
                           <button className="btn btn--sm btn--primary" disabled={busy}
                             onClick={() => void run(async () => {
+                              const invalid = t('date.invalid');
                               await adminApi.updateTournament(x.id, {
                                 name: editName.trim(),
-                                startsAt: toDate(editStartsAt),
-                                endsAt: toDate(editEndsAt),
+                                startsAt: toDate(editStartsAt, invalid),
+                                endsAt: toDate(editEndsAt, invalid),
                                 status: editStatus,
                               });
                               setEditId(null);

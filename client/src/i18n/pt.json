@@ -26,6 +26,12 @@
   "matchDetail": { "back": "← Voltar aos resultados", "notFound": "Jogo não encontrado." },
   "knockoutDetail": { "back": "← Voltar ao bracket", "notFound": "Jogo não encontrado." },
   "status": { "scheduled": "Agendado", "live": "AO VIVO", "finished": "Terminado" },
+  "date": {
+    "hint": "dd.mm.aaaa",
+    "hintTime": "dd.mm.aaaa hh:mm",
+    "invalid": "Data inválida - use dd.mm.aaaa.",
+    "invalidTime": "Data/hora inválida - use dd.mm.aaaa hh:mm."
+  },
   "adminControls": {
     "title": "Controlo (administrador)",
     "goal": "+ golo",

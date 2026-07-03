@@ -2,13 +2,16 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { Tournament, TournamentStatus } from '../../../shared/types';
 import { api } from '../api/client';
+import { formatDay } from '../lib/format';
 import { useTournamentStore, selectTournaments, selectLoaded } from '../stores/tournamentStore';
 import { useI18n } from '../i18n';
 
 function TournamentCard({ tour }: { tour: Tournament }) {
   const { t } = useI18n();
   const dates =
-    tour.startsAt || tour.endsAt ? `${tour.startsAt ?? '…'} - ${tour.endsAt ?? '…'}` : null;
+    tour.startsAt || tour.endsAt
+      ? `${tour.startsAt ? formatDay(tour.startsAt) : '…'} - ${tour.endsAt ? formatDay(tour.endsAt) : '…'}`
+      : null;
   return (
     <Link to={`/t/${tour.id}`} className={`tour-card tour-card--${tour.status}`}>
       <span className="tour-card__name">{tour.name}</span>

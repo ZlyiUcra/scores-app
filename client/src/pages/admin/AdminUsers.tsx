@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { AdminUserView, Paginated } from '../../../../shared/types';
 import { adminApi } from '../../api/admin';
 import { ApiError } from '../../api/client';
+import { formatDay } from '../../lib/format';
 import { useAuth } from '../../auth/AuthContext';
 import { useI18n } from '../../i18n';
 
@@ -83,7 +84,7 @@ export function AdminUsers() {
                   <td>{u.username}{isSelf && <span className="tag">{t('adminUsers.you')}</span>}</td>
                   <td><span className={`chip chip--${u.role}`}>{u.role === 'admin' ? t('role.admin') : t('role.viewer')}</span></td>
                   <td>{u.active ? t('adminUsers.active') : t('adminUsers.inactive')}</td>
-                  <td className="muted">{new Date(u.createdAt).toLocaleDateString()}</td>
+                  <td className="muted">{formatDay(u.createdAt)}</td>
                   <td className="table__actions">
                     <button className="btn btn--sm" disabled={busy || isSelf}
                       onClick={() => act(u.id, () => adminApi.updateUser(u.id, { active: !u.active }))}>

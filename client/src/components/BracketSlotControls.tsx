@@ -3,18 +3,10 @@ import type { BracketMatch, BracketParticipant, UpdateBracketRequest } from '../
 import { adminApi } from '../api/admin';
 import { ApiError } from '../api/client';
 import { participantName } from '../lib/bracketLabels';
+import { formatDayTime, parseDayTime } from '../lib/format';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 import { useRosterStore } from '../stores/rosterStore';
-
-/** ISO -> value for <input type="datetime-local"> in the local timezone. */
-function toLocalInput(iso: string | null): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-}
 
 /** The select shows the pinned team when a side is manual, "(auto)" otherwise. */
 function overrideValue(p: BracketParticipant): string {
@@ -34,7 +26,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
   const ready = 'team' in m.home && 'team' in m.away;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [startsAt, setStartsAt] = useState(toLocalInput(m.startsAt));
+  const [startsAt, setStartsAt] = useState(formatDayTime(m.startsAt));
   const teams = useRosterStore((s) => s.teams);
   // Rebuilt only when the roster changes, NOT on every bracket snapshot, so
   // the option children stay reference-equal across score-click re-renders.
@@ -50,7 +42,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
 
   // Re-sync the time field when the authoritative slot changes (rev bump).
   useEffect(() => {
-    setStartsAt(toLocalInput(m.startsAt));
+    setStartsAt(formatDayTime(m.startsAt));
   }, [m.rev]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function run(action: () => Promise<unknown>) {
@@ -94,7 +86,12 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
     );
 
   function commitTime() {
-    const next = startsAt === '' ? null : new Date(startsAt).toISOString();
+    const next = startsAt.trim() === '' ? null : parseDayTime(startsAt);
+    if (next === null && startsAt.trim() !== '') {
+      // Unparseable: keep the typed text on screen so it can be corrected.
+      setErr(t('date.invalidTime'));
+      return;
+    }
     if (next === m.startsAt) return;
     void patch({ startsAt: next });
   }
@@ -200,7 +197,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
 
           <label className="field">
             <span>{t('adminMatches.start')}</span>
-            <input className="input" type="datetime-local" value={startsAt}
+            <input className="input" value={startsAt} placeholder={t('date.hintTime')} maxLength={16}
               onChange={(e) => setStartsAt(e.target.value)} onBlur={commitTime} disabled={busy} />
           </label>
         </>
