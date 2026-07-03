@@ -1,10 +1,9 @@
 import type { AuthUser, BracketView, Match, MatchUpdate, Roster } from '../../../shared/types';
 
-/**
- * Thin REST client. All requests send the httpOnly cookie automatically via
- * `credentials: 'include'`. Errors are normalized to a thrown `ApiError`.
- */
+// Thin REST client. All requests send the httpOnly cookie automatically via
+// `credentials: 'include'`. Errors are normalized to a thrown `ApiError`.
 
+/** Non-2xx response, carrying the server's HTTP status and error code. */
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -15,6 +14,7 @@ export class ApiError extends Error {
   }
 }
 
+/** One JSON round-trip to `/api${path}`; throws ApiError on a non-2xx reply. */
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api${path}`, {
     credentials: 'include',
@@ -29,6 +29,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
+/** Endpoints available to every authenticated user (admin ones: api/admin.ts). */
 export const api = {
   login: (username: string, password: string) =>
     request<{ user: AuthUser }>('/auth/login', {

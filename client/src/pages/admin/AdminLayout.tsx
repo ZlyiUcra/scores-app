@@ -2,6 +2,7 @@ import { NavLink, Navigate, Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { useI18n } from '../../i18n';
 
+/** Shared frame for /admin/*: the sub-navigation plus a client-side role gate. */
 export function AdminLayout() {
   const { isAdmin } = useAuth();
   const { t } = useI18n();

@@ -286,5 +286,6 @@ class JsonFileUserRepository implements UserRepository {
   }
 }
 
+/** Singleton instance every service shares (state lives in one process). */
 export const userRepository: UserRepository = new JsonFileUserRepository();
 export { BCRYPT_COST, toPublic, toAdminView };

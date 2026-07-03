@@ -5,6 +5,8 @@ import { ApiError } from '../../api/client';
 import { useRosterStore, selectPlayers, selectTeams, bySquadOrder } from '../../stores/rosterStore';
 import { useI18n } from '../../i18n';
 
+/** Admin squads panel: pick a team, then add / inline-edit / delete its
+ * players. Purely descriptive data — no effect on standings or seeding. */
 export function AdminSquads() {
   const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);

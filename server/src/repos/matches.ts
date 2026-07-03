@@ -22,6 +22,7 @@ export interface StoredMatch {
   rev: number;
 }
 
+/** Persistence seam for group matches (SQLite today; swap behind this). */
 export interface MatchRepository {
   /** Resolved matches (teams embedded) for read/broadcast. */
   list(): Match[];
@@ -225,4 +226,5 @@ class JsonFileRepository implements MatchRepository {
   }
 }
 
+/** Singleton instance every service shares (state lives in one process). */
 export const matchRepository: MatchRepository = new JsonFileRepository();

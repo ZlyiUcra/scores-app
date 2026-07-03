@@ -69,6 +69,9 @@ function BracketCard({ m }: { m: BracketMatch }) {
 // Column order for the group-stage rounds (biggest first).
 const COLUMN_ROUNDS: Round[] = ['r32', 'r16', 'qf', 'sf', 'final'];
 
+/** The whole knockout tree: one column per round with elbow connectors, the
+ * third-place game below. Shows the unformable reason instead when the group
+ * setup cannot produce a bracket. */
 export function Bracket({ view }: { view: BracketView }) {
   const { t } = useI18n();
 

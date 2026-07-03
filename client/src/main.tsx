@@ -6,6 +6,8 @@ import { AuthProvider } from './auth/AuthContext';
 import { App } from './App';
 import './styles.css';
 
+// Entry point: provider order matters — i18n wraps auth so even the login
+// screen is translatable.
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>

@@ -5,6 +5,7 @@ import { adminRosterRouter } from './roster.js';
 import { adminPlayersRouter } from './players.js';
 import { adminMatchesRouter } from './matches.js';
 
+/** Everything under /api/admin, composed from the per-domain sub-routers. */
 export const adminRouter = Router();
 
 // The admin trust boundary is applied ONCE here — every sub-router below is

@@ -4,6 +4,7 @@
 
 export type Role = 'admin' | 'user';
 
+/** Lifecycle of any game, group or knockout. */
 export type MatchStatus = 'scheduled' | 'live' | 'finished';
 
 /** Tournament phase. Group matches live in the match store; knockout matches
@@ -21,6 +22,7 @@ export interface Group {
   name: string;
 }
 
+/** A tournament team — one identity across groups, matches and the bracket. */
 export interface Team {
   id: string;
   name: string;
@@ -43,6 +45,8 @@ export interface Player {
   position: string | null;
 }
 
+/** A group-stage game as it travels the wire: teams embedded (resolved by the
+ * server from stored ids), so clients never join by hand. */
 export interface Match {
   id: string;
   group: string;
@@ -88,6 +92,7 @@ export interface StandingRow {
   rank: number;
 }
 
+/** One group's computed standings, rows already sorted by rank. */
 export interface GroupTable {
   group: Group;
   rows: StandingRow[];
@@ -164,6 +169,7 @@ export interface Roster {
   players: Player[];
 }
 
+/** The session's own identity (login/me responses). Never anyone else's. */
 export interface AuthUser {
   id: string;
   username: string;
@@ -206,6 +212,7 @@ export interface CreateTeamRequest {
   shortName: string;
 }
 
+// Also reused as the rename-group PATCH body (same single field).
 export interface CreateGroupRequest {
   name: string;
 }
@@ -223,6 +230,8 @@ export interface CreatePlayerRequest {
   position?: string | null;
 }
 
+// Partial edit; `null` clears an optional field, absence keeps it. The team is
+// not editable — delete and re-add to move a player.
 export interface UpdatePlayerRequest {
   name?: string;
   number?: number | null;
@@ -263,6 +272,7 @@ export interface UpdateUserRequest {
   role?: Role;
 }
 
+/** Uniform error envelope every non-2xx REST response carries. */
 export interface ApiError {
   error: { code: string; message: string };
 }
@@ -287,10 +297,12 @@ export const SOCKET_EVENTS = {
   rosterSnapshot: 'roster:snapshot',
 } as const;
 
+/** Payload of match:removed — the id is all a client needs to drop the row. */
 export interface MatchRemoved {
   matchId: string;
 }
 
+/** Typed socket.io event map (see SOCKET_EVENTS for when each fires). */
 export interface ServerToClientEvents {
   'match:update': (payload: MatchUpdate) => void;
   'match:snapshot': (payload: Match[]) => void;

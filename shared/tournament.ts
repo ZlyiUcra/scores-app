@@ -55,6 +55,8 @@ export interface BracketResult {
   rev: number;
 }
 
+/** The pristine slot state (scheduled, 0:0, no pens/overrides) — what a slot
+ * "contains" before its first write and after a full knockout reset. */
 export function emptyBracketResult(): BracketResult {
   return {
     homeScore: 0,

@@ -38,6 +38,7 @@ export function connectSocket(): void {
   });
 }
 
+/** Tear the feed down (logout/unmount) and mark the UI as offline. */
 export function disconnectSocket(): void {
   socket?.disconnect();
   socket = null;

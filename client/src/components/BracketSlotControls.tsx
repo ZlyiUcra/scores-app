@@ -15,6 +15,11 @@ function toLocalInput(iso: string | null): string {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
+/** The select shows the pinned team when a side is manual, "(auto)" otherwise. */
+function overrideValue(p: BracketParticipant): string {
+  return 'team' in p && p.manual ? p.team.id : '';
+}
+
 /**
  * Click-driven slot controls, mirroring the group-match AdminControls: every
  * click PATCHes immediately (guarded by expectedRev) and the authoritative
@@ -22,11 +27,6 @@ function toLocalInput(iso: string | null): string {
  * Kick-off time is the one typed field; it commits on blur.
  * Rendered only for admins (UX) — the server's requireAdmin is the real gate.
  */
-/** The select shows the pinned team when a side is manual, "(auto)" otherwise. */
-function overrideValue(p: BracketParticipant): string {
-  return 'team' in p && p.manual ? p.team.id : '';
-}
-
 export function BracketSlotControls({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
   const ready = 'team' in m.home && 'team' in m.away;

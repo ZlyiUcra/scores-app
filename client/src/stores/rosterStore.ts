@@ -14,6 +14,7 @@ interface RosterState {
   setRoster: (roster: Roster) => void;
 }
 
+/** Holds the latest server-pushed roster snapshot. */
 export const useRosterStore = create<RosterState>((set) => ({
   groups: [],
   teams: [],
@@ -21,6 +22,7 @@ export const useRosterStore = create<RosterState>((set) => ({
   setRoster: (roster) => set({ groups: roster.groups, teams: roster.teams, players: roster.players }),
 }));
 
+// Narrow selectors — subscribe to just what a component needs.
 export const selectGroups = (s: RosterState) => s.groups;
 export const selectTeams = (s: RosterState) => s.teams;
 export const selectPlayers = (s: RosterState) => s.players;

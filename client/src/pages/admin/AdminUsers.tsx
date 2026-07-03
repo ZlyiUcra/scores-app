@@ -7,6 +7,9 @@ import { useI18n } from '../../i18n';
 
 const PAGE_SIZE = 10;
 
+/** Admin user management: paginated search, role promotion/demotion, enable/
+ * disable and delete. This data is not socket-fed, so every action refetches
+ * the page it acted on. */
 export function AdminUsers() {
   const { user: me } = useAuth();
   const { t } = useI18n();

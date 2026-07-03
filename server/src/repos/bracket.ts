@@ -144,4 +144,5 @@ class SqliteBracketRepository implements BracketRepository {
   }
 }
 
+/** Singleton instance every service shares (state lives in one process). */
 export const bracketRepository: BracketRepository = new SqliteBracketRepository();

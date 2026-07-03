@@ -13,9 +13,11 @@ interface BracketState {
 
 const EMPTY: BracketView = { formable: false, reason: null, size: 0, matches: [] };
 
+/** Holds the latest server-pushed knockout view (starts empty/unformable). */
 export const useBracketStore = create<BracketState>((set) => ({
   view: EMPTY,
   setBracket: (view) => set({ view }),
 }));
 
+/** Narrow selector for the whole view. */
 export const selectBracket = (s: BracketState) => s.view;

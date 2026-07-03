@@ -18,6 +18,7 @@ export const DATA_DIR_PATH = DATA_DIR;
 
 const DB_FILE = path.join(DATA_DIR, 'scores.db');
 
+/** The one process-wide connection; repositories share it via `transaction`. */
 export const db = new DatabaseSync(DB_FILE);
 
 // Dev-only schema evolution: an older `teams` table stored a `group` string and

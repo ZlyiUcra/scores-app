@@ -6,6 +6,8 @@ import { StandingsTable } from '../components/StandingsTable';
 import { ThirdPlacesTable } from '../components/ThirdPlacesTable';
 import { useI18n } from '../i18n';
 
+/** Front page: live group tables (green = qualifies wholesale, blue = the
+ * contested place) and the contested-tier qualification table. */
 export function Overview() {
   const { t } = useI18n();
   const tables = useStandings();

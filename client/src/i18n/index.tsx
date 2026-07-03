@@ -7,6 +7,7 @@ import pt from './pt.json';
 // would be 'uk', but it reads as "United Kingdom" in the UI).
 export type Lang = 'en' | 'ua' | 'pt';
 
+/** Display order of the language switcher buttons. */
 export const LANGS: Lang[] = ['en', 'ua', 'pt'];
 
 // English is the default and the fallback for any missing key.
@@ -49,6 +50,8 @@ function initialLang(): Lang {
   return stored === 'ua' || stored === 'pt' || stored === 'en' ? stored : 'en';
 }
 
+/** Active language (persisted in localStorage) + the `t(key, params)`
+ * translator with English fallback for missing keys. */
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(initialLang);
 
@@ -71,6 +74,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
+/** Translator + language state. */
 export function useI18n(): I18nContextValue {
   const ctx = useContext(I18nContext);
   if (!ctx) throw new Error('useI18n must be used within I18nProvider');

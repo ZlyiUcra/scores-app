@@ -35,6 +35,7 @@ export const RESERVED_USERNAMES = new Set([
   'undefined',
 ]);
 
+/** Self-signup body: username/password rules plus a reserved-name blocklist. */
 export const registerSchema = z
   .object({
     // NOTE: no `role` field — the server always assigns 'user'. Accepting a
@@ -240,6 +241,7 @@ export const listUsersQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
 
+// Inferred input types — the schemas above are the single source of truth.
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;

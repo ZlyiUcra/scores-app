@@ -28,6 +28,9 @@ enum PanelSection {
   Matches = 'Matches',
 }
 
+/** Admin games panel: groups (create/rename/delete + fixture generation),
+ * teams (create/edit/regroup while unplayed), manual game creation and the
+ * games table with inline schedule editing. */
 export function AdminMatches() {
   const { t } = useI18n();
   const [errors, setErrors] = useState<Partial<Record<PanelSection, string>>>({});

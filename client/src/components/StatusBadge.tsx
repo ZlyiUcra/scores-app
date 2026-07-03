@@ -1,6 +1,7 @@
 import type { MatchStatus } from '../../../shared/types';
 import { useI18n } from '../i18n';
 
+/** Localized match-status pill; the live one gets a pulsing dot. */
 export function StatusBadge({ status }: { status: MatchStatus }) {
   const { t } = useI18n();
   return (

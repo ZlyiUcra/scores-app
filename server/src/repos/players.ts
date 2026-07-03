@@ -169,4 +169,5 @@ class SqlitePlayerRepository implements PlayerRepository {
   }
 }
 
+/** Singleton instance every service shares (state lives in one process). */
 export const playerRepository: PlayerRepository = new SqlitePlayerRepository();

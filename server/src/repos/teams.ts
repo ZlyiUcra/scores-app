@@ -199,4 +199,5 @@ class SqliteTeamRepository implements TeamRepository {
   }
 }
 
+/** Singleton instance every service shares (state lives in one process). */
 export const teamRepository: TeamRepository = new SqliteTeamRepository();

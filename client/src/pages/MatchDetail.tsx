@@ -6,6 +6,9 @@ import { useI18n } from '../i18n';
 import { StatusBadge } from '../components/StatusBadge';
 import { AdminControls } from '../components/AdminControls';
 
+/** One group game, live: scoreboard for everyone, the click-driven scoring
+ * controls for admins. Lives at /match/:id (mirrored by /ko/:slot for
+ * knockout games). */
 export function MatchDetail() {
   const { id = '' } = useParams();
   const match = useMatchStore(selectMatch(id));

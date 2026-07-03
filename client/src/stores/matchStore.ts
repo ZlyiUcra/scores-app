@@ -28,6 +28,7 @@ function deriveOrder(byId: Record<string, Match>): string[] {
     .map((m) => m.id);
 }
 
+/** Live group-match state fed by REST snapshots + socket diffs (see socket.ts). */
 export const useMatchStore = create<MatchState>((set) => ({
   byId: {},
   order: [],

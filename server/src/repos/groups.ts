@@ -121,4 +121,5 @@ class SqliteGroupRepository implements GroupRepository {
   }
 }
 
+/** Singleton instance every service shares (state lives in one process). */
 export const groupRepository: GroupRepository = new SqliteGroupRepository();

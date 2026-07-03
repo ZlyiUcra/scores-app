@@ -6,6 +6,8 @@ import { ApiError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
 
+/** Knockout page: the full bracket plus, for admins, the bracket-wide reset —
+ * the knockout pages are the only place playoff state is managed. */
 export function Knockout() {
   const { t } = useI18n();
   const view = useBracketStore(selectBracket);

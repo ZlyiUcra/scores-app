@@ -20,6 +20,7 @@ function resolveJwtSecret(): string {
   return generated;
 }
 
+/** All environment-derived settings, resolved once at boot. */
 export const config = {
   nodeEnv: NODE_ENV,
   isProd,

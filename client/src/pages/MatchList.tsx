@@ -28,6 +28,8 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
   );
 });
 
+/** Results page: every group game clustered by group, each row linking to the
+ * game's own page. The header shows the live-connection state. */
 export function MatchList() {
   const order = useMatchStore(selectOrder);
   const byId = useMatchStore((s) => s.byId);

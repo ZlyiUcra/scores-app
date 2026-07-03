@@ -5,6 +5,8 @@ import { useI18n, LANGS } from '../i18n';
 
 type Mode = 'login' | 'register';
 
+/** Sign-in / registration screen shown to anyone without a session. In dev
+ * builds it also prints the seeded demo credentials. */
 export function Login() {
   const { login, register } = useAuth();
   const { t, lang, setLang } = useI18n();
