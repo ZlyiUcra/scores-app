@@ -88,6 +88,48 @@ export const goalSchema = z
   })
   .strict();
 
+// ---- Admin: tournaments ----
+
+const tournamentName = z
+  .string()
+  .trim()
+  .min(2, 'Tournament name must be at least 2 characters.')
+  .max(60, 'Tournament name must be at most 60 characters.')
+  .regex(/^[\p{L}\p{N} .'\-]+$/u, 'Tournament name contains invalid characters.');
+
+/** Planned tournament dates are DATE-ONLY (YYYY-MM-DD) — they describe a
+ * period of the year, not a kickoff instant, so no time/zone component. */
+const tournamentDate = z.string().date('Must be a date (YYYY-MM-DD).').nullable();
+
+const tournamentStatus = z.enum(['upcoming', 'active', 'finished']);
+
+/** Create-tournament body. Status defaults to `upcoming` in the service. */
+export const createTournamentSchema = z
+  .object({
+    name: tournamentName,
+    startsAt: tournamentDate.optional(),
+    endsAt: tournamentDate.optional(),
+    status: tournamentStatus.optional(),
+  })
+  .strict()
+  .refine((v) => v.startsAt == null || v.endsAt == null || v.startsAt <= v.endsAt, {
+    path: ['endsAt'],
+    message: 'End date must not be before the start date.',
+  });
+
+/** Patch-tournament body: any subset of name/dates/status, but not empty.
+ * NOTE: no cross-field date check here — a partial patch cannot see the
+ * stored counterpart, and planned dates are informational anyway. */
+export const updateTournamentSchema = z
+  .object({
+    name: tournamentName.optional(),
+    startsAt: tournamentDate.optional(),
+    endsAt: tournamentDate.optional(),
+    status: tournamentStatus.optional(),
+  })
+  .strict()
+  .refine((v) => Object.keys(v).length > 0, { message: 'No fields to update.' });
+
 // ---- Admin: teams & matches ----
 
 // A team is created WITHOUT a group; group is assigned separately.
@@ -243,6 +285,8 @@ export const listUsersQuerySchema = z.object({
 
 // Inferred input types — the schemas above are the single source of truth.
 export type LoginInput = z.infer<typeof loginSchema>;
+export type CreateTournamentInput = z.infer<typeof createTournamentSchema>;
+export type UpdateTournamentInput = z.infer<typeof updateTournamentSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 export type CreateMatchInput = z.infer<typeof createMatchSchema>;

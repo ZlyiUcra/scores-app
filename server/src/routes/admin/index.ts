@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAdmin } from '../../auth.js';
 import { adminUsersRouter } from './users.js';
+import { adminTournamentsRouter } from './tournaments.js';
 import { adminRosterRouter } from './roster.js';
 import { adminPlayersRouter } from './players.js';
 import { adminMatchesRouter } from './matches.js';
@@ -15,6 +16,7 @@ adminRouter.use(requireAdmin);
 // Sub-routers keep their full paths (e.g. '/teams/:id/players' lives in
 // players.ts by domain, not by URL prefix), so mounting is order-agnostic.
 adminRouter.use(adminUsersRouter);
+adminRouter.use(adminTournamentsRouter);
 adminRouter.use(adminRosterRouter);
 adminRouter.use(adminPlayersRouter);
 adminRouter.use(adminMatchesRouter);

@@ -8,7 +8,8 @@ import { adminMutationLimiter } from './mutationLimiter.js';
 
 /** Admin squad management: players are purely descriptive (no effect on
  * standings/seeding), so no bracket rebroadcasts here — squads ride the
- * roster snapshot. Mounted under /api/admin (auth applied in the parent). */
+ * roster snapshot of the owning team's tournament. Mounted under /api/admin
+ * (auth applied in the parent). */
 export const adminPlayersRouter = Router();
 
 // Add a player to a team. The team comes from the URL, never the body.
@@ -19,8 +20,8 @@ adminPlayersRouter.post('/teams/:id/players', adminMutationLimiter, (req, res, n
     return;
   }
   try {
-    const player = createPlayer(req.params.id, parsed.data);
-    broadcastRoster(getRoster()); // squads ride the roster snapshot
+    const { player, tournamentId } = createPlayer(req.params.id, parsed.data);
+    broadcastRoster(tournamentId, getRoster(tournamentId)); // squads ride the roster snapshot
     audit(req.user!.id, 'player.create', player.id);
     res.status(201).json({ player });
   } catch (err) {
@@ -36,8 +37,8 @@ adminPlayersRouter.patch('/players/:id', adminMutationLimiter, (req, res, next) 
     return;
   }
   try {
-    const player = updatePlayer(req.params.id, parsed.data);
-    broadcastRoster(getRoster());
+    const { player, tournamentId } = updatePlayer(req.params.id, parsed.data);
+    broadcastRoster(tournamentId, getRoster(tournamentId));
     audit(req.user!.id, `player.update(${JSON.stringify(parsed.data)})`, req.params.id);
     res.json({ player });
   } catch (err) {
@@ -47,8 +48,8 @@ adminPlayersRouter.patch('/players/:id', adminMutationLimiter, (req, res, next) 
 
 adminPlayersRouter.delete('/players/:id', adminMutationLimiter, (req, res, next) => {
   try {
-    removePlayer(req.params.id);
-    broadcastRoster(getRoster());
+    const tournamentId = removePlayer(req.params.id);
+    broadcastRoster(tournamentId, getRoster(tournamentId));
     audit(req.user!.id, 'player.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {

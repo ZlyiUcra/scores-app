@@ -19,30 +19,30 @@ import { AppError } from '../errors.js';
 // view annotates symbolic seeds with `projected` teams from the current
 // (live) standings. Write validation below resolves STRICTLY — never copy
 // this option into the hypothetical check in updateBracketSlot.
-function resolvedBracket(): BracketView {
+function resolvedBracket(tournamentId: string): BracketView {
   return resolveBracket(
-    groupRepository.list(),
-    teamRepository.listSeed(),
-    matchRepository.list(),
-    bracketRepository.results(),
+    groupRepository.list(tournamentId),
+    teamRepository.listSeed(tournamentId),
+    matchRepository.list(tournamentId),
+    bracketRepository.results(tournamentId),
     { includePreview: true },
   );
 }
 
-/** Full knockout view (formability + resolved matches). */
-export function listBracket(): BracketView {
-  return resolvedBracket();
+/** Full knockout view (formability + resolved matches) of one tournament. */
+export function listBracket(tournamentId: string): BracketView {
+  return resolvedBracket(tournamentId);
 }
 
-/** The slot ids that exist for the current group setup (empty if not formable). */
-function currentSlotIds(): Set<BracketSlotId> {
-  const { formable, size } = computeSize(groupRepository.list(), teamRepository.listSeed());
+/** The slot ids that exist for the tournament's group setup (empty if not formable). */
+function currentSlotIds(tournamentId: string): Set<BracketSlotId> {
+  const { formable, size } = computeSize(groupRepository.list(tournamentId), teamRepository.listSeed(tournamentId));
   if (!formable) return new Set();
   return new Set(generateBracket(size).map((s) => s.slot));
 }
 
-function assertSlot(slotRaw: string): BracketSlotId {
-  if (!currentSlotIds().has(slotRaw)) {
+function assertSlot(tournamentId: string, slotRaw: string): BracketSlotId {
+  if (!currentSlotIds(tournamentId).has(slotRaw)) {
     throw new AppError('NOT_FOUND', `Unknown knockout slot ${slotRaw}.`, 404);
   }
   return slotRaw;
@@ -60,9 +60,9 @@ function assertSlot(slotRaw: string): BracketSlotId {
  * The three override checks below (existence, self-play, hypothetical
  * resolution) are only correct TOGETHER — do not split or share them.
  */
-export function updateBracketSlot(slotRaw: string, input: UpdateBracketInput): BracketView {
-  const slot = assertSlot(slotRaw);
-  const current = bracketRepository.get(slot);
+export function updateBracketSlot(tournamentId: string, slotRaw: string, input: UpdateBracketInput): BracketView {
+  const slot = assertSlot(tournamentId, slotRaw);
+  const current = bracketRepository.get(tournamentId, slot);
   if (input.expectedRev !== undefined && input.expectedRev !== current.rev) {
     throw new AppError(
       'REV_CONFLICT',
@@ -84,12 +84,16 @@ export function updateBracketSlot(slotRaw: string, input: UpdateBracketInput): B
     rev: current.rev + 1,
   };
 
-  // A pin must reference an existing team (team deletion is locked while any
-  // override exists — see hasStarted — so a stored pin can never dangle).
-  if (next.homeOverrideId != null && !teamRepository.get(next.homeOverrideId)) {
+  // A pin must reference an existing team OF THIS TOURNAMENT (team deletion
+  // is locked while any override exists — see hasStarted — so a stored pin
+  // can never dangle). A foreign tournament's team is as nonexistent here as
+  // an unknown id.
+  const homeOverride = next.homeOverrideId != null ? teamRepository.getStored(next.homeOverrideId) : null;
+  if (next.homeOverrideId != null && (!homeOverride || homeOverride.tournamentId !== tournamentId)) {
     throw new AppError('NOT_FOUND', `Override team ${next.homeOverrideId} not found.`, 404);
   }
-  if (next.awayOverrideId != null && !teamRepository.get(next.awayOverrideId)) {
+  const awayOverride = next.awayOverrideId != null ? teamRepository.getStored(next.awayOverrideId) : null;
+  if (next.awayOverrideId != null && (!awayOverride || awayOverride.tournamentId !== tournamentId)) {
     throw new AppError('NOT_FOUND', `Override team ${next.awayOverrideId} not found.`, 404);
   }
   if (next.homeOverrideId != null && next.homeOverrideId === next.awayOverrideId) {
@@ -102,12 +106,12 @@ export function updateBracketSlot(slotRaw: string, input: UpdateBracketInput): B
   // (this also catches the propagated duplicate: a pinned team meeting itself
   // arriving as a derived winner of another slot).
   if (next.status !== 'scheduled') {
-    const hypothetical = bracketRepository.results();
+    const hypothetical = bracketRepository.results(tournamentId);
     hypothetical[slot] = next;
     const view = resolveBracket(
-      groupRepository.list(),
-      teamRepository.listSeed(),
-      matchRepository.list(),
+      groupRepository.list(tournamentId),
+      teamRepository.listSeed(tournamentId),
+      matchRepository.list(tournamentId),
       hypothetical,
     );
     const bm = view.matches.find((b) => b.slot === slot);
@@ -130,12 +134,13 @@ export function updateBracketSlot(slotRaw: string, input: UpdateBracketInput): B
     }
   }
 
-  bracketRepository.save(slot, next);
-  return resolvedBracket();
+  bracketRepository.save(tournamentId, slot, next);
+  return resolvedBracket(tournamentId);
 }
 
-/** Admin: clear every knockout result (needed before changing groups/matches). */
-export function resetBracket(): BracketView {
-  bracketRepository.reset();
-  return resolvedBracket();
+/** Admin: clear a tournament's knockout results (needed before changing its
+ * groups/matches). */
+export function resetBracket(tournamentId: string): BracketView {
+  bracketRepository.reset(tournamentId);
+  return resolvedBracket(tournamentId);
 }

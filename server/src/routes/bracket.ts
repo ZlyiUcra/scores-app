@@ -5,9 +5,12 @@ import { audit } from '../audit.js';
 import { updateBracketSchema } from '../validation.js';
 import { listBracket, resetBracket, updateBracketSlot } from '../services/bracket.js';
 import { broadcastBracket } from '../socket.js';
+import { requestTournamentId } from './scope.js';
 
 /** /api/bracket — knockout view for any logged-in user; slot writes and the
- * full reset are admin-only and re-broadcast the resolved bracket. */
+ * full reset are admin-only and re-broadcast the resolved bracket. All routes
+ * are tournament-scoped (slot ids repeat across tournaments), resolved from
+ * the optional `?tournamentId=` with the default-tournament fallback. */
 export const bracketRouter = Router();
 
 const bracketMutationLimiter = rateLimit({
@@ -19,8 +22,12 @@ const bracketMutationLimiter = rateLimit({
 });
 
 // Read: any logged-in user.
-bracketRouter.get('/', requireAuth, (_req, res) => {
-  res.json({ bracket: listBracket() });
+bracketRouter.get('/', requireAuth, (req, res, next) => {
+  try {
+    res.json({ bracket: listBracket(requestTournamentId(req)) });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Write one slot's result and/or participant pins: admin only. The slot comes
@@ -33,24 +40,26 @@ bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, (req, res, n
     return;
   }
   try {
-    const bracket = updateBracketSlot(req.params.slot, parsed.data);
+    const tournamentId = requestTournamentId(req);
+    const bracket = updateBracketSlot(tournamentId, req.params.slot, parsed.data);
     // Rewiring who plays is the highest-impact bracket write — leave a trace.
     if (parsed.data.homeOverrideId !== undefined || parsed.data.awayOverrideId !== undefined) {
       const pins = { home: parsed.data.homeOverrideId, away: parsed.data.awayOverrideId };
       audit(req.user!.id, `bracket.override(${JSON.stringify(pins)})`, req.params.slot);
     }
-    broadcastBracket(bracket);
+    broadcastBracket(tournamentId, bracket);
     res.json({ bracket });
   } catch (err) {
     next(err);
   }
 });
 
-// Clear all knockout results (unlocks group-match editing).
-bracketRouter.post('/reset', requireAdmin, bracketMutationLimiter, (_req, res, next) => {
+// Clear the tournament's knockout results (unlocks group-match editing).
+bracketRouter.post('/reset', requireAdmin, bracketMutationLimiter, (req, res, next) => {
   try {
-    const bracket = resetBracket();
-    broadcastBracket(bracket);
+    const tournamentId = requestTournamentId(req);
+    const bracket = resetBracket(tournamentId);
+    broadcastBracket(tournamentId, bracket);
     res.json({ bracket });
   } catch (err) {
     next(err);

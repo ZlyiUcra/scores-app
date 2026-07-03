@@ -33,9 +33,10 @@ function getStored(id: string): StoredMatch {
   return m;
 }
 
-/** All matches as resolved DTOs (teams embedded) — the read/broadcast shape. */
-export function listMatches(): Match[] {
-  return matchRepository.list();
+/** A tournament's matches as resolved DTOs (teams embedded) — the
+ * read/broadcast shape. */
+export function listMatches(tournamentId: string): Match[] {
+  return matchRepository.list(tournamentId);
 }
 
 /** One match as a resolved DTO. Throws NOT_FOUND for an unknown id. */
@@ -43,11 +44,12 @@ export function getMatch(id: string): Match {
   return resolveMatch(getStored(id));
 }
 
-/** Apply a partial edit (scores/status/schedule) with optimistic
- * concurrency. Schedule fields join the wire diff only when actually sent. */
-export function applyUpdate(id: string, input: UpdateMatchInput): MatchUpdate {
-  assertBracketNotStarted();
+/** Apply a partial edit (scores/status/schedule) with optimistic concurrency.
+ * Schedule fields join the wire diff only when actually sent. Returns the
+ * owning tournament alongside so routes can scope broadcasts. */
+export function applyUpdate(id: string, input: UpdateMatchInput): { update: MatchUpdate; tournamentId: string } {
   const current = getStored(id);
+  assertBracketNotStarted(current.tournamentId);
   assertFreshRev(current, input.expectedRev);
 
   const next: StoredMatch = {
@@ -63,13 +65,13 @@ export function applyUpdate(id: string, input: UpdateMatchInput): MatchUpdate {
   const update = toUpdate(next);
   if (input.startsAt !== undefined) update.startsAt = next.startsAt;
   if (input.field !== undefined) update.field = next.field;
-  return update;
+  return { update, tournamentId: current.tournamentId };
 }
 
 /** +1 / -1 goal for one side. Never lets a score drop below zero. */
-export function applyGoal(id: string, input: GoalInput): MatchUpdate {
-  assertBracketNotStarted();
+export function applyGoal(id: string, input: GoalInput): { update: MatchUpdate; tournamentId: string } {
   const current = getStored(id);
+  assertBracketNotStarted(current.tournamentId);
   assertFreshRev(current, input.expectedRev);
 
   const field = input.team === 'home' ? 'homeScore' : 'awayScore';
@@ -86,18 +88,18 @@ export function applyGoal(id: string, input: GoalInput): MatchUpdate {
     rev: current.rev + 1,
   };
   matchRepository.save(next);
-  return toUpdate(next);
+  return { update: toUpdate(next), tournamentId: current.tournamentId };
 }
 
-/** Admin: create a new group match from two existing teams. The group is
- * derived from the teams (both must share one). Returns the full Match. */
-export function createMatch(input: CreateMatchInput): Match {
-  assertBracketNotStarted();
+/** Admin: create a new group match from two existing teams. The group — and
+ * through it the tournament — is derived from the teams (both must share one
+ * group). Returns the full Match plus the owning tournament. */
+export function createMatch(input: CreateMatchInput): { match: Match; tournamentId: string } {
   if (input.homeId === input.awayId) {
     throw new AppError('INVALID', 'A team cannot play itself.', 400);
   }
-  const home = teamRepository.get(input.homeId);
-  const away = teamRepository.get(input.awayId);
+  const home = teamRepository.getStored(input.homeId);
+  const away = teamRepository.getStored(input.awayId);
   if (!home) {
     throw new AppError('INVALID', 'Home team does not exist.', 400);
   }
@@ -107,8 +109,10 @@ export function createMatch(input: CreateMatchInput): Match {
   if (!home.groupId || !away.groupId || home.groupId !== away.groupId) {
     throw new AppError('INVALID', 'Both teams must be in the same group.', 400);
   }
+  assertBracketNotStarted(home.tournamentId);
   const stored: StoredMatch = {
     id: crypto.randomUUID(),
+    tournamentId: home.tournamentId,
     group: home.groupId,
     homeId: input.homeId,
     awayId: input.awayId,
@@ -120,13 +124,15 @@ export function createMatch(input: CreateMatchInput): Match {
     rev: 1,
   };
   matchRepository.save(stored);
-  return resolveMatch(stored);
+  return { match: resolveMatch(stored), tournamentId: home.tournamentId };
 }
 
-/** Admin: remove a match. */
-export function removeMatch(id: string): void {
-  assertBracketNotStarted();
-  matchRepository.remove(id); // throws NOT_FOUND if missing
+/** Admin: remove a match. Returns the owning tournament. */
+export function removeMatch(id: string): string {
+  const current = getStored(id);
+  assertBracketNotStarted(current.tournamentId);
+  matchRepository.remove(id);
+  return current.tournamentId;
 }
 
 /** Order-insensitive pair identity: A-B and B-A are the same fixture. */
@@ -164,16 +170,17 @@ function roundRobinPairs(ids: string[]): Array<[string, string]> {
  * half-hour slots from the next full hour, in circle-method round order) and
  * the field is left empty — both meant to be edited afterwards.
  */
-export function generateGroupFixtures(groupId: string): Match[] {
-  assertBracketNotStarted();
-  if (!groupRepository.get(groupId)) {
+export function generateGroupFixtures(groupId: string): { matches: Match[]; tournamentId: string } {
+  const group = groupRepository.getStored(groupId);
+  if (!group) {
     throw new AppError('NOT_FOUND', `Group ${groupId} not found.`, 404);
   }
+  assertBracketNotStarted(group.tournamentId);
 
   // Deterministic seeding order (groupAddedAt, then id) so repeated calls
   // produce the same schedule shape.
   const members = teamRepository
-    .listSeed()
+    .listSeed(group.tournamentId)
     .filter((tm) => tm.groupId === groupId)
     .sort((a, b) => (a.groupAddedAt ?? '').localeCompare(b.groupAddedAt ?? '') || a.id.localeCompare(b.id));
   if (members.length < 2) {
@@ -181,7 +188,7 @@ export function generateGroupFixtures(groupId: string): Match[] {
   }
 
   const covered = new Set<string>();
-  const all = matchRepository.list();
+  const all = matchRepository.list(group.tournamentId);
   for (let i = 0; i < all.length; i++) {
     if (all[i].group === groupId) covered.add(pairKey(all[i].home.id, all[i].away.id));
   }
@@ -196,7 +203,7 @@ export function generateGroupFixtures(groupId: string): Match[] {
     const [homeId, awayId] = pairs[i];
     if (covered.has(pairKey(homeId, awayId))) continue;
     const startsAt = new Date(base.getTime() + created.length * 30 * 60 * 1000).toISOString();
-    created.push(createMatch({ homeId, awayId, startsAt, field: '' }));
+    created.push(createMatch({ homeId, awayId, startsAt, field: '' }).match);
   }
-  return created;
+  return { matches: created, tournamentId: group.tournamentId };
 }

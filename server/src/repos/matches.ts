@@ -1,6 +1,7 @@
 import type { Match, MatchStatus } from '../../../shared/types.js';
 import { AppError } from '../errors.js';
 import { teamRepository } from './teams.js';
+import { tournamentRepository } from './tournaments.js';
 import { db, transaction } from '../db.js';
 
 /**
@@ -11,6 +12,7 @@ import { db, transaction } from '../db.js';
  */
 export interface StoredMatch {
   id: string;
+  tournamentId: string;
   group: string;
   homeId: string;
   awayId: string;
@@ -22,10 +24,11 @@ export interface StoredMatch {
   rev: number;
 }
 
-/** Persistence seam for group matches (SQLite today; swap behind this). */
+/** Persistence seam for group matches (SQLite today; swap behind this).
+ * Matches are tournament-scoped; ids stay GLOBALLY unique. */
 export interface MatchRepository {
-  /** Resolved matches (teams embedded) for read/broadcast. */
-  list(): Match[];
+  /** A tournament's resolved matches (teams embedded) for read/broadcast. */
+  list(tournamentId: string): Match[];
   /** One resolved match, or undefined. */
   get(id: string): Match | undefined;
   /** Raw stored form for mutation logic. */
@@ -36,9 +39,11 @@ export interface MatchRepository {
   remove(id: string): void;
   /** How many stored matches reference a given team (referential-integrity guard). */
   countByTeam(teamId: string): number;
+  /** How many matches a tournament has (tournament-removal guard). */
+  countByTournament(tournamentId: string): number;
 }
 
-function seedMatches(): StoredMatch[] {
+function seedMatches(tournamentId: string): StoredMatch[] {
   const now = Date.now();
   const iso = (offsetMin: number) => new Date(now + offsetMin * 60_000).toISOString();
   let n = 0;
@@ -53,6 +58,7 @@ function seedMatches(): StoredMatch[] {
     field: string,
   ): StoredMatch => ({
     id: `m${++n}`,
+    tournamentId,
     group,
     homeId,
     awayId,
@@ -120,10 +126,11 @@ class JsonFileRepository implements MatchRepository {
   private load(): void {
     const rows = db
       .prepare(
-        'SELECT id, "group" AS grp, homeId, awayId, homeScore, awayScore, status, startsAt, field, rev FROM matches',
+        'SELECT id, tournamentId, "group" AS grp, homeId, awayId, homeScore, awayScore, status, startsAt, field, rev FROM matches',
       )
       .all() as Array<{
       id: string;
+      tournamentId: string;
       grp: string;
       homeId: string;
       awayId: string;
@@ -139,11 +146,10 @@ class JsonFileRepository implements MatchRepository {
       // (teams created by the admin, demo ones deleted) an empty match table
       // must STAY empty — seeding would point at missing teams and crash
       // every read until the database is wiped.
-      const demoTeams = seedMatches().every(
-        (m) => teamRepository.get(m.homeId) && teamRepository.get(m.awayId),
-      );
+      const seed = seedMatches(tournamentRepository.list()[0].id);
+      const demoTeams = seed.every((m) => teamRepository.get(m.homeId) && teamRepository.get(m.awayId));
       if (demoTeams) {
-        this.index(seedMatches());
+        this.index(seed);
         this.persist();
       }
       return;
@@ -151,6 +157,7 @@ class JsonFileRepository implements MatchRepository {
     this.index(
       rows.map((r) => ({
         id: r.id,
+        tournamentId: r.tournamentId,
         group: r.grp,
         homeId: r.homeId,
         awayId: r.awayId,
@@ -168,17 +175,19 @@ class JsonFileRepository implements MatchRepository {
     transaction(() => {
       db.exec('DELETE FROM matches');
       const ins = db.prepare(
-        'INSERT INTO matches (id, "group", homeId, awayId, homeScore, awayScore, status, startsAt, field, rev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO matches (id, tournamentId, "group", homeId, awayId, homeScore, awayScore, status, startsAt, field, rev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       );
       for (const m of this.matches.values()) {
-        ins.run(m.id, m.group, m.homeId, m.awayId, m.homeScore, m.awayScore, m.status, m.startsAt, m.field, m.rev);
+        ins.run(m.id, m.tournamentId, m.group, m.homeId, m.awayId, m.homeScore, m.awayScore, m.status, m.startsAt, m.field, m.rev);
       }
     });
   }
 
-  list(): Match[] {
+  list(tournamentId: string): Match[] {
     const out: Match[] = [];
-    for (const m of this.matches.values()) out.push(resolveMatch(m));
+    for (const m of this.matches.values()) {
+      if (m.tournamentId === tournamentId) out.push(resolveMatch(m));
+    }
     return out;
   }
 
@@ -222,6 +231,12 @@ class JsonFileRepository implements MatchRepository {
     for (const m of this.matches.values()) {
       if (m.homeId === teamId || m.awayId === teamId) count++;
     }
+    return count;
+  }
+
+  countByTournament(tournamentId: string): number {
+    let count = 0;
+    for (const m of this.matches.values()) if (m.tournamentId === tournamentId) count++;
     return count;
   }
 }

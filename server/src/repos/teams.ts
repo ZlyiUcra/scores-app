@@ -3,10 +3,13 @@ import type { Team } from '../../../shared/types.js';
 import type { SeedTeam } from '../../../shared/tournament.js';
 import { AppError } from '../errors.js';
 import { db, transaction } from '../db.js';
+import { tournamentRepository } from './tournaments.js';
 
-/** Stored team: identity + membership FK + the server-only seeding key. */
-interface StoredTeam {
+/** Stored team: identity + owning tournament + membership FK + the
+ * server-only seeding key. */
+export interface StoredTeam {
   id: string;
+  tournamentId: string;
   name: string;
   shortName: string;
   groupId: string | null;
@@ -17,22 +20,25 @@ interface StoredTeam {
 
 /**
  * Team registry — the single source of truth for team identity and group
- * membership. Teams are created WITHOUT a group and added to one later, which
- * stamps `groupAddedAt` (the seeding key).
+ * membership, scoped to a tournament (teams never move between tournaments).
+ * Teams are created WITHOUT a group and added to one later, which stamps
+ * `groupAddedAt` (the seeding key). Team ids stay GLOBALLY unique.
  */
 export interface TeamRepository {
-  /** Public DTO (no groupAddedAt). */
-  list(): Team[];
+  /** A tournament's teams as public DTOs (no groupAddedAt). */
+  list(tournamentId: string): Team[];
   /** Server-only view carrying the seeding key, for bracket resolution. */
-  listSeed(): SeedTeam[];
+  listSeed(tournamentId: string): SeedTeam[];
   /** Public DTO by id, or undefined. */
   get(id: string): Team | undefined;
-  /** Raw stored form (incl. seeding key) for service-side mutation logic. */
+  /** Raw stored form (incl. tournament + seeding key) for service logic. */
   getStored(id: string): StoredTeam | undefined;
   /** How many teams currently sit in a group (max-per-group guard). */
   countInGroup(groupId: string): number;
+  /** How many teams a tournament has (tournament-removal guard). */
+  countByTournament(tournamentId: string): number;
   /** Create an UNASSIGNED team (groupId/groupAddedAt start null). */
-  create(input: { name: string; shortName: string }): Team;
+  create(tournamentId: string, input: { name: string; shortName: string }): Team;
   /** Rename a team (name and/or code). Membership is untouched. */
   update(id: string, patch: { name?: string; shortName?: string }): Team;
   /** Set/clear a team's group. `groupAddedAt` is server-set here (null clears). */
@@ -44,11 +50,12 @@ export interface TeamRepository {
 
 /** Seed a small demo (3 groups x 3 teams) so the app shows something on boot.
  * `groupAddedAt` increments so seeding order is deterministic. */
-function seedTeams(): StoredTeam[] {
+function seedTeams(tournamentId: string): StoredTeam[] {
   const now = Date.now();
   const iso = (i: number) => new Date(now + i).toISOString();
   const mk = (id: string, name: string, shortName: string, groupId: string, order: number): StoredTeam => ({
     id,
+    tournamentId,
     name,
     shortName,
     groupId,
@@ -85,16 +92,18 @@ class SqliteTeamRepository implements TeamRepository {
 
   private load(): void {
     const rows = db
-      .prepare('SELECT id, name, shortName, groupId, groupAddedAt FROM teams')
+      .prepare('SELECT id, tournamentId, name, shortName, groupId, groupAddedAt FROM teams')
       .all() as Array<{
       id: string;
+      tournamentId: string;
       name: string;
       shortName: string;
       groupId: string | null;
       groupAddedAt: string | null;
     }>;
     if (rows.length === 0) {
-      this.index(seedTeams());
+      // Demo data belongs to the boot-guaranteed default tournament (db.ts).
+      this.index(seedTeams(tournamentRepository.list()[0].id));
       this.persist();
       return;
     }
@@ -104,17 +113,25 @@ class SqliteTeamRepository implements TeamRepository {
   private persist(): void {
     transaction(() => {
       db.exec('DELETE FROM teams');
-      const ins = db.prepare('INSERT INTO teams (id, name, shortName, groupId, groupAddedAt) VALUES (?, ?, ?, ?, ?)');
-      for (const t of this.byId.values()) ins.run(t.id, t.name, t.shortName, t.groupId, t.groupAddedAt);
+      const ins = db.prepare(
+        'INSERT INTO teams (id, tournamentId, name, shortName, groupId, groupAddedAt) VALUES (?, ?, ?, ?, ?, ?)',
+      );
+      for (const t of this.byId.values()) ins.run(t.id, t.tournamentId, t.name, t.shortName, t.groupId, t.groupAddedAt);
     });
   }
 
-  list(): Team[] {
-    return Array.from(this.byId.values()).map(toDto);
+  list(tournamentId: string): Team[] {
+    const out: Team[] = [];
+    for (const t of this.byId.values()) if (t.tournamentId === tournamentId) out.push(toDto(t));
+    return out;
   }
 
-  listSeed(): SeedTeam[] {
-    return Array.from(this.byId.values()).map((t) => ({ ...toDto(t), groupAddedAt: t.groupAddedAt }));
+  listSeed(tournamentId: string): SeedTeam[] {
+    const out: SeedTeam[] = [];
+    for (const t of this.byId.values()) {
+      if (t.tournamentId === tournamentId) out.push({ ...toDto(t), groupAddedAt: t.groupAddedAt });
+    }
+    return out;
   }
 
   get(id: string): Team | undefined {
@@ -132,9 +149,16 @@ class SqliteTeamRepository implements TeamRepository {
     return n;
   }
 
-  create(input: { name: string; shortName: string }): Team {
+  countByTournament(tournamentId: string): number {
+    let n = 0;
+    for (const t of this.byId.values()) if (t.tournamentId === tournamentId) n++;
+    return n;
+  }
+
+  create(tournamentId: string, input: { name: string; shortName: string }): Team {
     const team: StoredTeam = {
       id: crypto.randomUUID(),
+      tournamentId,
       name: input.name.trim(),
       shortName: input.shortName.trim().toUpperCase(),
       groupId: null,

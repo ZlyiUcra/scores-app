@@ -4,15 +4,22 @@ import { goalSchema, updateMatchSchema } from '../validation.js';
 import { applyGoal, applyUpdate, getMatch, listMatches } from '../services/matches.js';
 import { listBracket } from '../services/bracket.js';
 import { broadcastBracket, broadcastMatchUpdate } from '../socket.js';
+import { requestTournamentId } from './scope.js';
 
 /** /api/matches — reads for any logged-in user; live score/status edits are
  * admin-only and each write broadcasts a compact diff plus a bracket refresh
- * (a group result can re-seed the knockout). */
+ * (a group result can re-seed the knockout). The list is tournament-scoped;
+ * id-addressed routes need no scope (ids are global) and derive the
+ * tournament for their broadcasts from the match itself. */
 export const matchesRouter = Router();
 
 // Reads require a logged-in user (any role).
-matchesRouter.get('/', requireAuth, (_req, res) => {
-  res.json({ matches: listMatches() });
+matchesRouter.get('/', requireAuth, (req, res, next) => {
+  try {
+    res.json({ matches: listMatches(requestTournamentId(req)) });
+  } catch (err) {
+    next(err);
+  }
 });
 
 matchesRouter.get('/:id', requireAuth, (req, res, next) => {
@@ -32,10 +39,10 @@ matchesRouter.patch('/:id', requireAdmin, (req, res, next) => {
     return;
   }
   try {
-    const update = applyUpdate(req.params.id, parsed.data);
-    broadcastMatchUpdate(update);
+    const { update, tournamentId } = applyUpdate(req.params.id, parsed.data);
+    broadcastMatchUpdate(tournamentId, update);
     // A group result may complete a group and re-seed the bracket.
-    broadcastBracket(listBracket());
+    broadcastBracket(tournamentId, listBracket(tournamentId));
     res.json({ update });
   } catch (err) {
     next(err);
@@ -49,9 +56,9 @@ matchesRouter.post('/:id/goal', requireAdmin, (req, res, next) => {
     return;
   }
   try {
-    const update = applyGoal(req.params.id, parsed.data);
-    broadcastMatchUpdate(update);
-    broadcastBracket(listBracket());
+    const { update, tournamentId } = applyGoal(req.params.id, parsed.data);
+    broadcastMatchUpdate(tournamentId, update);
+    broadcastBracket(tournamentId, listBracket(tournamentId));
     res.json({ update });
   } catch (err) {
     next(err);

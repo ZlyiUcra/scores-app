@@ -13,8 +13,8 @@ import { AppError } from '../errors.js';
  * This is the ONE invariant shared by the match and roster services; it stays
  * a leaf module (repos-only imports) so neither service has to import a peer.
  */
-export function assertBracketNotStarted(): void {
-  if (bracketRepository.hasStarted()) {
+export function assertBracketNotStarted(tournamentId: string): void {
+  if (bracketRepository.hasStarted(tournamentId)) {
     throw new AppError(
       'BRACKET_STARTED',
       'Reset the knockout stage before changing groups, teams or group matches.',

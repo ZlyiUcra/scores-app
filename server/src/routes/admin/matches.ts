@@ -7,7 +7,8 @@ import { broadcastBracket, broadcastMatchCreated, broadcastMatchRemoved } from '
 import { adminMutationLimiter } from './mutationLimiter.js';
 
 /** Admin match lifecycle: create/delete only — score edits stay on the public
- * /api/matches routes. Mounted under /api/admin (auth applied in the parent). */
+ * /api/matches routes. The tournament is derived from the match's teams, never
+ * supplied. Mounted under /api/admin (auth applied in the parent). */
 export const adminMatchesRouter = Router();
 
 adminMatchesRouter.post('/matches', adminMutationLimiter, (req, res, next) => {
@@ -17,9 +18,9 @@ adminMatchesRouter.post('/matches', adminMutationLimiter, (req, res, next) => {
     return;
   }
   try {
-    const match = createMatch(parsed.data);
-    broadcastMatchCreated(match); // appears live for everyone
-    broadcastBracket(listBracket()); // a new group match can change seeding
+    const { match, tournamentId } = createMatch(parsed.data);
+    broadcastMatchCreated(tournamentId, match); // appears live for everyone
+    broadcastBracket(tournamentId, listBracket(tournamentId)); // a new group match can change seeding
     audit(req.user!.id, 'match.create', match.id);
     res.status(201).json({ match });
   } catch (err) {
@@ -29,9 +30,9 @@ adminMatchesRouter.post('/matches', adminMutationLimiter, (req, res, next) => {
 
 adminMatchesRouter.delete('/matches/:id', adminMutationLimiter, (req, res, next) => {
   try {
-    removeMatch(req.params.id);
-    broadcastMatchRemoved(req.params.id);
-    broadcastBracket(listBracket());
+    const tournamentId = removeMatch(req.params.id);
+    broadcastMatchRemoved(tournamentId, req.params.id);
+    broadcastBracket(tournamentId, listBracket(tournamentId));
     audit(req.user!.id, 'match.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {

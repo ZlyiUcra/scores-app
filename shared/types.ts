@@ -16,6 +16,23 @@ export type Stage = 'group' | 'knockout';
  * on the wire. `r32` is the largest supported (bracket size capped at 32). */
 export type Round = 'r32' | 'r16' | 'qf' | 'sf' | 'final' | 'third';
 
+/** Tournament lifecycle. Set explicitly by an admin — dates are informational
+ * (a tournament may start late or run over), the status is the truth. */
+export type TournamentStatus = 'upcoming' | 'active' | 'finished';
+
+/** A tournament — the top-level container every group, team, match and
+ * bracket slot belongs to. Groups/teams/matches never move between
+ * tournaments; ids stay globally unique so entity URLs need no tournament. */
+export interface Tournament {
+  id: string;
+  name: string;
+  /** ISO date (YYYY-MM-DD) the tournament is planned to start, or null. */
+  startsAt: string | null;
+  /** ISO date the tournament is planned to end, or null. */
+  endsAt: string | null;
+  status: TournamentStatus;
+}
+
 /** A tournament group — first-class entity now (admin-created). */
 export interface Group {
   id: string;

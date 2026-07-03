@@ -16,17 +16,24 @@ import {
 } from '../../services/roster.js';
 import { listBracket } from '../../services/bracket.js';
 import { broadcastBracket, broadcastMatchSnapshot, broadcastRoster } from '../../socket.js';
+import { requestTournamentId } from '../scope.js';
 import { adminMutationLimiter } from './mutationLimiter.js';
 
 /** Admin roster management: groups, teams and group membership — the entities
- * bracket seeding is derived from, hence the bracket rebroadcasts.
- * Mounted under /api/admin (auth applied once in the parent router). */
+ * bracket seeding is derived from, hence the bracket rebroadcasts. Creations
+ * and listings are tournament-scoped (`?tournamentId=`, default fallback);
+ * id-addressed mutations derive the tournament from the entity so broadcasts
+ * always land in the right room. Mounted under /api/admin (auth in parent). */
 export const adminRosterRouter = Router();
 
 // ---- Groups ----
 
-adminRosterRouter.get('/groups', (_req, res) => {
-  res.json({ groups: listGroups() });
+adminRosterRouter.get('/groups', (req, res, next) => {
+  try {
+    res.json({ groups: listGroups(requestTournamentId(req)) });
+  } catch (err) {
+    next(err);
+  }
 });
 
 adminRosterRouter.post('/groups', adminMutationLimiter, (req, res, next) => {
@@ -36,9 +43,10 @@ adminRosterRouter.post('/groups', adminMutationLimiter, (req, res, next) => {
     return;
   }
   try {
-    const group = createGroup(parsed.data.name);
-    broadcastRoster(getRoster());
-    broadcastBracket(listBracket());
+    const tournamentId = requestTournamentId(req);
+    const group = createGroup(tournamentId, parsed.data.name);
+    broadcastRoster(tournamentId, getRoster(tournamentId));
+    broadcastBracket(tournamentId, listBracket(tournamentId));
     audit(req.user!.id, 'group.create', group.id);
     res.status(201).json({ group });
   } catch (err) {
@@ -54,8 +62,8 @@ adminRosterRouter.patch('/groups/:id', adminMutationLimiter, (req, res, next) =>
     return;
   }
   try {
-    const group = updateGroup(req.params.id, parsed.data.name);
-    broadcastRoster(getRoster()); // group name shows in standings + match rows
+    const { group, tournamentId } = updateGroup(req.params.id, parsed.data.name);
+    broadcastRoster(tournamentId, getRoster(tournamentId)); // group name shows in standings + match rows
     audit(req.user!.id, 'group.update', req.params.id);
     res.json({ group });
   } catch (err) {
@@ -65,9 +73,9 @@ adminRosterRouter.patch('/groups/:id', adminMutationLimiter, (req, res, next) =>
 
 adminRosterRouter.delete('/groups/:id', adminMutationLimiter, (req, res, next) => {
   try {
-    removeGroup(req.params.id); // 409 if it still has teams / bracket started
-    broadcastRoster(getRoster());
-    broadcastBracket(listBracket());
+    const tournamentId = removeGroup(req.params.id); // 409 if it still has teams / bracket started
+    broadcastRoster(tournamentId, getRoster(tournamentId));
+    broadcastBracket(tournamentId, listBracket(tournamentId));
     audit(req.user!.id, 'group.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {
@@ -78,8 +86,8 @@ adminRosterRouter.delete('/groups/:id', adminMutationLimiter, (req, res, next) =
 // Generate the group's missing round-robin fixtures (idempotent top-up).
 adminRosterRouter.post('/groups/:id/fixtures', adminMutationLimiter, (req, res, next) => {
   try {
-    const created = generateGroupFixtures(req.params.id);
-    broadcastMatchSnapshot(listMatches()); // batch create -> one snapshot
+    const { matches: created, tournamentId } = generateGroupFixtures(req.params.id);
+    broadcastMatchSnapshot(tournamentId, listMatches(tournamentId)); // batch create -> one snapshot
     audit(req.user!.id, `group.fixtures(created=${created.length})`, req.params.id);
     res.json({ matches: created });
   } catch (err) {
@@ -89,8 +97,12 @@ adminRosterRouter.post('/groups/:id/fixtures', adminMutationLimiter, (req, res, 
 
 // ---- Teams ----
 
-adminRosterRouter.get('/teams', (_req, res) => {
-  res.json({ teams: listTeams() });
+adminRosterRouter.get('/teams', (req, res, next) => {
+  try {
+    res.json({ teams: listTeams(requestTournamentId(req)) });
+  } catch (err) {
+    next(err);
+  }
 });
 
 adminRosterRouter.post('/teams', adminMutationLimiter, (req, res, next) => {
@@ -100,8 +112,9 @@ adminRosterRouter.post('/teams', adminMutationLimiter, (req, res, next) => {
     return;
   }
   try {
-    const team = createTeam(parsed.data);
-    broadcastRoster(getRoster());
+    const tournamentId = requestTournamentId(req);
+    const team = createTeam(tournamentId, parsed.data);
+    broadcastRoster(tournamentId, getRoster(tournamentId));
     audit(req.user!.id, 'team.create', team.id);
     res.status(201).json({ team });
   } catch (err) {
@@ -117,10 +130,10 @@ adminRosterRouter.patch('/teams/:id', adminMutationLimiter, (req, res, next) => 
     return;
   }
   try {
-    const team = updateTeam(req.params.id, parsed.data);
-    broadcastRoster(getRoster()); // standings names
-    broadcastMatchSnapshot(listMatches()); // names embedded in match DTOs
-    broadcastBracket(listBracket()); // names embedded in resolved bracket
+    const { team, tournamentId } = updateTeam(req.params.id, parsed.data);
+    broadcastRoster(tournamentId, getRoster(tournamentId)); // standings names
+    broadcastMatchSnapshot(tournamentId, listMatches(tournamentId)); // names embedded in match DTOs
+    broadcastBracket(tournamentId, listBracket(tournamentId)); // names embedded in resolved bracket
     audit(req.user!.id, `team.update(${JSON.stringify(parsed.data)})`, req.params.id);
     res.json({ team });
   } catch (err) {
@@ -136,9 +149,9 @@ adminRosterRouter.patch('/teams/:id/group', adminMutationLimiter, (req, res, nex
     return;
   }
   try {
-    const team = assignTeam(req.params.id, parsed.data);
-    broadcastRoster(getRoster());
-    broadcastBracket(listBracket()); // membership changes bracket seeding/size
+    const { team, tournamentId } = assignTeam(req.params.id, parsed.data);
+    broadcastRoster(tournamentId, getRoster(tournamentId));
+    broadcastBracket(tournamentId, listBracket(tournamentId)); // membership changes bracket seeding/size
     audit(req.user!.id, `team.assign(${JSON.stringify(parsed.data)})`, req.params.id);
     res.json({ team });
   } catch (err) {
@@ -148,9 +161,9 @@ adminRosterRouter.patch('/teams/:id/group', adminMutationLimiter, (req, res, nex
 
 adminRosterRouter.delete('/teams/:id', adminMutationLimiter, (req, res, next) => {
   try {
-    removeTeam(req.params.id); // 409 if referenced by a match / bracket started
-    broadcastRoster(getRoster());
-    broadcastBracket(listBracket());
+    const tournamentId = removeTeam(req.params.id); // 409 if referenced by a match / bracket started
+    broadcastRoster(tournamentId, getRoster(tournamentId));
+    broadcastBracket(tournamentId, listBracket(tournamentId));
     audit(req.user!.id, 'team.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {

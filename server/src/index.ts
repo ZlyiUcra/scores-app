@@ -6,6 +6,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import cookieParser from 'cookie-parser';
 import { config } from './config.js';
 import { authRouter } from './routes/auth.js';
+import { tournamentsRouter } from './routes/tournaments.js';
 import { matchesRouter } from './routes/matches.js';
 import { bracketRouter } from './routes/bracket.js';
 import { rosterRouter } from './routes/roster.js';
@@ -37,6 +38,7 @@ if (config.isProd) {
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRouter);
+app.use('/api/tournaments', tournamentsRouter);
 app.use('/api/matches', matchesRouter);
 app.use('/api/bracket', bracketRouter);
 app.use('/api/roster', rosterRouter);

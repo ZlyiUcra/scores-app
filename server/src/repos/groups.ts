@@ -2,23 +2,31 @@ import crypto from 'node:crypto';
 import type { Group } from '../../../shared/types.js';
 import { AppError } from '../errors.js';
 import { db, transaction } from '../db.js';
+import { tournamentRepository } from './tournaments.js';
 
-/** Stored group carries a creation timestamp (for stable list ordering). */
-interface StoredGroup extends Group {
+/** Stored group: the public DTO plus its owning tournament and a creation
+ * timestamp (for stable list ordering). */
+export interface StoredGroup extends Group {
+  tournamentId: string;
   createdAt: string;
 }
 
 /**
- * Group registry — first-class entity, admin-created. Teams reference a group by
- * id (see teams.ts). Kept deliberately small: create / list / remove.
+ * Group registry — first-class entity, admin-created, scoped to a tournament.
+ * Teams reference a group by id (see teams.ts). Group ids stay GLOBALLY
+ * unique, so id-addressed reads need no tournament.
  */
 export interface GroupRepository {
-  /** All groups in stable creation order (createdAt, then id). */
-  list(): Group[];
+  /** A tournament's groups in stable creation order (createdAt, then id). */
+  list(tournamentId: string): Group[];
   /** Group by id, or undefined. */
   get(id: string): Group | undefined;
+  /** Raw stored form (incl. tournamentId) for service-side scoping logic. */
+  getStored(id: string): StoredGroup | undefined;
+  /** How many groups a tournament has (tournament-removal guard). */
+  countByTournament(tournamentId: string): number;
   /** Create a group with a fresh uuid; name arrives pre-validated. */
-  create(name: string): Group;
+  create(tournamentId: string, name: string): Group;
   /** Rename a group (cosmetic — id-based references stay valid). */
   update(id: string, name: string): Group;
   /** Delete a group. Emptiness (no member teams) is the SERVICE's guard. */
@@ -26,13 +34,13 @@ export interface GroupRepository {
 }
 
 /** Seed a small demo tournament so the app shows something on first boot. */
-function seedGroups(): StoredGroup[] {
+function seedGroups(tournamentId: string): StoredGroup[] {
   const now = Date.now();
   const iso = (offsetMs: number) => new Date(now + offsetMs).toISOString();
   return [
-    { id: 'gA', name: 'Group A', createdAt: iso(0) },
-    { id: 'gB', name: 'Group B', createdAt: iso(1) },
-    { id: 'gC', name: 'Group C', createdAt: iso(2) },
+    { id: 'gA', tournamentId, name: 'Group A', createdAt: iso(0) },
+    { id: 'gB', tournamentId, name: 'Group B', createdAt: iso(1) },
+    { id: 'gC', tournamentId, name: 'Group C', createdAt: iso(2) },
   ];
 }
 
@@ -52,10 +60,11 @@ class SqliteGroupRepository implements GroupRepository {
 
   private load(): void {
     const rows = db
-      .prepare('SELECT id, name, createdAt FROM groups')
-      .all() as Array<{ id: string; name: string; createdAt: string }>;
+      .prepare('SELECT id, tournamentId, name, createdAt FROM groups')
+      .all() as Array<{ id: string; tournamentId: string; name: string; createdAt: string }>;
     if (rows.length === 0) {
-      this.index(seedGroups());
+      // Demo data belongs to the boot-guaranteed default tournament (db.ts).
+      this.index(seedGroups(tournamentRepository.list()[0].id));
       this.persist();
       return;
     }
@@ -65,13 +74,17 @@ class SqliteGroupRepository implements GroupRepository {
   private persist(): void {
     transaction(() => {
       db.exec('DELETE FROM groups');
-      const ins = db.prepare('INSERT INTO groups (id, name, createdAt) VALUES (?, ?, ?)');
-      for (const g of this.byId.values()) ins.run(g.id, g.name, g.createdAt);
+      const ins = db.prepare('INSERT INTO groups (id, tournamentId, name, createdAt) VALUES (?, ?, ?, ?)');
+      for (const g of this.byId.values()) ins.run(g.id, g.tournamentId, g.name, g.createdAt);
     });
   }
 
-  list(): Group[] {
-    return Array.from(this.byId.values()).map((g) => ({ id: g.id, name: g.name }));
+  list(tournamentId: string): Group[] {
+    const out: Group[] = [];
+    for (const g of this.byId.values()) {
+      if (g.tournamentId === tournamentId) out.push({ id: g.id, name: g.name });
+    }
+    return out;
   }
 
   get(id: string): Group | undefined {
@@ -79,8 +92,18 @@ class SqliteGroupRepository implements GroupRepository {
     return g ? { id: g.id, name: g.name } : undefined;
   }
 
-  create(name: string): Group {
-    const group: StoredGroup = { id: crypto.randomUUID(), name: name.trim(), createdAt: new Date().toISOString() };
+  getStored(id: string): StoredGroup | undefined {
+    return this.byId.get(id);
+  }
+
+  countByTournament(tournamentId: string): number {
+    let n = 0;
+    for (const g of this.byId.values()) if (g.tournamentId === tournamentId) n++;
+    return n;
+  }
+
+  create(tournamentId: string, name: string): Group {
+    const group: StoredGroup = { id: crypto.randomUUID(), tournamentId, name: name.trim(), createdAt: new Date().toISOString() };
     this.byId.set(group.id, group);
     try {
       this.persist();
