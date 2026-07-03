@@ -134,8 +134,17 @@ class JsonFileRepository implements MatchRepository {
       rev: number;
     }>;
     if (rows.length === 0) {
-      this.index(seedMatches());
-      this.persist();
+      // Demo fixtures reference the demo teams t1..t9. On a customized roster
+      // (teams created by the admin, demo ones deleted) an empty match table
+      // must STAY empty — seeding would point at missing teams and crash
+      // every read until the database is wiped.
+      const demoTeams = seedMatches().every(
+        (m) => teamRepository.get(m.homeId) && teamRepository.get(m.awayId),
+      );
+      if (demoTeams) {
+        this.index(seedMatches());
+        this.persist();
+      }
       return;
     }
     this.index(
