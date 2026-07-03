@@ -178,7 +178,7 @@
     "manual": "Atribuído manualmente",
     "previewNote": "Previsão: as equipas entre parênteses são projeções dos resultados atuais e ainda podem mudar.",
     "empty": "O bracket aparece assim que os grupos estiverem definidos.",
-    "note": "O bracket comporta a maior potência de dois que o número de equipas preenche. As posições apuram-se por ordem (todos os 1ºs, todos os 2ºs, ...); as últimas vagas disputam-se dentro de uma única posição entre grupos. Um jogo empatado é decidido nas grandes penalidades.",
+    "note": "O bracket comporta a maior potência de dois ABAIXO do número de equipas, por isso a fase de grupos elimina sempre alguém. As posições apuram-se por ordem (todos os 1ºs, todos os 2ºs, ...); as últimas vagas disputam-se dentro de uma única posição entre grupos. Um jogo empatado é decidido nas grandes penalidades.",
     "reason": {
       "noGroups": "Crie pelo menos um grupo para formar o bracket.",
       "groupTooSmall": "Cada grupo precisa de pelo menos 2 equipas.",

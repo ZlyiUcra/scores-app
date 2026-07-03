@@ -72,10 +72,10 @@ export function emptyBracketResult(): BracketResult {
   };
 }
 
-/** Largest power of 2 <= n (n >= 1). */
-function floorPow2(n: number): number {
+/** Largest power of 2 STRICTLY BELOW n (16 -> 8, 35 -> 32, 2 -> 1). */
+function pow2Below(n: number): number {
   let p = 1;
-  while (p * 2 <= n) p *= 2;
+  while (p * 2 < n) p *= 2;
   return p;
 }
 
@@ -255,9 +255,10 @@ function isGroupComplete(groupId: string, teams: Team[], matches: Match[]): bool
 }
 
 /** Can a bracket be formed from the current groups, and at what size? The
- * bracket holds the LARGEST power of two that the total team count can fill
- * (35 teams -> 32 qualify, 3 are eliminated). Depends only on group count and
- * team counts (NOT results). */
+ * group stage must eliminate someone, so the bracket holds the largest power
+ * of two STRICTLY BELOW the total team count (35 teams -> 32 qualify; an
+ * exact 16 -> 8, never everyone). Depends only on group count and team
+ * counts (NOT results). */
 export function computeSize(
   groups: Group[],
   teams: Team[],
@@ -274,7 +275,9 @@ export function computeSize(
     total += n;
   }
 
-  const size = floorPow2(total);
+  const size = pow2Below(total);
+  // Only one group of exactly two teams lands here — nothing left to eliminate.
+  if (size < 2) return { formable: false, reason: 'groupTooSmall', size: 0 };
   if (size > TOURNAMENT_FORMAT.maxBracketSize) return { formable: false, reason: 'tooManyGroups', size };
 
   return { formable: true, reason: null, size };

@@ -58,8 +58,9 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
       <section className="card">
         <h3>Eliminatórias</h3>
         <p>
-          O bracket comporta a maior potência de dois que o número de equipas preenche
-          (por exemplo, 35 equipas dão um bracket de 32 e 3 ficam de fora). As posições
+          O bracket comporta a maior potência de dois abaixo do número de equipas, por
+          isso a fase de grupos elimina sempre alguém: 35 equipas dão um bracket de 32
+          (3 ficam de fora) e 16 equipas exatas dão um bracket de 8. As posições
           apuram-se por ordem - todos os 1ºs, todos os 2ºs, e assim por diante - e as
           últimas vagas decidem-se entre as equipas de uma única posição de grupos
           diferentes.

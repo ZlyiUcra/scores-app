@@ -56,10 +56,11 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
       <section className="card">
         <h3>Knockouts</h3>
         <p>
-          The bracket holds the largest power of two that the number of teams can fill
-          (for example, 35 teams make a 32-team bracket and 3 are eliminated). Group places
-          qualify in order - all winners, all runners-up, and so on - and the last spots
-          are decided among the teams of a single place across groups.
+          The bracket holds the largest power of two below the number of teams, so the
+          group stage always eliminates someone: 35 teams make a 32-team bracket (3 are
+          eliminated), and an exact 16 makes an 8-team bracket. Group places qualify in
+          order - all winners, all runners-up, and so on - and the last spots are decided
+          among the teams of a single place across groups.
         </p>
         <ul>
           <li>

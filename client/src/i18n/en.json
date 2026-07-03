@@ -178,7 +178,7 @@
     "manual": "Manually assigned",
     "previewNote": "Preview: teams in parentheses are projected from the current results and may still change.",
     "empty": "The bracket appears once the group stage is set up.",
-    "note": "The bracket holds the largest power of two the team count can fill. Group places qualify in order (all 1sts, all 2nds, ...); the last spots are contested within a single place across groups. A level knockout match is decided on penalties.",
+    "note": "The bracket holds the largest power of two below the team count, so the group stage always eliminates someone. Group places qualify in order (all 1sts, all 2nds, ...); the last spots are contested within a single place across groups. A level knockout match is decided on penalties.",
     "reason": {
       "noGroups": "Create at least one group to form a bracket.",
       "groupTooSmall": "Every group needs at least 2 teams.",
