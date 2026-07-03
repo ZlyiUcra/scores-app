@@ -4,6 +4,7 @@ import { adminApi } from '../api/admin';
 import { ApiError } from '../api/client';
 import { participantName } from '../lib/bracketLabels';
 import { useI18n } from '../i18n';
+import { useTournament } from '../tournament/TournamentScope';
 import { useRosterStore } from '../stores/rosterStore';
 
 /** ISO -> value for <input type="datetime-local"> in the local timezone. */
@@ -29,6 +30,7 @@ function overrideValue(p: BracketParticipant): string {
  */
 export function BracketSlotControls({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
+  const { tournament } = useTournament();
   const ready = 'team' in m.home && 'team' in m.away;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -65,7 +67,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
   }
 
   const patch = (p: Omit<UpdateBracketRequest, 'expectedRev'>) =>
-    run(() => adminApi.updateBracketSlot(m.slot, { ...p, expectedRev: m.rev }));
+    run(() => adminApi.updateBracketSlot(tournament.id, m.slot, { ...p, expectedRev: m.rev }));
 
   // Scoring a scheduled game also starts it — one click instead of two.
   const goal = (side: 'home' | 'away', delta: 1 | -1) =>

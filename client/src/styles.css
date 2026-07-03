@@ -123,6 +123,10 @@ body {
 .chip--finished { background: rgba(139,148,158,0.15); color: var(--muted); }
 .chip--live { background: rgba(248,81,73,0.15); color: var(--danger); }
 .chip--scheduled { background: rgba(47,129,247,0.15); color: var(--accent-2); }
+/* Tournament status pills: active = green, upcoming = blue, finished reuses
+ * the quiet grey above. */
+.chip--active { background: rgba(63,185,80,0.15); color: var(--accent); }
+.chip--upcoming { background: rgba(47,129,247,0.15); color: var(--accent-2); }
 
 .app__main { max-width: 900px; margin: 0 auto; padding: 1rem; }
 
@@ -461,3 +465,23 @@ body {
   font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap;
   background: var(--bg); padding: 0.1rem 0.5rem; border-radius: 7px;
 }
+
+/* ---------- Tournaments ---------- */
+/* Slim scope bar above every tournament page: name + status pill (+ the
+   view-only note for finished tournaments). */
+.tour-bar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.tour-bar__name { font-weight: 700; }
+.tour-bar__note { font-size: 0.8rem; }
+
+.tour-list__section { margin-top: 1rem; }
+.tour-list__section h3 { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.4rem; }
+.tour-card {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  text-decoration: none; color: inherit;
+  padding: 0.65rem 0.75rem; margin-bottom: 0.4rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+}
+.tour-card:hover { background: var(--surface-2); }
+.tour-card__name { font-weight: 600; }
+.tour-card__dates { font-size: 0.8rem; }
+.tour-card .chip { margin-left: auto; }

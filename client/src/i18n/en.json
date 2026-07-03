@@ -107,7 +107,16 @@
     "name": "Joyn Consulting Tournament 2026",
     "location": "Urban Soccer, Monsanto, Lisbon"
   },
-  "nav": { "overview": "Overview", "results": "Results", "knockout": "Knockouts", "teams": "Teams", "help": "Help", "admin": "Admin" },
+  "nav": { "tournaments": "Tournaments", "overview": "Overview", "results": "Results", "knockout": "Knockouts", "teams": "Teams", "help": "Help", "admin": "Admin" },
+  "tournaments": {
+    "title": "Tournaments",
+    "empty": "No tournaments yet.",
+    "active": "active",
+    "upcoming": "upcoming",
+    "finished": "finished",
+    "readOnly": "This tournament is finished - view only.",
+    "section": { "active": "Now playing", "upcoming": "Upcoming", "finished": "Past tournaments" }
+  },
   "adminSquads": {
     "title": "Squads",
     "team": "Team",

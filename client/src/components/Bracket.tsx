@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { BracketMatch, BracketView, Round } from '../../../shared/types';
 import { useI18n } from '../i18n';
+import { useTournament } from '../tournament/TournamentScope';
 import { participantName, slotShort } from '../lib/bracketLabels';
 import { formatTime } from '../lib/format';
 
@@ -49,10 +50,11 @@ function Side({ m, side }: { m: BracketMatch; side: 'home' | 'away' }) {
 
 function BracketCard({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
+  const { basePath } = useTournament();
   // The whole card links to the game page (admins get the edit controls
   // there), same as a row in the results list.
   return (
-    <Link to={`/ko/${m.slot}`} className={`bcard-link bcard bcard--${m.status}`}>
+    <Link to={`${basePath}/ko/${m.slot}`} className={`bcard-link bcard bcard--${m.status}`}>
       <div className="bcard__head">
         <span className="bcard__slot">{slotShort(m.slot, t)}</span>
         {m.startsAt && <span className="bcard__field">{formatTime(m.startsAt)}</span>}

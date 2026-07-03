@@ -1,4 +1,4 @@
-import type { AuthUser, BracketView, Match, MatchUpdate, Roster } from '../../../shared/types';
+import type { AuthUser, BracketView, Match, MatchUpdate, Roster, Tournament } from '../../../shared/types';
 
 // Thin REST client. All requests send the httpOnly cookie automatically via
 // `credentials: 'include'`. Errors are normalized to a thrown `ApiError`.
@@ -47,11 +47,17 @@ export const api = {
 
   me: () => request<{ user: AuthUser }>('/auth/me'),
 
-  listMatches: () => request<{ matches: Match[] }>('/matches'),
+  /** All tournaments plus the id every unscoped request lands in. */
+  listTournaments: () => request<{ tournaments: Tournament[]; defaultId: string }>('/tournaments'),
 
-  getBracket: () => request<{ bracket: BracketView }>('/bracket'),
+  listMatches: (tournamentId: string) =>
+    request<{ matches: Match[] }>(`/matches?tournamentId=${encodeURIComponent(tournamentId)}`),
 
-  getRoster: () => request<{ roster: Roster }>('/roster'),
+  getBracket: (tournamentId: string) =>
+    request<{ bracket: BracketView }>(`/bracket?tournamentId=${encodeURIComponent(tournamentId)}`),
+
+  getRoster: (tournamentId: string) =>
+    request<{ roster: Roster }>(`/roster?tournamentId=${encodeURIComponent(tournamentId)}`),
 
   goal: (matchId: string, team: 'home' | 'away', delta: 1 | -1, expectedRev: number) =>
     request<{ update: MatchUpdate }>(`/matches/${matchId}/goal`, {

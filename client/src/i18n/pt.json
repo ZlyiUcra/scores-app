@@ -107,7 +107,16 @@
     "name": "Torneio Joyn Consulting 2026",
     "location": "Urban Soccer, Monsanto, Lisboa"
   },
-  "nav": { "overview": "Overview", "results": "Resultados", "knockout": "Eliminatórias", "teams": "Equipas", "help": "Ajuda", "admin": "Admin" },
+  "nav": { "tournaments": "Torneios", "overview": "Overview", "results": "Resultados", "knockout": "Eliminatórias", "teams": "Equipas", "help": "Ajuda", "admin": "Admin" },
+  "tournaments": {
+    "title": "Torneios",
+    "empty": "Ainda não há torneios.",
+    "active": "a decorrer",
+    "upcoming": "previsto",
+    "finished": "terminado",
+    "readOnly": "Este torneio terminou - apenas consulta.",
+    "section": { "active": "A decorrer", "upcoming": "Previstos", "finished": "Torneios anteriores" }
+  },
   "adminSquads": {
     "title": "Plantéis",
     "team": "Equipa",

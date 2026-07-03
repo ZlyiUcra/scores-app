@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useMatchStore, selectOrder, selectConnected, selectMatch } from '../stores/matchStore';
 import { useRosterStore, selectGroups } from '../stores/rosterStore';
 import { useI18n } from '../i18n';
+import { useTournament } from '../tournament/TournamentScope';
 import { formatTime } from '../lib/format';
 
 /** Compact result row: time · field · status, then teams with score. Selects
@@ -10,10 +11,11 @@ import { formatTime } from '../lib/format';
 const ResultRow = memo(function ResultRow({ id }: { id: string }) {
   const m = useMatchStore(selectMatch(id));
   const { t } = useI18n();
+  const { basePath } = useTournament();
   if (!m) return null;
   const played = m.status !== 'scheduled';
   return (
-    <Link to={`/match/${m.id}`} className={`rrow rrow--${m.status}`}>
+    <Link to={`${basePath}/match/${m.id}`} className={`rrow rrow--${m.status}`}>
       <div className="rrow__meta">
         <span>{formatTime(m.startsAt)}</span>
         {m.field && <span>· {m.field}</span>}

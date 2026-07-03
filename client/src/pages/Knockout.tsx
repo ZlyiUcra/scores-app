@@ -5,13 +5,16 @@ import { adminApi } from '../api/admin';
 import { ApiError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
+import { useTournament } from '../tournament/TournamentScope';
 
 /** Knockout page: the full bracket plus, for admins, the bracket-wide reset —
- * the knockout pages are the only place playoff state is managed. */
+ * the knockout pages are the only place playoff state is managed. A finished
+ * tournament is an archive, so the reset is hidden there. */
 export function Knockout() {
   const { t } = useI18n();
   const view = useBracketStore(selectBracket);
   const { isAdmin } = useAuth();
+  const { tournament, readOnly } = useTournament();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +30,7 @@ export function Knockout() {
     setBusy(true);
     setError(null);
     try {
-      await adminApi.resetBracket();
+      await adminApi.resetBracket(tournament.id);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t('adminBracket.resetError'));
     } finally {
@@ -39,7 +42,7 @@ export function Knockout() {
     <div className="ko-page">
       <div className="list__head">
         <h2>{t('nav.knockout')}</h2>
-        {isAdmin && (
+        {isAdmin && !readOnly && (
           <button className="btn btn--sm btn--danger" disabled={busy} onClick={() => void onReset()}>
             {t('adminBracket.reset')}
           </button>

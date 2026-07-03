@@ -3,23 +3,25 @@ import { useMatchStore, selectMatch } from '../stores/matchStore';
 import { useRosterStore } from '../stores/rosterStore';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
+import { useTournament } from '../tournament/TournamentScope';
 import { StatusBadge } from '../components/StatusBadge';
 import { AdminControls } from '../components/AdminControls';
 
 /** One group game, live: scoreboard for everyone, the click-driven scoring
- * controls for admins. Lives at /match/:id (mirrored by /ko/:slot for
- * knockout games). */
+ * controls for admins (hidden in a finished tournament — it is an archive).
+ * Lives at /t/:tid/match/:id (mirrored by /t/:tid/ko/:slot for knockouts). */
 export function MatchDetail() {
   const { id = '' } = useParams();
   const match = useMatchStore(selectMatch(id));
   const groups = useRosterStore((s) => s.groups);
   const { isAdmin } = useAuth();
   const { t } = useI18n();
+  const { basePath, readOnly } = useTournament();
 
   if (!match) {
     return (
       <div className="detail">
-        <Link to="/results" className="back">{t('matchDetail.back')}</Link>
+        <Link to={`${basePath}/results`} className="back">{t('matchDetail.back')}</Link>
         <p className="muted">{t('matchDetail.notFound')}</p>
       </div>
     );
@@ -27,7 +29,7 @@ export function MatchDetail() {
 
   return (
     <div className="detail">
-      <Link to="/results" className="back">{t('matchDetail.back')}</Link>
+      <Link to={`${basePath}/results`} className="back">{t('matchDetail.back')}</Link>
 
       <div className="scoreboard">
         <div className="scoreboard__team">
@@ -48,7 +50,7 @@ export function MatchDetail() {
 
       <div className="detail__meta">{groups.find((g) => g.id === match.group)?.name ?? match.group}</div>
 
-      {isAdmin && <AdminControls match={match} />}
+      {isAdmin && !readOnly && <AdminControls match={match} />}
     </div>
   );
 }

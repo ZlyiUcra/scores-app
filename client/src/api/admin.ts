@@ -85,15 +85,18 @@ export const adminApi = {
   deleteMatch: (id: string) =>
     request<{ ok: true }>(`/admin/matches/${id}`, { method: 'DELETE' }),
 
-  // Knockout (server route is /api/bracket, admin-guarded).
-  updateBracketSlot: (slot: BracketSlotId, patch: UpdateBracketRequest) =>
-    request<{ bracket: BracketView }>(`/bracket/${slot}`, {
+  // Knockout (server route is /api/bracket, admin-guarded). Slot ids repeat
+  // across tournaments, so bracket writes always carry the tournament.
+  updateBracketSlot: (tournamentId: string, slot: BracketSlotId, patch: UpdateBracketRequest) =>
+    request<{ bracket: BracketView }>(`/bracket/${slot}?tournamentId=${encodeURIComponent(tournamentId)}`, {
       method: 'PATCH',
       body: JSON.stringify(patch),
     }),
 
-  resetBracket: () =>
-    request<{ bracket: BracketView }>('/bracket/reset', { method: 'POST' }),
+  resetBracket: (tournamentId: string) =>
+    request<{ bracket: BracketView }>(`/bracket/reset?tournamentId=${encodeURIComponent(tournamentId)}`, {
+      method: 'POST',
+    }),
 };
 
 export type { AdminUserView, Role };

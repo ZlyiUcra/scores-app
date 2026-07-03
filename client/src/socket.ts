@@ -7,13 +7,15 @@ import { useRosterStore } from './stores/rosterStore';
 let socket: Socket<ServerToClientEvents> | null = null;
 
 /**
- * Connect the live feed. The httpOnly auth cookie is sent automatically on the
- * handshake (same origin via the Vite proxy). Server pushes a full snapshot on
- * connect (resync) then compact diffs.
+ * Connect the live feed for ONE tournament. The httpOnly auth cookie is sent
+ * automatically on the handshake (same origin via the Vite proxy); the
+ * tournament id rides the handshake auth payload, joining that tournament's
+ * room. Server pushes a full snapshot on connect (resync) then compact diffs.
+ * Switching tournaments = disconnect + connect with the other id.
  */
-export function connectSocket(): void {
+export function connectSocket(tournamentId: string): void {
   if (socket) return;
-  socket = io({ withCredentials: true });
+  socket = io({ withCredentials: true, auth: { tournamentId } });
 
   socket.on('connect', () => useMatchStore.getState().setConnected(true));
   socket.on('disconnect', () => useMatchStore.getState().setConnected(false));

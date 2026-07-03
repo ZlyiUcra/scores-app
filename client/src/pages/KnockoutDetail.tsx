@@ -2,25 +2,28 @@ import { Link, useParams } from 'react-router-dom';
 import { useBracketStore, selectBracket } from '../stores/bracketStore';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
+import { useTournament } from '../tournament/TournamentScope';
 import { StatusBadge } from '../components/StatusBadge';
 import { BracketSlotControls } from '../components/BracketSlotControls';
 import { formatTime } from '../lib/format';
 import { participantName, slotShort } from '../lib/bracketLabels';
 
 /** One knockout game, mirroring MatchDetail: scoreboard for everyone, the
- * click-driven slot controls for admins. Lives at /ko/:slot. */
+ * click-driven slot controls for admins (hidden in a finished tournament).
+ * Lives at /t/:tid/ko/:slot. */
 export function KnockoutDetail() {
   const { slot = '' } = useParams();
   const view = useBracketStore(selectBracket);
   const { isAdmin } = useAuth();
   const { t } = useI18n();
+  const { basePath, readOnly } = useTournament();
 
   const m = view.matches.find((x) => x.slot === slot);
 
   if (!m) {
     return (
       <div className="detail">
-        <Link to="/ko" className="back">{t('knockoutDetail.back')}</Link>
+        <Link to={`${basePath}/ko`} className="back">{t('knockoutDetail.back')}</Link>
         <p className="muted">{t('knockoutDetail.notFound')}</p>
       </div>
     );
@@ -33,7 +36,7 @@ export function KnockoutDetail() {
 
   return (
     <div className="detail">
-      <Link to="/ko" className="back">{t('knockoutDetail.back')}</Link>
+      <Link to={`${basePath}/ko`} className="back">{t('knockoutDetail.back')}</Link>
 
       {preview && <p className="ko-preview-note">{t('bracket.previewNote')}</p>}
 
@@ -63,7 +66,7 @@ export function KnockoutDetail() {
         {m.field ? ` · ${m.field}` : ''}
       </div>
 
-      {isAdmin && <BracketSlotControls m={m} />}
+      {isAdmin && !readOnly && <BracketSlotControls m={m} />}
     </div>
   );
 }
