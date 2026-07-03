@@ -44,15 +44,16 @@ app.use('/api/bracket', bracketRouter);
 app.use('/api/roster', rosterRouter);
 app.use('/api/admin', adminRouter);
 
-// Single-host deploy: serve the built client when it exists (dev uses Vite
-// instead, so no dist and this whole block is skipped). The entry runs either
-// from src/ (tsx) or from dist/server/src/ (tsc build), hence two candidates.
+// Single-host deploy: in production serve the built client. Dev uses Vite
+// instead, so the API stays API-only there even when a leftover client/dist
+// exists (it would be stale anyway). The entry runs either from src/ (tsx)
+// or from dist/server/src/ (tsc build), hence two candidates.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = [
   path.resolve(__dirname, '..', '..', 'client', 'dist'),
   path.resolve(__dirname, '..', '..', '..', '..', 'client', 'dist'),
 ].find((p) => fs.existsSync(p));
-if (clientDist) {
+if (config.isProd && clientDist) {
   app.use(express.static(clientDist));
   // SPA fallback: any non-API GET renders the app shell (deep links like /ko/R8M0).
   app.get('*', (req, res, next) => {
