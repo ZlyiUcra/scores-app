@@ -9,6 +9,7 @@ import { formatTime } from '../../lib/format';
 import { useMatchStore, selectOrder } from '../../stores/matchStore';
 import { useRosterStore, selectGroups, selectTeams } from '../../stores/rosterStore';
 import { useI18n } from '../../i18n';
+import { useAdminTournament } from './AdminLayout';
 
 /** ISO -> value for <input type="datetime-local"> in the local timezone. */
 function toLocalInput(iso: string): string {
@@ -33,6 +34,7 @@ enum PanelSection {
  * games table with inline schedule editing. */
 export function AdminMatches() {
   const { t } = useI18n();
+  const { tournament } = useAdminTournament();
   const [errors, setErrors] = useState<Partial<Record<PanelSection, string>>>({});
   const order = useMatchStore(selectOrder);
   const byId = useMatchStore((s) => s.byId);
@@ -148,7 +150,7 @@ export function AdminMatches() {
   async function onCreateGroup(e: FormEvent) {
     e.preventDefault();
     await run(PanelSection.Groups, async () => {
-      await adminApi.createGroup({ name: groupName.trim() });
+      await adminApi.createGroup(tournament.id, { name: groupName.trim() });
       setGroupName('');
     }, 'adminMatches.errorCreateGroup');
   }
@@ -156,7 +158,7 @@ export function AdminMatches() {
   async function onCreateTeam(e: FormEvent) {
     e.preventDefault();
     await run(PanelSection.NewTeam, async () => {
-      const { team } = await adminApi.createTeam({ name: teamName.trim(), shortName: teamShort.trim() });
+      const { team } = await adminApi.createTeam(tournament.id, { name: teamName.trim(), shortName: teamShort.trim() });
       setTeamName('');
       setTeamShort('');
       // Optional immediate grouping through the regular assign path, so the

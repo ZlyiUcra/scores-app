@@ -485,3 +485,6 @@ body {
 .tour-card__name { font-weight: 600; }
 .tour-card__dates { font-size: 0.8rem; }
 .tour-card .chip { margin-left: auto; }
+/* Admin bar variant of the scope bar: label + tournament select. */
+.tour-bar__pick { display: flex; align-items: center; gap: 0.5rem; }
+.tour-bar__pick .input { width: auto; padding: 0.35rem 0.5rem; }

@@ -20,6 +20,16 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
       </section>
 
       <section className="card">
+        <h3>Tournaments</h3>
+        <p>
+          The site hosts many tournaments over time. The Tournaments page lists them all:
+          what is playing right now, what is planned (with dates) and the past ones. A
+          finished tournament stays available as a read-only archive - its results,
+          tables and bracket are kept exactly as they ended.
+        </p>
+      </section>
+
+      <section className="card">
         <h3>Overview</h3>
         <p>
           The front page shows one table per group. Tables are <em>live</em>: a match that
@@ -120,6 +130,18 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
           <section className="card">
             <h3>Admin: setting up the tournament</h3>
             <ul>
+              <li>
+                <strong>Admin - Tournaments</strong>: create tournaments ahead of time
+                (name, planned dates, status). The "finished" status turns a tournament
+                into an archive - every change inside it is rejected until you set it
+                back to active. Only an empty tournament can be deleted, and never the
+                last one.
+              </li>
+              <li>
+                The tournament selector above the admin pages picks which tournament
+                Games and Squads edit - so an upcoming tournament can be fully prepared
+                before it starts.
+              </li>
               <li>
                 <strong>Admin - Games</strong>: create groups and teams; a team can be
                 placed into a group at creation or later, but only while it has no

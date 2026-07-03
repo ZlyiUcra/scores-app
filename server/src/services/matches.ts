@@ -6,6 +6,7 @@ import { groupRepository } from '../repos/groups.js';
 import type { CreateMatchInput, GoalInput, UpdateMatchInput } from '../validation.js';
 import { AppError } from '../errors.js';
 import { assertBracketNotStarted } from './bracketLock.js';
+import { assertTournamentEditable } from './tournamentLock.js';
 
 function toUpdate(m: StoredMatch): MatchUpdate {
   return {
@@ -49,6 +50,7 @@ export function getMatch(id: string): Match {
  * owning tournament alongside so routes can scope broadcasts. */
 export function applyUpdate(id: string, input: UpdateMatchInput): { update: MatchUpdate; tournamentId: string } {
   const current = getStored(id);
+  assertTournamentEditable(current.tournamentId);
   assertBracketNotStarted(current.tournamentId);
   assertFreshRev(current, input.expectedRev);
 
@@ -71,6 +73,7 @@ export function applyUpdate(id: string, input: UpdateMatchInput): { update: Matc
 /** +1 / -1 goal for one side. Never lets a score drop below zero. */
 export function applyGoal(id: string, input: GoalInput): { update: MatchUpdate; tournamentId: string } {
   const current = getStored(id);
+  assertTournamentEditable(current.tournamentId);
   assertBracketNotStarted(current.tournamentId);
   assertFreshRev(current, input.expectedRev);
 
@@ -109,6 +112,7 @@ export function createMatch(input: CreateMatchInput): { match: Match; tournament
   if (!home.groupId || !away.groupId || home.groupId !== away.groupId) {
     throw new AppError('INVALID', 'Both teams must be in the same group.', 400);
   }
+  assertTournamentEditable(home.tournamentId);
   assertBracketNotStarted(home.tournamentId);
   const stored: StoredMatch = {
     id: crypto.randomUUID(),
@@ -130,6 +134,7 @@ export function createMatch(input: CreateMatchInput): { match: Match; tournament
 /** Admin: remove a match. Returns the owning tournament. */
 export function removeMatch(id: string): string {
   const current = getStored(id);
+  assertTournamentEditable(current.tournamentId);
   assertBracketNotStarted(current.tournamentId);
   matchRepository.remove(id);
   return current.tournamentId;
@@ -175,6 +180,7 @@ export function generateGroupFixtures(groupId: string): { matches: Match[]; tour
   if (!group) {
     throw new AppError('NOT_FOUND', `Group ${groupId} not found.`, 404);
   }
+  assertTournamentEditable(group.tournamentId);
   assertBracketNotStarted(group.tournamentId);
 
   // Deterministic seeding order (groupAddedAt, then id) so repeated calls

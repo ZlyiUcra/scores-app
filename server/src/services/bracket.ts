@@ -11,9 +11,11 @@ import { groupRepository } from '../repos/groups.js';
 import { bracketRepository } from '../repos/bracket.js';
 import type { UpdateBracketInput } from '../validation.js';
 import { AppError } from '../errors.js';
+import { assertTournamentEditable } from './tournamentLock.js';
 
 // Deliberately NOT guarded by assertBracketNotStarted: these writes are what
 // that lock protects everything else from, plus its escape hatch (reset).
+// The finished-tournament lock DOES apply — an archive rejects all writes.
 
 // includePreview here is DISPLAY-ONLY: while the groups are unfinished the
 // view annotates symbolic seeds with `projected` teams from the current
@@ -61,6 +63,7 @@ function assertSlot(tournamentId: string, slotRaw: string): BracketSlotId {
  * resolution) are only correct TOGETHER — do not split or share them.
  */
 export function updateBracketSlot(tournamentId: string, slotRaw: string, input: UpdateBracketInput): BracketView {
+  assertTournamentEditable(tournamentId);
   const slot = assertSlot(tournamentId, slotRaw);
   const current = bracketRepository.get(tournamentId, slot);
   if (input.expectedRev !== undefined && input.expectedRev !== current.rev) {
@@ -141,6 +144,7 @@ export function updateBracketSlot(tournamentId: string, slotRaw: string, input: 
 /** Admin: clear a tournament's knockout results (needed before changing its
  * groups/matches). */
 export function resetBracket(tournamentId: string): BracketView {
+  assertTournamentEditable(tournamentId);
   bracketRepository.reset(tournamentId);
   return resolvedBracket(tournamentId);
 }

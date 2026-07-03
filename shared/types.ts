@@ -223,6 +223,24 @@ export interface RegisterRequest {
   password: string;
 }
 
+// Tournament dates are DATE-ONLY (YYYY-MM-DD) and informational; the status
+// is the truth (and setting it back from `finished` is how an archived
+// tournament is reopened for corrections).
+export interface CreateTournamentRequest {
+  name: string;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  status?: TournamentStatus;
+}
+
+// Partial edit; the same field rules as creation.
+export interface UpdateTournamentRequest {
+  name?: string;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  status?: TournamentStatus;
+}
+
 // A team is created WITHOUT a group; it is added to a group as a separate step.
 export interface CreateTeamRequest {
   name: string;

@@ -34,7 +34,37 @@
     "reset": "Repor",
     "error": "Falha no pedido."
   },
-  "adminLayout": { "back": "← Voltar ao placar", "users": "Utilizadores", "matches": "Jogos", "squads": "Plantéis" },
+  "adminLayout": {
+    "back": "← Voltar ao placar",
+    "users": "Utilizadores",
+    "tournaments": "Torneios",
+    "matches": "Jogos",
+    "squads": "Plantéis",
+    "tournament": "Torneio:",
+    "finishedNote": "Este torneio terminou - volte a pô-lo «a decorrer» para fazer alterações."
+  },
+  "adminTournaments": {
+    "newTitle": "Novo torneio",
+    "name": "Nome",
+    "namePlaceholder": "ex. Taça de Verão 2026",
+    "start": "Data de início",
+    "end": "Data de fim",
+    "status": "Estado",
+    "add": "Adicionar torneio",
+    "listTitle": "Torneios",
+    "colName": "Nome",
+    "colDates": "Datas",
+    "colStatus": "Estado",
+    "colActions": "Ações",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "deleteTitle": "Só um torneio vazio (sem grupos, equipas ou jogos) pode ser eliminado.",
+    "errorCreate": "Torneio não criado.",
+    "errorUpdate": "Torneio não atualizado.",
+    "errorDelete": "Torneio não eliminado."
+  },
   "adminUsers": {
     "title": "Utilizadores",
     "search": "Procurar por utilizador…",

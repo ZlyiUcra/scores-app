@@ -7,17 +7,26 @@ import type {
   CreateMatchRequest,
   CreatePlayerRequest,
   CreateTeamRequest,
+  CreateTournamentRequest,
   Group,
   Match,
   Paginated,
   Player,
   Role,
   Team,
+  Tournament,
   UpdateBracketRequest,
   UpdatePlayerRequest,
+  UpdateTournamentRequest,
   UpdateUserRequest,
 } from '../../../shared/types';
 import { request } from './client';
+
+/** `?tournamentId=` suffix for the endpoints that create into / list from a
+ * specific tournament (id-addressed mutations derive it server-side). */
+function scope(tournamentId: string): string {
+  return `?tournamentId=${encodeURIComponent(tournamentId)}`;
+}
 
 /** Admin-only endpoints (server enforces requireAdmin on the /api/admin router). */
 export const adminApi = {
@@ -38,12 +47,23 @@ export const adminApi = {
   deleteUser: (id: string) =>
     request<{ ok: true }>(`/admin/users/${id}`, { method: 'DELETE' }),
 
-  listTeams: () => request<{ teams: Team[] }>('/admin/teams'),
+  // Tournament lifecycle. Deletion is server-guarded: only an empty
+  // tournament can go, and never the last one.
+  createTournament: (input: CreateTournamentRequest) =>
+    request<{ tournament: Tournament }>('/admin/tournaments', { method: 'POST', body: JSON.stringify(input) }),
 
-  listGroups: () => request<{ groups: Group[] }>('/admin/groups'),
+  updateTournament: (id: string, patch: UpdateTournamentRequest) =>
+    request<{ tournament: Tournament }>(`/admin/tournaments/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
 
-  createGroup: (input: CreateGroupRequest) =>
-    request<{ group: Group }>('/admin/groups', { method: 'POST', body: JSON.stringify(input) }),
+  deleteTournament: (id: string) =>
+    request<{ ok: true }>(`/admin/tournaments/${id}`, { method: 'DELETE' }),
+
+  listTeams: (tournamentId: string) => request<{ teams: Team[] }>(`/admin/teams${scope(tournamentId)}`),
+
+  listGroups: (tournamentId: string) => request<{ groups: Group[] }>(`/admin/groups${scope(tournamentId)}`),
+
+  createGroup: (tournamentId: string, input: CreateGroupRequest) =>
+    request<{ group: Group }>(`/admin/groups${scope(tournamentId)}`, { method: 'POST', body: JSON.stringify(input) }),
 
   updateGroup: (id: string, input: CreateGroupRequest) =>
     request<{ group: Group }>(`/admin/groups/${id}`, { method: 'PATCH', body: JSON.stringify(input) }),
@@ -51,8 +71,8 @@ export const adminApi = {
   deleteGroup: (id: string) =>
     request<{ ok: true }>(`/admin/groups/${id}`, { method: 'DELETE' }),
 
-  createTeam: (input: CreateTeamRequest) =>
-    request<{ team: Team }>('/admin/teams', { method: 'POST', body: JSON.stringify(input) }),
+  createTeam: (tournamentId: string, input: CreateTeamRequest) =>
+    request<{ team: Team }>(`/admin/teams${scope(tournamentId)}`, { method: 'POST', body: JSON.stringify(input) }),
 
   // Rename a team (name and/or code).
   updateTeam: (id: string, patch: { name?: string; shortName?: string }) =>

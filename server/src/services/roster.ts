@@ -7,6 +7,7 @@ import { matchRepository } from '../repos/matches.js';
 import type { AssignTeamInput } from '../validation.js';
 import { AppError } from '../errors.js';
 import { assertBracketNotStarted } from './bracketLock.js';
+import { assertTournamentEditable } from './tournamentLock.js';
 
 // Groups and teams are mutually entangled (assignment checks the group,
 // group removal checks its teams), with Team as the hub that also reaches
@@ -35,6 +36,7 @@ export function getRoster(tournamentId: string): Roster {
 
 /** Admin: create a team in a tournament (no group — assigned separately). */
 export function createTeam(tournamentId: string, input: { name: string; shortName: string }): Team {
+  assertTournamentEditable(tournamentId);
   return teamRepository.create(tournamentId, input);
 }
 
@@ -43,11 +45,13 @@ export function createTeam(tournamentId: string, input: { name: string; shortNam
 export function updateTeam(id: string, patch: { name?: string; shortName?: string }): { team: Team; tournamentId: string } {
   const stored = teamRepository.getStored(id);
   if (!stored) throw new AppError('NOT_FOUND', `Team ${id} not found.`, 404);
+  assertTournamentEditable(stored.tournamentId);
   return { team: teamRepository.update(id, patch), tournamentId: stored.tournamentId };
 }
 
 /** Admin: create a group in a tournament. */
 export function createGroup(tournamentId: string, name: string): Group {
+  assertTournamentEditable(tournamentId);
   assertBracketNotStarted(tournamentId);
   return groupRepository.create(tournamentId, name);
 }
@@ -56,6 +60,7 @@ export function createGroup(tournamentId: string, name: string): Group {
 export function updateGroup(id: string, name: string): { group: Group; tournamentId: string } {
   const stored = groupRepository.getStored(id);
   if (!stored) throw new AppError('NOT_FOUND', `Group ${id} not found.`, 404);
+  assertTournamentEditable(stored.tournamentId);
   return { group: groupRepository.update(id, name), tournamentId: stored.tournamentId };
 }
 
@@ -63,6 +68,7 @@ export function updateGroup(id: string, name: string): { group: Group; tournamen
 export function removeGroup(id: string): string {
   const stored = groupRepository.getStored(id);
   if (!stored) throw new AppError('NOT_FOUND', `Group ${id} not found.`, 404);
+  assertTournamentEditable(stored.tournamentId);
   assertBracketNotStarted(stored.tournamentId);
   if (teamRepository.countInGroup(id) > 0) {
     throw new AppError('GROUP_IN_USE', 'Remove the group\'s teams before deleting it.', 409);
@@ -80,6 +86,7 @@ export function removeGroup(id: string): string {
 export function assignTeam(teamId: string, input: AssignTeamInput): { team: Team; tournamentId: string } {
   const team = teamRepository.getStored(teamId);
   if (!team) throw new AppError('NOT_FOUND', `Team ${teamId} not found.`, 404);
+  assertTournamentEditable(team.tournamentId);
   assertBracketNotStarted(team.tournamentId);
 
   if (input.groupId === null) {
@@ -107,6 +114,7 @@ export function assignTeam(teamId: string, input: AssignTeamInput): { team: Team
 export function removeTeam(id: string): string {
   const stored = teamRepository.getStored(id);
   if (!stored) throw new AppError('NOT_FOUND', `Team ${id} not found.`, 404);
+  assertTournamentEditable(stored.tournamentId);
   assertBracketNotStarted(stored.tournamentId);
   const used = matchRepository.countByTeam(id);
   if (used > 0) {

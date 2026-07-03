@@ -1,12 +1,8 @@
 import React from 'react';
 import { Navigate, Outlet, useParams } from 'react-router-dom';
 import type { Tournament } from '../../../shared/types';
-import { api } from '../api/client';
-import { connectSocket, disconnectSocket } from '../socket';
-import { useMatchStore } from '../stores/matchStore';
-import { useBracketStore } from '../stores/bracketStore';
-import { useRosterStore } from '../stores/rosterStore';
 import { useTournamentStore } from '../stores/tournamentStore';
+import { useTournamentFeed } from './useTournamentFeed';
 import { useI18n } from '../i18n';
 
 /** What every page under /t/:tournamentId can rely on. */
@@ -31,10 +27,8 @@ export function useTournament(): TournamentScopeValue {
 /**
  * Layout route for /t/:tournamentId/*: validates the id against the fetched
  * tournament list (unknown -> the tournaments page), provides the scope to
- * every child page, and owns the tournament's data lifecycle — REST snapshot
- * + live socket, torn down and rebuilt whenever the id changes. Stores are
- * cleared first so a tournament switch never flashes the previous
- * tournament's data.
+ * every child page, and owns the tournament's data lifecycle (see
+ * useTournamentFeed) — torn down and rebuilt whenever the id changes.
  */
 export function TournamentScope() {
   const { tournamentId = '' } = useParams();
@@ -43,32 +37,7 @@ export function TournamentScope() {
   const loaded = useTournamentStore((s) => s.loaded);
   const tournament = tournaments.find((x) => x.id === tournamentId);
 
-  React.useEffect(() => {
-    if (!tournament) return;
-    const id = tournament.id;
-    let alive = true;
-    // Blank slate before the new tournament's data arrives.
-    useMatchStore.getState().setSnapshot([]);
-    useBracketStore.getState().setBracket({ formable: false, reason: null, size: 0, matches: [] });
-    useRosterStore.getState().setRoster({ groups: [], teams: [], players: [] });
-    api
-      .listMatches(id)
-      .then(({ matches }) => alive && useMatchStore.getState().setSnapshot(matches))
-      .catch((err) => console.error(err));
-    api
-      .getBracket(id)
-      .then(({ bracket }) => alive && useBracketStore.getState().setBracket(bracket))
-      .catch((err) => console.error(err));
-    api
-      .getRoster(id)
-      .then(({ roster }) => alive && useRosterStore.getState().setRoster(roster))
-      .catch((err) => console.error(err));
-    connectSocket(id);
-    return () => {
-      alive = false;
-      disconnectSocket();
-    };
-  }, [tournament?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useTournamentFeed(tournament?.id ?? null);
 
   if (!loaded) return <div className="splash">{t('app.loading')}</div>;
   if (!tournament) return <Navigate to="/tournaments" replace />;

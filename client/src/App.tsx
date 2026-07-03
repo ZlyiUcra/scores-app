@@ -16,6 +16,7 @@ import { Help } from './pages/Help';
 import { MatchDetail } from './pages/MatchDetail';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminTournaments } from './pages/admin/AdminTournaments';
 import { AdminMatches } from './pages/admin/AdminMatches';
 import { AdminSquads } from './pages/admin/AdminSquads';
 
@@ -185,6 +186,7 @@ export function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/matches" replace />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="tournaments" element={<AdminTournaments />} />
             <Route path="matches" element={<AdminMatches />} />
             <Route path="squads" element={<AdminSquads />} />
           </Route>

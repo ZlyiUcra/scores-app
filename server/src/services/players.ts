@@ -3,6 +3,7 @@ import { teamRepository } from '../repos/teams.js';
 import { playerRepository } from '../repos/players.js';
 import type { CreatePlayerInput, UpdatePlayerInput } from '../validation.js';
 import { AppError } from '../errors.js';
+import { assertTournamentEditable } from './tournamentLock.js';
 
 // Squads are purely descriptive (no effect on standings/seeding), so none of
 // these mutations take the bracket lock. Players inherit their tournament
@@ -25,6 +26,7 @@ function tournamentOfTeam(teamId: string): string {
 /** Admin: add a player to a team. Jersey number (if given) must be free. */
 export function createPlayer(teamId: string, input: CreatePlayerInput): { player: Player; tournamentId: string } {
   const tournamentId = tournamentOfTeam(teamId);
+  assertTournamentEditable(tournamentId);
   const number = input.number ?? null;
   assertNumberFree(teamId, number);
   return {
@@ -37,8 +39,10 @@ export function createPlayer(teamId: string, input: CreatePlayerInput): { player
 export function updatePlayer(id: string, input: UpdatePlayerInput): { player: Player; tournamentId: string } {
   const player = playerRepository.get(id);
   if (!player) throw new AppError('NOT_FOUND', `Player ${id} not found.`, 404);
+  const tournamentId = tournamentOfTeam(player.teamId);
+  assertTournamentEditable(tournamentId);
   if (input.number !== undefined) assertNumberFree(player.teamId, input.number, id);
-  return { player: playerRepository.update(id, input), tournamentId: tournamentOfTeam(player.teamId) };
+  return { player: playerRepository.update(id, input), tournamentId };
 }
 
 /** Admin: remove a player. Returns the owning tournament. */
@@ -46,6 +50,7 @@ export function removePlayer(id: string): string {
   const player = playerRepository.get(id);
   if (!player) throw new AppError('NOT_FOUND', `Player ${id} not found.`, 404);
   const tournamentId = tournamentOfTeam(player.teamId);
+  assertTournamentEditable(tournamentId);
   playerRepository.remove(id);
   return tournamentId;
 }

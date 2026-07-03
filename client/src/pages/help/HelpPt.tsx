@@ -20,6 +20,16 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
       </section>
 
       <section className="card">
+        <h3>Torneios</h3>
+        <p>
+          O site acolhe muitos torneios ao longo do tempo. A página «Torneios» lista-os
+          todos: o que se joga agora, o que está previsto (com datas) e os anteriores. Um
+          torneio terminado fica disponível como arquivo em modo de leitura - os
+          resultados, as tabelas e o bracket ficam exatamente como acabaram.
+        </p>
+      </section>
+
+      <section className="card">
         <h3>Overview</h3>
         <p>
           A página inicial mostra uma tabela por grupo. As tabelas são <em>ao vivo</em>:
@@ -123,6 +133,17 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
           <section className="card">
             <h3>Administração: montar o torneio</h3>
             <ul>
+              <li>
+                <strong>Admin - Torneios</strong>: crie torneios com antecedência (nome,
+                datas previstas, estado). O estado «terminado» transforma o torneio num
+                arquivo - qualquer alteração dentro dele é rejeitada até voltar a pô-lo «a
+                decorrer». Só um torneio vazio pode ser eliminado, e nunca o último.
+              </li>
+              <li>
+                O seletor de torneio no topo das páginas de administração define que
+                torneio os Jogos e os Plantéis editam - assim um torneio previsto pode ser
+                totalmente preparado antes de começar.
+              </li>
               <li>
                 <strong>Admin - Jogos</strong>: crie grupos e equipas; uma equipa pode
                 entrar num grupo ao ser criada ou mais tarde, mas apenas enquanto não tem
