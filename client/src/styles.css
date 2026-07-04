@@ -531,8 +531,14 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .slot-editor__scores, .slot-editor__pens { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
 .slot-editor__overrides { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; font-size: 0.85rem; }
 .slot-editor__overrides select { flex: 1; min-width: 0; }
-/* Pens sit under the centered goal panels — center them the same way. */
-.slot-editor__pens { justify-content: center; }
+/* Pens sit under the centered goal panels — center them the same way, and set
+   them off as their own section so they do not crowd the score controls. */
+.slot-editor__pens {
+  justify-content: center;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+}
 .slot-editor__hint { margin: 0; font-size: 0.85rem; }
 .input--num { width: 3.5rem; text-align: center; }
 .input--short { width: 5rem; }
