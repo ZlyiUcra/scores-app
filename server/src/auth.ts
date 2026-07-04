@@ -1,14 +1,17 @@
 import bcrypt from 'bcryptjs';
+import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import type { NextFunction, Request, Response } from 'express';
 import type { AuthUser } from '../../shared/types.js';
 import { config } from './config.js';
 import { AppError } from './errors.js';
-import { BCRYPT_COST, toPublic, userRepository } from './repos/users.js';
+import { userRepository } from './storage/index.js';
+import { toPublicUser } from './storage/mapping.js';
+import { withMutationLock } from './services/mutationLock.js';
 
 // A valid bcrypt hash of a random value, used to keep the "unknown user" login
 // path taking the same time as a real compare (anti user-enumeration).
-const DUMMY_HASH = bcrypt.hashSync('unused-timing-defense', BCRYPT_COST);
+const DUMMY_HASH = bcrypt.hashSync('unused-timing-defense', config.bcryptCost);
 
 /**
  * Check a username/password pair. Returns the public user on success, null on
@@ -17,7 +20,7 @@ const DUMMY_HASH = bcrypt.hashSync('unused-timing-defense', BCRYPT_COST);
  * account. Timing-safe against user enumeration (see DUMMY_HASH).
  */
 export async function verifyCredentials(username: string, password: string): Promise<AuthUser | null> {
-  const found = userRepository.findByUsername(username); // O(1) Map lookup
+  const found = await userRepository.findByUsername(username);
   // Always run a compare (even on unknown user) so timing doesn't reveal
   // whether the account exists.
   const hash = found?.passwordHash ?? DUMMY_HASH;
@@ -28,16 +31,26 @@ export async function verifyCredentials(username: string, password: string): Pro
   if (!found.active) {
     throw new AppError('ACCOUNT_DISABLED', 'Your account has been deactivated. Contact an administrator.', 403);
   }
-  return toPublic(found);
+  return toPublicUser(found);
 }
 
-/** Create a self-registered account. Role is ALWAYS 'user' — never client input. */
+/** Create a self-registered account. Role is ALWAYS 'user' — never client input.
+ * Uniqueness and the global cap are checked INSIDE the mutation lock (the same
+ * queue as every other write), so two concurrent registers cannot race them;
+ * the password is hashed BEFORE entering so the lock is never held across
+ * bcrypt work. */
 export async function createUser(username: string, password: string): Promise<AuthUser> {
-  // Hash BEFORE the repository's atomic check-and-insert, so the only `await`
-  // sits outside the critical section and two concurrent registers can't race.
-  const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
-  const created = userRepository.create({ username, passwordHash, role: 'user' });
-  return toPublic(created);
+  const passwordHash = await bcrypt.hash(password, config.bcryptCost);
+  return withMutationLock(async () => {
+    if (await userRepository.findByUsername(username)) {
+      throw new AppError('USERNAME_TAKEN', 'This username is already taken.', 409);
+    }
+    if ((await userRepository.count()) >= config.maxUsers) {
+      throw new AppError('USER_LIMIT', 'Registration is temporarily closed.', 503);
+    }
+    const created = await userRepository.create({ username, passwordHash, role: 'user' });
+    return toPublicUser(created);
+  });
 }
 
 /** What goes inside the JWT: identity only. Role/active are RE-CHECKED against
@@ -103,40 +116,56 @@ declare global {
  * request. That way deactivating, deleting, or demoting a user takes effect
  * immediately, even though their JWT is still cryptographically valid.
  */
-export function readUserFromCookies(cookies: Record<string, string> | undefined): AuthUser | null {
+export async function readUserFromCookies(cookies: Record<string, string> | undefined): Promise<AuthUser | null> {
   const token = cookies?.[config.cookieName];
   if (!token) return null;
   const claims = verifyToken(token);
   if (!claims) return null;
-  const fresh = userRepository.getById(claims.id);
+  const fresh = await userRepository.getById(claims.id);
   if (!fresh || !fresh.active) return null; // deleted or deactivated -> revoked
-  return toPublic(fresh); // role reflects the store, not the (possibly stale) token
+  return toPublicUser(fresh); // role reflects the store, not the (possibly stale) token
 }
 
-/** Middleware: any logged-in, active user. Populates req.user or answers 401. */
-export function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  const user = readUserFromCookies(req.cookies);
-  if (!user) {
-    res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Login required.' } });
-    return;
+/** Same resolution from a raw Cookie header — the socket handshake path. */
+export async function readUserFromCookieHeader(header: string | undefined): Promise<AuthUser | null> {
+  if (!header) return null;
+  return readUserFromCookies(cookie.parse(header));
+}
+
+/** Middleware: any logged-in, active user. Populates req.user or answers 401.
+ * Express 4 does NOT route rejected promises to the error middleware — every
+ * await here stays inside the try, and failures go through next(err). */
+export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const user = await readUserFromCookies(req.cookies);
+    if (!user) {
+      res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Login required.' } });
+      return;
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    next(err);
   }
-  req.user = user;
-  next();
 }
 
 /** Middleware: admin role required — THE server-side gate for every mutation
  * under /api/admin (and any route that mounts it). 401 unauthenticated, 403
  * for a non-admin. Role comes from the store, not the token. */
-export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
-  const user = req.user ?? readUserFromCookies(req.cookies);
-  if (!user) {
-    res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Login required.' } });
-    return;
+export async function requireAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const user = req.user ?? (await readUserFromCookies(req.cookies));
+    if (!user) {
+      res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Login required.' } });
+      return;
+    }
+    if (user.role !== 'admin') {
+      res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Admin role required.' } });
+      return;
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    next(err);
   }
-  if (user.role !== 'admin') {
-    res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Admin role required.' } });
-    return;
-  }
-  req.user = user;
-  next();
 }

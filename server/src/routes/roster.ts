@@ -9,9 +9,9 @@ import { requestTournamentId } from './scope.js';
 export const rosterRouter = Router();
 
 // Groups + teams (with membership). Any logged-in user; drives client standings.
-rosterRouter.get('/', requireAuth, (req, res, next) => {
+rosterRouter.get('/', requireAuth, async (req, res, next) => {
   try {
-    res.json({ roster: getRoster(requestTournamentId(req)) });
+    res.json({ roster: await getRoster(await requestTournamentId(req)) });
   } catch (err) {
     next(err);
   }

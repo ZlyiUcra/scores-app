@@ -7,6 +7,10 @@ import { defaultTournamentId, listTournaments } from '../services/tournaments.js
  * one they are looking at without re-implementing the resolution rule. */
 export const tournamentsRouter = Router();
 
-tournamentsRouter.get('/', requireAuth, (_req, res) => {
-  res.json({ tournaments: listTournaments(), defaultId: defaultTournamentId() });
+tournamentsRouter.get('/', requireAuth, async (_req, res, next) => {
+  try {
+    res.json({ tournaments: await listTournaments(), defaultId: await defaultTournamentId() });
+  } catch (err) {
+    next(err);
+  }
 });

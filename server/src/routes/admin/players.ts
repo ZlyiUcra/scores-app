@@ -13,15 +13,15 @@ import { adminMutationLimiter } from './mutationLimiter.js';
 export const adminPlayersRouter = Router();
 
 // Add a player to a team. The team comes from the URL, never the body.
-adminPlayersRouter.post('/teams/:id/players', adminMutationLimiter, (req, res, next) => {
+adminPlayersRouter.post('/teams/:id/players', adminMutationLimiter, async (req, res, next) => {
   const parsed = createPlayerSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
     return;
   }
   try {
-    const { player, tournamentId } = createPlayer(req.params.id, parsed.data);
-    broadcastRoster(tournamentId, getRoster(tournamentId)); // squads ride the roster snapshot
+    const { player, tournamentId } = await createPlayer(req.params.id, parsed.data);
+    broadcastRoster(tournamentId, await getRoster(tournamentId)); // squads ride the roster snapshot
     audit(req.user!.id, 'player.create', player.id);
     res.status(201).json({ player });
   } catch (err) {
@@ -30,15 +30,15 @@ adminPlayersRouter.post('/teams/:id/players', adminMutationLimiter, (req, res, n
 });
 
 // Edit a player (name/number/position). Team is not editable — delete + re-add.
-adminPlayersRouter.patch('/players/:id', adminMutationLimiter, (req, res, next) => {
+adminPlayersRouter.patch('/players/:id', adminMutationLimiter, async (req, res, next) => {
   const parsed = updatePlayerSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
     return;
   }
   try {
-    const { player, tournamentId } = updatePlayer(req.params.id, parsed.data);
-    broadcastRoster(tournamentId, getRoster(tournamentId));
+    const { player, tournamentId } = await updatePlayer(req.params.id, parsed.data);
+    broadcastRoster(tournamentId, await getRoster(tournamentId));
     audit(req.user!.id, `player.update(${JSON.stringify(parsed.data)})`, req.params.id);
     res.json({ player });
   } catch (err) {
@@ -46,10 +46,10 @@ adminPlayersRouter.patch('/players/:id', adminMutationLimiter, (req, res, next) 
   }
 });
 
-adminPlayersRouter.delete('/players/:id', adminMutationLimiter, (req, res, next) => {
+adminPlayersRouter.delete('/players/:id', adminMutationLimiter, async (req, res, next) => {
   try {
-    const tournamentId = removePlayer(req.params.id);
-    broadcastRoster(tournamentId, getRoster(tournamentId));
+    const tournamentId = await removePlayer(req.params.id);
+    broadcastRoster(tournamentId, await getRoster(tournamentId));
     audit(req.user!.id, 'player.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {

@@ -5,13 +5,11 @@ import {
   resolveBracket,
   type BracketResult,
 } from '../../../shared/tournament.js';
-import { matchRepository } from '../repos/matches.js';
-import { teamRepository } from '../repos/teams.js';
-import { groupRepository } from '../repos/groups.js';
-import { bracketRepository } from '../repos/bracket.js';
+import { bracketRepository, groupRepository, matchRepository, teamRepository } from '../storage/index.js';
 import type { UpdateBracketInput } from '../validation.js';
 import { AppError } from '../errors.js';
 import { assertTournamentEditable } from './tournamentLock.js';
+import { withMutationLock } from './mutationLock.js';
 
 // Deliberately NOT guarded by assertBracketNotStarted: these writes are what
 // that lock protects everything else from, plus its escape hatch (reset).
@@ -21,30 +19,33 @@ import { assertTournamentEditable } from './tournamentLock.js';
 // view annotates symbolic seeds with `projected` teams from the current
 // (live) standings. Write validation below resolves STRICTLY — never copy
 // this option into the hypothetical check in updateBracketSlot.
-function resolvedBracket(tournamentId: string): BracketView {
+async function resolvedBracket(tournamentId: string): Promise<BracketView> {
   return resolveBracket(
-    groupRepository.list(tournamentId),
-    teamRepository.listSeed(tournamentId),
-    matchRepository.list(tournamentId),
-    bracketRepository.results(tournamentId),
+    await groupRepository.list(tournamentId),
+    await teamRepository.listSeed(tournamentId),
+    await matchRepository.list(tournamentId),
+    await bracketRepository.results(tournamentId),
     { includePreview: true },
   );
 }
 
 /** Full knockout view (formability + resolved matches) of one tournament. */
-export function listBracket(tournamentId: string): BracketView {
+export function listBracket(tournamentId: string): Promise<BracketView> {
   return resolvedBracket(tournamentId);
 }
 
 /** The slot ids that exist for the tournament's group setup (empty if not formable). */
-function currentSlotIds(tournamentId: string): Set<BracketSlotId> {
-  const { formable, size } = computeSize(groupRepository.list(tournamentId), teamRepository.listSeed(tournamentId));
+async function currentSlotIds(tournamentId: string): Promise<Set<BracketSlotId>> {
+  const { formable, size } = computeSize(
+    await groupRepository.list(tournamentId),
+    await teamRepository.listSeed(tournamentId),
+  );
   if (!formable) return new Set();
   return new Set(generateBracket(size).map((s) => s.slot));
 }
 
-function assertSlot(tournamentId: string, slotRaw: string): BracketSlotId {
-  if (!currentSlotIds(tournamentId).has(slotRaw)) {
+async function assertSlot(tournamentId: string, slotRaw: string): Promise<BracketSlotId> {
+  if (!(await currentSlotIds(tournamentId)).has(slotRaw)) {
     throw new AppError('NOT_FOUND', `Unknown knockout slot ${slotRaw}.`, 404);
   }
   return slotRaw;
@@ -62,89 +63,97 @@ function assertSlot(tournamentId: string, slotRaw: string): BracketSlotId {
  * The three override checks below (existence, self-play, hypothetical
  * resolution) are only correct TOGETHER — do not split or share them.
  */
-export function updateBracketSlot(tournamentId: string, slotRaw: string, input: UpdateBracketInput): BracketView {
-  assertTournamentEditable(tournamentId);
-  const slot = assertSlot(tournamentId, slotRaw);
-  const current = bracketRepository.get(tournamentId, slot);
-  if (input.expectedRev !== undefined && input.expectedRev !== current.rev) {
-    throw new AppError(
-      'REV_CONFLICT',
-      `Stale update: expected rev ${input.expectedRev} but current is ${current.rev}.`,
-      409,
-    );
-  }
-
-  const next: BracketResult = {
-    homeScore: input.homeScore ?? current.homeScore,
-    awayScore: input.awayScore ?? current.awayScore,
-    homePens: input.homePens !== undefined ? input.homePens : current.homePens,
-    awayPens: input.awayPens !== undefined ? input.awayPens : current.awayPens,
-    status: input.status ?? current.status,
-    field: input.field ?? current.field,
-    startsAt: input.startsAt !== undefined ? input.startsAt : current.startsAt,
-    homeOverrideId: input.homeOverrideId !== undefined ? input.homeOverrideId : current.homeOverrideId,
-    awayOverrideId: input.awayOverrideId !== undefined ? input.awayOverrideId : current.awayOverrideId,
-    rev: current.rev + 1,
-  };
-
-  // A pin must reference an existing team OF THIS TOURNAMENT (team deletion
-  // is locked while any override exists — see hasStarted — so a stored pin
-  // can never dangle). A foreign tournament's team is as nonexistent here as
-  // an unknown id.
-  const homeOverride = next.homeOverrideId != null ? teamRepository.getStored(next.homeOverrideId) : null;
-  if (next.homeOverrideId != null && (!homeOverride || homeOverride.tournamentId !== tournamentId)) {
-    throw new AppError('NOT_FOUND', `Override team ${next.homeOverrideId} not found.`, 404);
-  }
-  const awayOverride = next.awayOverrideId != null ? teamRepository.getStored(next.awayOverrideId) : null;
-  if (next.awayOverrideId != null && (!awayOverride || awayOverride.tournamentId !== tournamentId)) {
-    throw new AppError('NOT_FOUND', `Override team ${next.awayOverrideId} not found.`, 404);
-  }
-  if (next.homeOverrideId != null && next.homeOverrideId === next.awayOverrideId) {
-    throw new AppError('INVALID', 'A team cannot play itself.', 400);
-  }
-
-  // A slot can only be played once its two sides resolve to two DIFFERENT
-  // teams. Resolve against the HYPOTHETICAL store including this write, so a
-  // patch that both pins a side and starts the match is judged on its outcome
-  // (this also catches the propagated duplicate: a pinned team meeting itself
-  // arriving as a derived winner of another slot).
-  if (next.status !== 'scheduled') {
-    const hypothetical = bracketRepository.results(tournamentId);
-    hypothetical[slot] = next;
-    const view = resolveBracket(
-      groupRepository.list(tournamentId),
-      teamRepository.listSeed(tournamentId),
-      matchRepository.list(tournamentId),
-      hypothetical,
-    );
-    const bm = view.matches.find((b) => b.slot === slot);
-    if (!bm || !('team' in bm.home) || !('team' in bm.away)) {
-      throw new AppError('SLOT_NOT_READY', 'This knockout match has no teams yet.', 409);
-    }
-    if (bm.home.team.id === bm.away.team.id) {
-      throw new AppError('INVALID', 'Both sides of this match resolve to the same team.', 400);
-    }
-  }
-
-  // Knockouts cannot end level: a finished draw needs a decisive shootout.
-  if (next.status === 'finished' && next.homeScore === next.awayScore) {
-    if (next.homePens == null || next.awayPens == null || next.homePens === next.awayPens) {
+export function updateBracketSlot(
+  tournamentId: string,
+  slotRaw: string,
+  input: UpdateBracketInput,
+): Promise<BracketView> {
+  return withMutationLock(async () => {
+    await assertTournamentEditable(tournamentId);
+    const slot = await assertSlot(tournamentId, slotRaw);
+    const current = await bracketRepository.get(tournamentId, slot);
+    if (input.expectedRev !== undefined && input.expectedRev !== current.rev) {
       throw new AppError(
-        'DRAW_UNRESOLVED',
-        'A level knockout match needs a penalty result to decide a winner.',
-        400,
+        'REV_CONFLICT',
+        `Stale update: expected rev ${input.expectedRev} but current is ${current.rev}.`,
+        409,
       );
     }
-  }
 
-  bracketRepository.save(tournamentId, slot, next);
-  return resolvedBracket(tournamentId);
+    const next: BracketResult = {
+      homeScore: input.homeScore ?? current.homeScore,
+      awayScore: input.awayScore ?? current.awayScore,
+      homePens: input.homePens !== undefined ? input.homePens : current.homePens,
+      awayPens: input.awayPens !== undefined ? input.awayPens : current.awayPens,
+      status: input.status ?? current.status,
+      field: input.field ?? current.field,
+      startsAt: input.startsAt !== undefined ? input.startsAt : current.startsAt,
+      homeOverrideId: input.homeOverrideId !== undefined ? input.homeOverrideId : current.homeOverrideId,
+      awayOverrideId: input.awayOverrideId !== undefined ? input.awayOverrideId : current.awayOverrideId,
+      rev: current.rev + 1,
+    };
+
+    // A pin must reference an existing team OF THIS TOURNAMENT (team deletion
+    // is locked while any override exists — see hasStarted — so a stored pin
+    // can never dangle). A foreign tournament's team is as nonexistent here as
+    // an unknown id.
+    const homeOverride = next.homeOverrideId != null ? await teamRepository.getStored(next.homeOverrideId) : null;
+    if (next.homeOverrideId != null && (!homeOverride || homeOverride.tournamentId !== tournamentId)) {
+      throw new AppError('NOT_FOUND', `Override team ${next.homeOverrideId} not found.`, 404);
+    }
+    const awayOverride = next.awayOverrideId != null ? await teamRepository.getStored(next.awayOverrideId) : null;
+    if (next.awayOverrideId != null && (!awayOverride || awayOverride.tournamentId !== tournamentId)) {
+      throw new AppError('NOT_FOUND', `Override team ${next.awayOverrideId} not found.`, 404);
+    }
+    if (next.homeOverrideId != null && next.homeOverrideId === next.awayOverrideId) {
+      throw new AppError('INVALID', 'A team cannot play itself.', 400);
+    }
+
+    // A slot can only be played once its two sides resolve to two DIFFERENT
+    // teams. Resolve against the HYPOTHETICAL store including this write, so a
+    // patch that both pins a side and starts the match is judged on its outcome
+    // (this also catches the propagated duplicate: a pinned team meeting itself
+    // arriving as a derived winner of another slot).
+    if (next.status !== 'scheduled') {
+      const hypothetical = await bracketRepository.results(tournamentId);
+      hypothetical[slot] = next;
+      const view = resolveBracket(
+        await groupRepository.list(tournamentId),
+        await teamRepository.listSeed(tournamentId),
+        await matchRepository.list(tournamentId),
+        hypothetical,
+      );
+      const bm = view.matches.find((b) => b.slot === slot);
+      if (!bm || !('team' in bm.home) || !('team' in bm.away)) {
+        throw new AppError('SLOT_NOT_READY', 'This knockout match has no teams yet.', 409);
+      }
+      if (bm.home.team.id === bm.away.team.id) {
+        throw new AppError('INVALID', 'Both sides of this match resolve to the same team.', 400);
+      }
+    }
+
+    // Knockouts cannot end level: a finished draw needs a decisive shootout.
+    if (next.status === 'finished' && next.homeScore === next.awayScore) {
+      if (next.homePens == null || next.awayPens == null || next.homePens === next.awayPens) {
+        throw new AppError(
+          'DRAW_UNRESOLVED',
+          'A level knockout match needs a penalty result to decide a winner.',
+          400,
+        );
+      }
+    }
+
+    await bracketRepository.save(tournamentId, slot, next);
+    return resolvedBracket(tournamentId);
+  });
 }
 
 /** Admin: clear a tournament's knockout results (needed before changing its
  * groups/matches). */
-export function resetBracket(tournamentId: string): BracketView {
-  assertTournamentEditable(tournamentId);
-  bracketRepository.reset(tournamentId);
-  return resolvedBracket(tournamentId);
+export function resetBracket(tournamentId: string): Promise<BracketView> {
+  return withMutationLock(async () => {
+    await assertTournamentEditable(tournamentId);
+    await bracketRepository.reset(tournamentId);
+    return resolvedBracket(tournamentId);
+  });
 }

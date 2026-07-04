@@ -10,55 +10,58 @@ import { requestTournamentId } from './scope.js';
  * admin-only and each write broadcasts a compact diff plus a bracket refresh
  * (a group result can re-seed the knockout). The list is tournament-scoped;
  * id-addressed routes need no scope (ids are global) and derive the
- * tournament for their broadcasts from the match itself. */
+ * tournament for their broadcasts from the match itself.
+ * Express 4 note: every await sits INSIDE the try — rejections must reach
+ * next(err) by hand, the framework won't route them. */
 export const matchesRouter = Router();
 
 // Reads require a logged-in user (any role).
-matchesRouter.get('/', requireAuth, (req, res, next) => {
+matchesRouter.get('/', requireAuth, async (req, res, next) => {
   try {
-    res.json({ matches: listMatches(requestTournamentId(req)) });
+    res.json({ matches: await listMatches(await requestTournamentId(req)) });
   } catch (err) {
     next(err);
   }
 });
 
-matchesRouter.get('/:id', requireAuth, (req, res, next) => {
+matchesRouter.get('/:id', requireAuth, async (req, res, next) => {
   try {
-    res.json({ match: getMatch(req.params.id) });
+    res.json({ match: await getMatch(req.params.id) });
   } catch (err) {
     next(err);
   }
 });
 
 // Writes require admin. Client-side hiding of these controls is UX only;
-// this middleware is the actual gate.
-matchesRouter.patch('/:id', requireAdmin, (req, res, next) => {
+// this middleware is the actual gate. Broadcast payloads (incl. the bracket
+// recompute) are built AFTER the service call returns — outside the lock.
+matchesRouter.patch('/:id', requireAdmin, async (req, res, next) => {
   const parsed = updateMatchSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
     return;
   }
   try {
-    const { update, tournamentId } = applyUpdate(req.params.id, parsed.data);
+    const { update, tournamentId } = await applyUpdate(req.params.id, parsed.data);
     broadcastMatchUpdate(tournamentId, update);
     // A group result may complete a group and re-seed the bracket.
-    broadcastBracket(tournamentId, listBracket(tournamentId));
+    broadcastBracket(tournamentId, await listBracket(tournamentId));
     res.json({ update });
   } catch (err) {
     next(err);
   }
 });
 
-matchesRouter.post('/:id/goal', requireAdmin, (req, res, next) => {
+matchesRouter.post('/:id/goal', requireAdmin, async (req, res, next) => {
   const parsed = goalSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
     return;
   }
   try {
-    const { update, tournamentId } = applyGoal(req.params.id, parsed.data);
+    const { update, tournamentId } = await applyGoal(req.params.id, parsed.data);
     broadcastMatchUpdate(tournamentId, update);
-    broadcastBracket(tournamentId, listBracket(tournamentId));
+    broadcastBracket(tournamentId, await listBracket(tournamentId));
     res.json({ update });
   } catch (err) {
     next(err);

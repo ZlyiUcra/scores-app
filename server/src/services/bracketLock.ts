@@ -1,4 +1,4 @@
-import { bracketRepository } from '../repos/bracket.js';
+import { bracketRepository } from '../storage/index.js';
 import { AppError } from '../errors.js';
 
 /**
@@ -11,10 +11,10 @@ import { AppError } from '../errors.js';
  * explicitly resets the knockout stage.
  *
  * This is the ONE invariant shared by the match and roster services; it stays
- * a leaf module (repos-only imports) so neither service has to import a peer.
+ * a leaf module (storage-only imports) so neither service has to import a peer.
  */
-export function assertBracketNotStarted(tournamentId: string): void {
-  if (bracketRepository.hasStarted(tournamentId)) {
+export async function assertBracketNotStarted(tournamentId: string): Promise<void> {
+  if (await bracketRepository.hasStarted(tournamentId)) {
     throw new AppError(
       'BRACKET_STARTED',
       'Reset the knockout stage before changing groups, teams or group matches.',

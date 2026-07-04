@@ -1,50 +1,21 @@
 import crypto from 'node:crypto';
-import type { Tournament, TournamentStatus } from '../../../shared/types.js';
-import { AppError } from '../errors.js';
-import { db, transaction } from '../db.js';
+import type { Tournament, TournamentStatus } from '../../../../shared/types.js';
+import { AppError } from '../../errors.js';
+import type { StoredTournament, TournamentRepository } from '../contracts.js';
+import { toTournamentDto } from '../mapping.js';
+import type { SqliteContext } from './db.js';
 
-/** Stored tournament carries a creation timestamp (stable ordering + the
- * default-tournament resolution key). */
-interface StoredTournament extends Tournament {
-  createdAt: string;
-}
-
-/**
- * Tournament registry — the top-level container. Every group/team/match/
- * bracket row references a tournament by id. db.ts guarantees at least one
- * tournament exists at boot (it adopts pre-tournament data into a default).
- * Emptiness guards for removal live in the SERVICE.
- */
-export interface TournamentRepository {
-  /** All tournaments in stable creation order (createdAt, then id). */
-  list(): Tournament[];
-  /** Tournament by id, or undefined. */
-  get(id: string): Tournament | undefined;
-  /** Create a tournament with a fresh uuid; fields arrive pre-validated. */
-  create(input: { name: string; startsAt: string | null; endsAt: string | null; status: TournamentStatus }): Tournament;
-  /** Patch name/dates/status. */
-  update(
-    id: string,
-    patch: { name?: string; startsAt?: string | null; endsAt?: string | null; status?: TournamentStatus },
-  ): Tournament;
-  /** Delete a tournament. Emptiness (no groups/teams/matches/bracket rows) and
-   * the last-tournament guard are the SERVICE's checks. */
-  remove(id: string): void;
-}
-
-function toDto(t: StoredTournament): Tournament {
-  return { id: t.id, name: t.name, startsAt: t.startsAt, endsAt: t.endsAt, status: t.status };
-}
-
-class SqliteTournamentRepository implements TournamentRepository {
+/** SQLite tournaments: full collection in a Map, persist = rewrite-all inside
+ * a transaction (driver-private detail — fine at this data size). */
+export class SqliteTournamentRepository implements TournamentRepository {
   private byId = new Map<string, StoredTournament>();
 
-  constructor() {
+  constructor(private ctx: SqliteContext) {
     this.load();
   }
 
   private load(): void {
-    const rows = db
+    const rows = this.ctx.db
       .prepare('SELECT id, name, startsAt, endsAt, status, createdAt FROM tournaments')
       .all() as Array<{
       id: string;
@@ -63,23 +34,30 @@ class SqliteTournamentRepository implements TournamentRepository {
   }
 
   private persist(): void {
-    transaction(() => {
-      db.exec('DELETE FROM tournaments');
-      const ins = db.prepare('INSERT INTO tournaments (id, name, startsAt, endsAt, status, createdAt) VALUES (?, ?, ?, ?, ?, ?)');
+    this.ctx.transaction(() => {
+      this.ctx.db.exec('DELETE FROM tournaments');
+      const ins = this.ctx.db.prepare(
+        'INSERT INTO tournaments (id, name, startsAt, endsAt, status, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
+      );
       for (const t of this.byId.values()) ins.run(t.id, t.name, t.startsAt, t.endsAt, t.status, t.createdAt);
     });
   }
 
-  list(): Tournament[] {
-    return Array.from(this.byId.values()).map(toDto);
+  async list(): Promise<Tournament[]> {
+    return Array.from(this.byId.values()).map(toTournamentDto);
   }
 
-  get(id: string): Tournament | undefined {
+  async get(id: string): Promise<Tournament | undefined> {
     const t = this.byId.get(id);
-    return t ? toDto(t) : undefined;
+    return t ? toTournamentDto(t) : undefined;
   }
 
-  create(input: { name: string; startsAt: string | null; endsAt: string | null; status: TournamentStatus }): Tournament {
+  async create(input: {
+    name: string;
+    startsAt: string | null;
+    endsAt: string | null;
+    status: TournamentStatus;
+  }): Promise<Tournament> {
     const tournament: StoredTournament = {
       id: crypto.randomUUID(),
       name: input.name.trim(),
@@ -96,13 +74,13 @@ class SqliteTournamentRepository implements TournamentRepository {
       this.byId.delete(tournament.id);
       throw new AppError('STORE_WRITE_FAILED', 'Could not save the tournament. Try again.', 500);
     }
-    return toDto(tournament);
+    return toTournamentDto(tournament);
   }
 
-  update(
+  async update(
     id: string,
     patch: { name?: string; startsAt?: string | null; endsAt?: string | null; status?: TournamentStatus },
-  ): Tournament {
+  ): Promise<Tournament> {
     const tournament = this.byId.get(id);
     if (!tournament) throw new AppError('NOT_FOUND', `Tournament ${id} not found.`, 404);
     const prev = { ...tournament };
@@ -117,10 +95,10 @@ class SqliteTournamentRepository implements TournamentRepository {
       this.byId.set(id, prev);
       throw new AppError('STORE_WRITE_FAILED', 'Could not update the tournament. Try again.', 500);
     }
-    return toDto(tournament);
+    return toTournamentDto(tournament);
   }
 
-  remove(id: string): void {
+  async remove(id: string): Promise<void> {
     const prev = this.byId.get(id);
     if (!prev) throw new AppError('NOT_FOUND', `Tournament ${id} not found.`, 404);
     this.byId.delete(id);
@@ -133,6 +111,3 @@ class SqliteTournamentRepository implements TournamentRepository {
     }
   }
 }
-
-/** Singleton instance every service shares (state lives in one process). */
-export const tournamentRepository: TournamentRepository = new SqliteTournamentRepository();

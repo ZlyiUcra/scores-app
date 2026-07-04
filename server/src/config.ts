@@ -1,4 +1,6 @@
 import crypto from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const NODE_ENV = process.env.NODE_ENV ?? 'development';
 const isProd = NODE_ENV === 'production';
@@ -20,6 +22,8 @@ function resolveJwtSecret(): string {
   return generated;
 }
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** All environment-derived settings, resolved once at boot. */
 export const config = {
   nodeEnv: NODE_ENV,
@@ -30,4 +34,14 @@ export const config = {
   tokenTtlSeconds: 60 * 60 * 8, // 8h
   cookieName: 'scores_token',
   clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
+  /** Where the storage driver keeps its files — overridable so a host with a
+   * persistent disk can point it at the mount. */
+  dataDir: process.env.DATA_DIR ?? path.join(__dirname, '..', 'data'),
+  /** Cost for every bcrypt hash (auth + seeded accounts). */
+  bcryptCost: 12,
+  /** Global account cap — blunts registration flooding. */
+  maxUsers: 500,
+  /** Password of the seeded admin (first boot / empty users table only). On a
+   * public deploy the well-known dev default MUST be overridden. */
+  adminPassword: process.env.ADMIN_PASSWORD?.trim() || 'admin123',
 };

@@ -93,11 +93,15 @@ authRouter.post('/logout', (_req, res) => {
   res.json({ ok: true });
 });
 
-authRouter.get('/me', (req, res) => {
-  const user = readUserFromCookies(req.cookies);
-  if (!user) {
-    res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Not logged in.' } });
-    return;
+authRouter.get('/me', async (req, res, next) => {
+  try {
+    const user = await readUserFromCookies(req.cookies);
+    if (!user) {
+      res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Not logged in.' } });
+      return;
+    }
+    res.json({ user });
+  } catch (err) {
+    next(err);
   }
-  res.json({ user });
 });

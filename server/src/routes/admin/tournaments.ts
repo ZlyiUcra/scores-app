@@ -10,14 +10,14 @@ import { adminMutationLimiter } from './mutationLimiter.js';
  * scoped events. Mounted under /api/admin (auth applied in the parent). */
 export const adminTournamentsRouter = Router();
 
-adminTournamentsRouter.post('/tournaments', adminMutationLimiter, (req, res, next) => {
+adminTournamentsRouter.post('/tournaments', adminMutationLimiter, async (req, res, next) => {
   const parsed = createTournamentSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
     return;
   }
   try {
-    const tournament = createTournament(parsed.data);
+    const tournament = await createTournament(parsed.data);
     audit(req.user!.id, 'tournament.create', tournament.id);
     res.status(201).json({ tournament });
   } catch (err) {
@@ -25,14 +25,14 @@ adminTournamentsRouter.post('/tournaments', adminMutationLimiter, (req, res, nex
   }
 });
 
-adminTournamentsRouter.patch('/tournaments/:id', adminMutationLimiter, (req, res, next) => {
+adminTournamentsRouter.patch('/tournaments/:id', adminMutationLimiter, async (req, res, next) => {
   const parsed = updateTournamentSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
     return;
   }
   try {
-    const tournament = updateTournament(req.params.id, parsed.data);
+    const tournament = await updateTournament(req.params.id, parsed.data);
     audit(req.user!.id, `tournament.update(${JSON.stringify(parsed.data)})`, req.params.id);
     res.json({ tournament });
   } catch (err) {
@@ -40,9 +40,9 @@ adminTournamentsRouter.patch('/tournaments/:id', adminMutationLimiter, (req, res
   }
 });
 
-adminTournamentsRouter.delete('/tournaments/:id', adminMutationLimiter, (req, res, next) => {
+adminTournamentsRouter.delete('/tournaments/:id', adminMutationLimiter, async (req, res, next) => {
   try {
-    removeTournament(req.params.id); // 409 unless empty and not the last one
+    await removeTournament(req.params.id); // 409 unless empty and not the last one
     audit(req.user!.id, 'tournament.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {

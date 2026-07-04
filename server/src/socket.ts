@@ -1,6 +1,5 @@
 import type { Server as HttpServer } from 'node:http';
-import { Server } from 'socket.io';
-import cookie from 'cookie';
+import { Server, type Socket } from 'socket.io';
 import type {
   BracketView,
   ClientToServerEvents,
@@ -12,13 +11,11 @@ import type {
 } from '../../shared/types.js';
 import { SOCKET_EVENTS } from '../../shared/types.js';
 import { config } from './config.js';
-import { verifyToken } from './auth.js';
-import { userRepository } from './repos/users.js';
-import { tournamentRepository } from './repos/tournaments.js';
+import { readUserFromCookieHeader } from './auth.js';
 import { listMatches } from './services/matches.js';
 import { getRoster } from './services/roster.js';
 import { listBracket } from './services/bracket.js';
-import { defaultTournamentId } from './services/tournaments.js';
+import { defaultTournamentId, resolveTournamentId } from './services/tournaments.js';
 
 let io: Server<ClientToServerEvents, ServerToClientEvents> | null = null;
 
@@ -31,6 +28,35 @@ function userRoom(userId: string): string {
  * client watching an archive never receives another tournament's updates. */
 function tournamentRoom(tournamentId: string): string {
   return `tournament:${tournamentId}`;
+}
+
+/** Join the socket to its rooms and push the authoritative snapshot (resync)
+ * so a client that missed events while offline is never left with a stale
+ * score. Async work of the `connection` handler, isolated so its failure can
+ * be handled (socket.io does not await listeners). */
+async function attachSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>): Promise<void> {
+  // Per-user room so an admin can force-disconnect a user's live sockets on
+  // deactivation/deletion (see disconnectUser).
+  const userId = (socket.data as { userId?: string }).userId;
+  if (userId) await socket.join(userRoom(userId));
+
+  // The tournament this socket watches. An unknown/absent id falls back to
+  // the default tournament (never an error — a stale id after a deletion
+  // must not kill live updates).
+  const requested = (socket.handshake.auth as { tournamentId?: unknown }).tournamentId;
+  let tournamentId: string;
+  try {
+    tournamentId = await resolveTournamentId(typeof requested === 'string' ? requested : undefined);
+  } catch {
+    tournamentId = await defaultTournamentId();
+  }
+  await socket.join(tournamentRoom(tournamentId));
+
+  const snapshot: Match[] = await listMatches(tournamentId);
+  socket.emit(SOCKET_EVENTS.matchSnapshot, snapshot);
+  // Roster (groups + teams) drives client standings; the bracket is derived.
+  socket.emit(SOCKET_EVENTS.rosterSnapshot, await getRoster(tournamentId));
+  socket.emit(SOCKET_EVENTS.bracketSnapshot, await listBracket(tournamentId));
 }
 
 /**
@@ -51,42 +77,31 @@ export function initSocket(httpServer: HttpServer): void {
 
   // Authenticate the handshake from the httpOnly cookie, re-loading the user
   // from the store (not trusting the token) so a deactivated/deleted account
-  // can't open a fresh socket.
+  // can't open a fresh socket. socket.io does NOT await an async middleware —
+  // the promise is bridged to next() explicitly so a rejection becomes a
+  // failed handshake, never an unhandled rejection.
   io.use((socket, next) => {
-    const header = socket.request.headers.cookie;
-    if (!header) return next(new Error('unauthenticated'));
-    const parsed = cookie.parse(header);
-    const token = parsed[config.cookieName];
-    const claims = token ? verifyToken(token) : null;
-    const fresh = claims ? userRepository.getById(claims.id) : undefined;
-    if (!fresh || !fresh.active) return next(new Error('unauthenticated'));
-    (socket.data as { userId?: string }).userId = fresh.id;
-    next();
+    readUserFromCookieHeader(socket.request.headers.cookie).then(
+      (user) => {
+        if (!user) return next(new Error('unauthenticated'));
+        (socket.data as { userId?: string }).userId = user.id;
+        next();
+      },
+      (err: unknown) => {
+        console.error('[socket] handshake auth failed:', err);
+        next(new Error('unauthenticated'));
+      },
+    );
   });
 
   io.on('connection', (socket) => {
-    // Per-user room so an admin can force-disconnect a user's live sockets on
-    // deactivation/deletion (see disconnectUser).
-    const userId = (socket.data as { userId?: string }).userId;
-    if (userId) socket.join(userRoom(userId));
-
-    // The tournament this socket watches. An unknown/absent id falls back to
-    // the default tournament (never an error — a stale id after a deletion
-    // must not kill live updates).
-    const requested = (socket.handshake.auth as { tournamentId?: unknown }).tournamentId;
-    const tournamentId =
-      typeof requested === 'string' && tournamentRepository.get(requested)
-        ? requested
-        : defaultTournamentId();
-    socket.join(tournamentRoom(tournamentId));
-
-    // Reconnect resync: push the authoritative snapshot immediately so a client
-    // that missed events while offline is never left with a stale score.
-    const snapshot: Match[] = listMatches(tournamentId);
-    socket.emit(SOCKET_EVENTS.matchSnapshot, snapshot);
-    // Roster (groups + teams) drives client standings; the bracket is derived.
-    socket.emit(SOCKET_EVENTS.rosterSnapshot, getRoster(tournamentId));
-    socket.emit(SOCKET_EVENTS.bracketSnapshot, listBracket(tournamentId));
+    // socket.io does not await listeners either; a failed resync closes the
+    // socket so the client retries with a clean handshake instead of sitting
+    // on a half-initialized connection.
+    attachSocket(socket).catch((err: unknown) => {
+      console.error('[socket] connection setup failed:', err);
+      socket.disconnect(true);
+    });
   });
 }
 

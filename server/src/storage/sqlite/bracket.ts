@@ -1,38 +1,15 @@
-import type { BracketSlotId, MatchStatus } from '../../../shared/types.js';
-import { emptyBracketResult, type BracketResult } from '../../../shared/tournament.js';
-import { AppError } from '../errors.js';
-import { db, transaction } from '../db.js';
+import type { BracketSlotId, MatchStatus } from '../../../../shared/types.js';
+import { emptyBracketResult, type BracketResult } from '../../../../shared/tournament.js';
+import { AppError } from '../../errors.js';
+import type { BracketRepository } from '../contracts.js';
+import type { SqliteContext } from './db.js';
 
-/**
- * Bracket store — per tournament, a partial map of slotId -> result (the key
- * is the (tournamentId, slot) pair). Deliberately narrow: aside from the
- * sanctioned per-side overrides (validated in the service), it can only set a
- * slot's RESULT, so the seed/format integrity can't be bypassed here. Size is
- * NOT this store's concern: which slots exist is a pure function of the
- * tournament's group setup, computed elsewhere.
- */
-export interface BracketRepository {
-  /** A tournament's written slot results (partial), for the pure resolver. */
-  results(tournamentId: string): Partial<Record<BracketSlotId, BracketResult>>;
-  /** Stored result for a slot, or an empty scheduled result. */
-  get(tournamentId: string, slot: BracketSlotId): BracketResult;
-  /** Insert-or-replace one slot's result (slot validity is the service's check). */
-  save(tournamentId: string, slot: BracketSlotId, result: BracketResult): void;
-  /** Clear a tournament's slots (needed before its bracket size can change). */
-  reset(tournamentId: string): void;
-  /** True once the tournament's knockout was touched: any slot off `scheduled`
-   * OR any pinned participant. Both couple bracket state to the group setup,
-   * so both must lock group/team mutations until an explicit reset. */
-  hasStarted(tournamentId: string): boolean;
-  /** Whether any slot row exists at all (tournament-removal guard). */
-  hasAny(tournamentId: string): boolean;
-}
-
-class SqliteBracketRepository implements BracketRepository {
-  /** tournamentId -> (slot -> result). */
+/** SQLite bracket: tournamentId -> (slot -> result) in nested Maps, persist =
+ * rewrite-all inside a transaction. */
+export class SqliteBracketRepository implements BracketRepository {
   private byTournament = new Map<string, Map<BracketSlotId, BracketResult>>();
 
-  constructor() {
+  constructor(private ctx: SqliteContext) {
     this.load();
   }
 
@@ -46,7 +23,7 @@ class SqliteBracketRepository implements BracketRepository {
   }
 
   private load(): void {
-    const rows = db
+    const rows = this.ctx.db
       .prepare(
         'SELECT tournamentId, slot, homeScore, awayScore, homePens, awayPens, status, field, startsAt, homeOverrideId, awayOverrideId, rev FROM bracket',
       )
@@ -83,9 +60,9 @@ class SqliteBracketRepository implements BracketRepository {
   }
 
   private persist(): void {
-    transaction(() => {
-      db.exec('DELETE FROM bracket');
-      const ins = db.prepare(
+    this.ctx.transaction(() => {
+      this.ctx.db.exec('DELETE FROM bracket');
+      const ins = this.ctx.db.prepare(
         'INSERT INTO bracket (tournamentId, slot, homeScore, awayScore, homePens, awayPens, status, field, startsAt, homeOverrideId, awayOverrideId, rev) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       );
       for (const [tournamentId, slots] of this.byTournament) {
@@ -109,18 +86,18 @@ class SqliteBracketRepository implements BracketRepository {
     });
   }
 
-  results(tournamentId: string): Partial<Record<BracketSlotId, BracketResult>> {
+  async results(tournamentId: string): Promise<Partial<Record<BracketSlotId, BracketResult>>> {
     const out: Partial<Record<BracketSlotId, BracketResult>> = {};
     const slots = this.byTournament.get(tournamentId);
     if (slots) for (const [slot, r] of slots) out[slot] = r;
     return out;
   }
 
-  get(tournamentId: string, slot: BracketSlotId): BracketResult {
+  async get(tournamentId: string, slot: BracketSlotId): Promise<BracketResult> {
     return this.byTournament.get(tournamentId)?.get(slot) ?? emptyBracketResult();
   }
 
-  save(tournamentId: string, slot: BracketSlotId, result: BracketResult): void {
+  async save(tournamentId: string, slot: BracketSlotId, result: BracketResult): Promise<void> {
     const slots = this.slots(tournamentId);
     const prev = slots.get(slot);
     slots.set(slot, result);
@@ -134,7 +111,7 @@ class SqliteBracketRepository implements BracketRepository {
     }
   }
 
-  reset(tournamentId: string): void {
+  async reset(tournamentId: string): Promise<void> {
     const prev = this.byTournament.get(tournamentId);
     if (!prev || prev.size === 0) return;
     this.byTournament.set(tournamentId, new Map());
@@ -147,7 +124,7 @@ class SqliteBracketRepository implements BracketRepository {
     }
   }
 
-  hasStarted(tournamentId: string): boolean {
+  async hasStarted(tournamentId: string): Promise<boolean> {
     const slots = this.byTournament.get(tournamentId);
     if (!slots) return false;
     for (const r of slots.values()) {
@@ -156,11 +133,8 @@ class SqliteBracketRepository implements BracketRepository {
     return false;
   }
 
-  hasAny(tournamentId: string): boolean {
+  async hasAny(tournamentId: string): Promise<boolean> {
     const slots = this.byTournament.get(tournamentId);
     return slots !== undefined && slots.size > 0;
   }
 }
-
-/** Singleton instance every service shares (state lives in one process). */
-export const bracketRepository: BracketRepository = new SqliteBracketRepository();

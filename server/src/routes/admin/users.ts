@@ -9,16 +9,20 @@ import { adminMutationLimiter } from './mutationLimiter.js';
  * Mounted under /api/admin (auth applied once in the parent router). */
 export const adminUsersRouter = Router();
 
-adminUsersRouter.get('/users', (req, res) => {
+adminUsersRouter.get('/users', async (req, res, next) => {
   const parsed = listUsersQuerySchema.safeParse(req.query);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'Invalid query.' } });
     return;
   }
-  res.json(listUsers(parsed.data));
+  try {
+    res.json(await listUsers(parsed.data));
+  } catch (err) {
+    next(err);
+  }
 });
 
-adminUsersRouter.patch('/users/:id', adminMutationLimiter, (req, res, next) => {
+adminUsersRouter.patch('/users/:id', adminMutationLimiter, async (req, res, next) => {
   const parsed = updateUserSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
@@ -26,7 +30,7 @@ adminUsersRouter.patch('/users/:id', adminMutationLimiter, (req, res, next) => {
   }
   try {
     const actor = req.user!.id;
-    const view = updateUser(req.params.id, actor, parsed.data);
+    const view = await updateUser(req.params.id, actor, parsed.data);
     // Revocation: if we just deactivated them, cut their live sockets now.
     if (parsed.data.active === false) disconnectUser(req.params.id);
     audit(actor, `user.update(${JSON.stringify(parsed.data)})`, req.params.id);
@@ -36,10 +40,10 @@ adminUsersRouter.patch('/users/:id', adminMutationLimiter, (req, res, next) => {
   }
 });
 
-adminUsersRouter.delete('/users/:id', adminMutationLimiter, (req, res, next) => {
+adminUsersRouter.delete('/users/:id', adminMutationLimiter, async (req, res, next) => {
   try {
     const actor = req.user!.id;
-    deleteUser(req.params.id, actor);
+    await deleteUser(req.params.id, actor);
     disconnectUser(req.params.id); // revoke live sockets of the deleted user
     audit(actor, 'user.delete', req.params.id);
     res.json({ ok: true });

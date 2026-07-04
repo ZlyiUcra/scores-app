@@ -22,9 +22,9 @@ const bracketMutationLimiter = rateLimit({
 });
 
 // Read: any logged-in user.
-bracketRouter.get('/', requireAuth, (req, res, next) => {
+bracketRouter.get('/', requireAuth, async (req, res, next) => {
   try {
-    res.json({ bracket: listBracket(requestTournamentId(req)) });
+    res.json({ bracket: await listBracket(await requestTournamentId(req)) });
   } catch (err) {
     next(err);
   }
@@ -33,15 +33,15 @@ bracketRouter.get('/', requireAuth, (req, res, next) => {
 // Write one slot's result and/or participant pins: admin only. The slot comes
 // from the URL; override ids in the body are the one sanctioned way to place a
 // team manually (validated in the service).
-bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, (req, res, next) => {
+bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, async (req, res, next) => {
   const parsed = updateBracketSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
     return;
   }
   try {
-    const tournamentId = requestTournamentId(req);
-    const bracket = updateBracketSlot(tournamentId, req.params.slot, parsed.data);
+    const tournamentId = await requestTournamentId(req);
+    const bracket = await updateBracketSlot(tournamentId, req.params.slot, parsed.data);
     // Rewiring who plays is the highest-impact bracket write — leave a trace.
     if (parsed.data.homeOverrideId !== undefined || parsed.data.awayOverrideId !== undefined) {
       const pins = { home: parsed.data.homeOverrideId, away: parsed.data.awayOverrideId };
@@ -55,10 +55,10 @@ bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, (req, res, n
 });
 
 // Clear the tournament's knockout results (unlocks group-match editing).
-bracketRouter.post('/reset', requireAdmin, bracketMutationLimiter, (req, res, next) => {
+bracketRouter.post('/reset', requireAdmin, bracketMutationLimiter, async (req, res, next) => {
   try {
-    const tournamentId = requestTournamentId(req);
-    const bracket = resetBracket(tournamentId);
+    const tournamentId = await requestTournamentId(req);
+    const bracket = await resetBracket(tournamentId);
     broadcastBracket(tournamentId, bracket);
     res.json({ bracket });
   } catch (err) {
