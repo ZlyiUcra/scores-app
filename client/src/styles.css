@@ -324,9 +324,12 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 
 /* ---------- Bracket (aligned columns + elbow connectors) ---------- */
 .bracket-wrap { margin-top: 0.5rem; }
-/* All rounds share the container width so the whole path to the final is
-   visible at once; columns shrink evenly and long names ellipsize. The
-   min-width only matters on phones, where horizontal scroll is the fallback. */
+/* Two interchangeable layouts share the round/card styles below; screen width
+   picks one (see the media query): linear on narrow, mirror on wide. */
+.bracket-mirror { display: none; }
+
+/* Linear (default / narrow): all rounds left to right, horizontal scroll on
+   phones; columns shrink evenly and long names ellipsize. */
 .bracket { display: flex; align-items: stretch; overflow-x: auto; padding-bottom: 0.5rem; }
 .bracket-round { display: flex; flex-direction: column; flex: 1 1 0; min-width: 120px; }
 .bracket-round__title {
@@ -341,24 +344,61 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
   padding: 0.4rem 0.9rem;
 }
 
-/* Connector gutter width (must match the round horizontal padding). */
-/* Outgoing elbow from every feeding round: half-height vertical bar + a spur
-   into the card. Odd cards draw the lower half, even cards the upper half, so a
-   pair forms one continuous vertical bar whose midpoint faces the next round. */
-.bracket-round:not(:last-child) .bracket-match::after {
+/* Linear connectors. Outgoing elbow from every feeding round: half-height
+   vertical bar + a spur into the card. Odd cards draw the lower half, even cards
+   the upper half, so a pair forms one continuous vertical bar whose midpoint
+   faces the next round. Scoped to .bracket so the wings below are unaffected. */
+.bracket .bracket-round:not(:last-child) .bracket-match::after {
   content: ''; position: absolute; left: 100%; width: 0.9rem;
   border-right: 2px solid var(--line);
 }
-.bracket-round:not(:last-child) .bracket-match:nth-child(odd)::after {
+.bracket .bracket-round:not(:last-child) .bracket-match:nth-child(odd)::after {
   top: 50%; height: 50%; border-top: 2px solid var(--line);
 }
-.bracket-round:not(:last-child) .bracket-match:nth-child(even)::after {
+.bracket .bracket-round:not(:last-child) .bracket-match:nth-child(even)::after {
   bottom: 50%; height: 50%; border-bottom: 2px solid var(--line);
 }
-/* Incoming spur into every round after the first, at the card's vertical centre. */
-.bracket-round:not(:first-child) .bracket-match::before {
+.bracket .bracket-round:not(:first-child) .bracket-match::before {
   content: ''; position: absolute; right: 100%; width: 0.9rem; top: 50%;
   border-top: 2px solid var(--line);
+}
+
+/* Mirror (wide): a grid where the rounds fan out from the centred final. A card
+   and its mirror across the centre share the SAME grid row, so an auto-sized row
+   lifts only that symmetric pair when a name wraps — not every card. Columns and
+   row count are set inline (they depend on the bracket size). */
+@media (min-width: 900px) {
+  .bracket-linear { display: none; }
+  .bracket-mirror { display: block; overflow-x: auto; padding-bottom: 0.5rem; }
+}
+.bracket-grid { display: grid; }
+.bracket-grid__title { align-self: end; }
+/* Each cell fills its row-span (grid default stretch); the card is centred in
+   it, so a round spanning two rows (a semifinal over two quarterfinals) lands
+   between them. Connectors live in the 0.9rem side padding. */
+.bcell { position: relative; display: flex; align-items: center; padding: 0.35rem 0.9rem; min-width: 0; }
+
+/* Outgoing spur toward the centre (one pseudo per side). */
+.bcell--left::after,
+.bcell--center::after {
+  content: ''; position: absolute; right: 0; width: 0.9rem; top: 50%; border-top: 2px solid var(--line);
+}
+.bcell--right::before,
+.bcell--center::before {
+  content: ''; position: absolute; left: 0; width: 0.9rem; top: 50%; border-top: 2px solid var(--line);
+}
+/* Pairing bracket into the two children (outer side) on a parent cell: a
+   vertical bar spanning ~child-centre to child-centre, plus a centre spur to the
+   card (the background line). The children's own spurs meet the bar's ends. */
+.bcell--left.bcell--parent::before {
+  content: ''; position: absolute; left: 0; width: 0.9rem; top: 25%; height: 50%;
+  border-left: 2px solid var(--line);
+  background: linear-gradient(var(--line), var(--line)) no-repeat left 50% / 100% 2px;
+}
+.bcell--right.bcell--parent::after {
+  content: ''; position: absolute; right: 0; width: 0.9rem; top: 25%; height: 50%;
+  border-right: 2px solid var(--line);
+  background: linear-gradient(var(--line), var(--line)) no-repeat left 50% / 100% 2px;
 }
 
 /* Third-place: a separate centred block below the main bracket. */
@@ -395,8 +435,11 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .bcard__vs::before { left: 0.6rem; }
 .bcard__vs::after { right: 0.6rem; }
 .bcard__name {
-  font-weight: 600; font-size: 0.9rem;
-  flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-weight: 600; font-size: 0.9rem; line-height: 1.2;
+  /* Wrap long names across lines (on spaces) instead of ellipsizing. Heights
+     are matched per symmetric pair by the mirror grid (a shared auto row), so
+     no per-card min-height reservation is needed here. */
+  flex: 1; min-width: 0; overflow-wrap: break-word;
 }
 .bcard__side--seed .bcard__name { color: var(--muted); font-style: italic; font-weight: 500; }
 .bcard__side--won .bcard__name { color: var(--accent); }
