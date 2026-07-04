@@ -14,6 +14,11 @@ let socket: Socket<ServerToClientEvents> | null = null;
  * Switching tournaments = disconnect + connect with the other id.
  */
 export function connectSocket(tournamentId: string): void {
+  // Guard against a double-connect. NOTE: this also means a live socket is
+  // NOT re-pointed at a different tournament — the id only takes effect on a
+  // fresh connection. Switching tournaments therefore REQUIRES a
+  // disconnectSocket() first (useTournamentFeed's effect cleanup does exactly
+  // that before reconnecting with the new id).
   if (socket) return;
   socket = io({ withCredentials: true, auth: { tournamentId } });
 
