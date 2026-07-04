@@ -30,7 +30,9 @@ enum PanelSection {
 
 /** Admin games panel: groups (create/rename/delete + fixture generation),
  * teams (create/edit/regroup while unplayed), manual game creation and the
- * games table with inline schedule editing. */
+ * games table with inline schedule editing. Each card is a <details>
+ * accordion — the entry forms open by default, the (longer) teams/games
+ * tables collapsed. */
 export function AdminMatches() {
   const { t } = useI18n();
   const { tournament } = useAdminTournament();
@@ -183,8 +185,8 @@ export function AdminMatches() {
   return (
     <div className="admin-panel">
       <div className="admin-grid">
-        <section className="card">
-          <h3>{t('adminMatches.groups')}</h3>
+        <details className="card" open>
+          <summary><h3>{t('adminMatches.groups')}</h3></summary>
           {errors[PanelSection.Groups] && <p className="admin__error">{errors[PanelSection.Groups]}</p>}
           <form className="stack" onSubmit={onCreateGroup}>
             <input className="input" placeholder={t('adminMatches.groupNamePlaceholder')} value={groupName}
@@ -233,10 +235,10 @@ export function AdminMatches() {
               );
             })}
           </div>
-        </section>
+        </details>
 
-        <section className="card">
-          <h3>{t('adminMatches.newTeam')}</h3>
+        <details className="card" open>
+          <summary><h3>{t('adminMatches.newTeam')}</h3></summary>
           {errors[PanelSection.NewTeam] && <p className="admin__error">{errors[PanelSection.NewTeam]}</p>}
           <form className="stack" onSubmit={onCreateTeam}>
             <input className="input" placeholder={t('adminMatches.teamNamePlaceholder')} value={teamName}
@@ -250,11 +252,11 @@ export function AdminMatches() {
             </select>
             <button className="btn btn--primary" disabled={busy} type="submit">{t('adminMatches.addTeam')}</button>
           </form>
-        </section>
+        </details>
       </div>
 
-      <section className="card">
-        <h3>{t('adminMatches.teamsTitle')} ({teams.length})</h3>
+      <details className="card">
+        <summary><h3>{t('adminMatches.teamsTitle')} ({teams.length})</h3></summary>
         {errors[PanelSection.Teams] && <p className="admin__error">{errors[PanelSection.Teams]}</p>}
         <div className="table-wrap">
           <table className="table">
@@ -331,13 +333,13 @@ export function AdminMatches() {
             </tbody>
           </table>
         </div>
-      </section>
+      </details>
 
       {/* Manual game creation only makes sense while some group pairing still
           lacks a match; with full round-robin coverage the form disappears. */}
       {totalMissing > 0 && (
-      <section className="card">
-        <h3>{t('adminMatches.newGame')}</h3>
+      <details className="card" open>
+        <summary><h3>{t('adminMatches.newGame')}</h3></summary>
         {errors[PanelSection.NewGame] && <p className="admin__error">{errors[PanelSection.NewGame]}</p>}
         <form className="stack admin-grid" onSubmit={onCreateMatch}>
           <label className="field">
@@ -372,11 +374,11 @@ export function AdminMatches() {
           </label>
           <button className="btn btn--primary" disabled={busy} type="submit">{t('adminMatches.createGame')}</button>
         </form>
-      </section>
+      </details>
       )}
 
-      <section className="card">
-        <h3>{t('adminMatches.matchesTitle')} ({order.length})</h3>
+      <details className="card">
+        <summary><h3>{t('adminMatches.matchesTitle')} ({order.length})</h3></summary>
         {errors[PanelSection.Matches] && <p className="admin__error">{errors[PanelSection.Matches]}</p>}
         <div className="table-wrap">
           <table className="table">
@@ -456,7 +458,7 @@ export function AdminMatches() {
             </tbody>
           </table>
         </div>
-      </section>
+      </details>
     </div>
   );
 }
