@@ -30,7 +30,22 @@
     "hint": "dd.mm.yyyy",
     "hintTime": "dd.mm.yyyy hh:mm",
     "invalid": "Invalid date - use dd.mm.yyyy.",
-    "invalidTime": "Invalid date/time - use dd.mm.yyyy hh:mm."
+    "invalidTime": "Invalid date/time - use dd.mm.yyyy hh:mm.",
+    "months": "January,February,March,April,May,June,July,August,September,October,November,December",
+    "weekdays": "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
+    "calendar": "Open calendar",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "prevYear": "Previous year",
+    "nextYear": "Next year",
+    "hour": "Hour",
+    "minute": "Minute",
+    "from": "From",
+    "to": "To",
+    "am": "AM",
+    "pm": "PM",
+    "today": "Today",
+    "clear": "Clear"
   },
   "adminControls": {
     "title": "Controls (admin)",

@@ -30,7 +30,22 @@
     "hint": "dd.mm.aaaa",
     "hintTime": "dd.mm.aaaa hh:mm",
     "invalid": "Data inválida - use dd.mm.aaaa.",
-    "invalidTime": "Data/hora inválida - use dd.mm.aaaa hh:mm."
+    "invalidTime": "Data/hora inválida - use dd.mm.aaaa hh:mm.",
+    "months": "Janeiro,Fevereiro,Março,Abril,Maio,Junho,Julho,Agosto,Setembro,Outubro,Novembro,Dezembro",
+    "weekdays": "Seg,Ter,Qua,Qui,Sex,Sáb,Dom",
+    "calendar": "Abrir calendário",
+    "prevMonth": "Mês anterior",
+    "nextMonth": "Mês seguinte",
+    "prevYear": "Ano anterior",
+    "nextYear": "Próximo ano",
+    "hour": "Hora",
+    "minute": "Minuto",
+    "from": "De",
+    "to": "Até",
+    "am": "AM",
+    "pm": "PM",
+    "today": "Hoje",
+    "clear": "Limpar"
   },
   "adminControls": {
     "title": "Controlo (administrador)",
