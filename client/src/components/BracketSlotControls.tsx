@@ -3,7 +3,8 @@ import type { BracketMatch, BracketParticipant, UpdateBracketRequest } from '../
 import { adminApi } from '../api/admin';
 import { ApiError } from '../api/client';
 import { participantName } from '../lib/bracketLabels';
-import { formatDayTime, parseDayTime } from '../lib/format';
+import { DateField } from './DateField';
+import { useDateLabels } from '../lib/dateLabels';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 import { useRosterStore } from '../stores/rosterStore';
@@ -22,11 +23,12 @@ function overrideValue(p: BracketParticipant): string {
  */
 export function BracketSlotControls({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
+  const dateLabels = useDateLabels();
   const { tournament } = useTournament();
   const ready = 'team' in m.home && 'team' in m.away;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [startsAt, setStartsAt] = useState(formatDayTime(m.startsAt));
+  const [startsAt, setStartsAt] = useState<string | null>(m.startsAt);
   const teams = useRosterStore((s) => s.teams);
   // Rebuilt only when the roster changes, NOT on every bracket snapshot, so
   // the option children stay reference-equal across score-click re-renders.
@@ -42,7 +44,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
 
   // Re-sync the time field when the authoritative slot changes (rev bump).
   useEffect(() => {
-    setStartsAt(formatDayTime(m.startsAt));
+    setStartsAt(m.startsAt);
   }, [m.rev]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function run(action: () => Promise<unknown>) {
@@ -85,13 +87,9 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
         : { awayOverrideId: value === '' ? null : value },
     );
 
-  function commitTime() {
-    const next = startsAt.trim() === '' ? null : parseDayTime(startsAt);
-    if (next === null && startsAt.trim() !== '') {
-      // Unparseable: keep the typed text on screen so it can be corrected.
-      setErr(t('date.invalidTime'));
-      return;
-    }
+  // DateField hands back the canonical value (ISO or null); a half-typed value
+  // never reaches here (it reverts on blur), so we just patch the change.
+  function commitTime(next: string | null) {
     if (next === m.startsAt) return;
     void patch({ startsAt: next });
   }
@@ -197,8 +195,8 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
 
           <label className="field">
             <span>{t('adminMatches.start')}</span>
-            <input className="input" value={startsAt} placeholder={t('date.hintTime')} maxLength={16}
-              onChange={(e) => setStartsAt(e.target.value)} onBlur={commitTime} disabled={busy} />
+            <DateField value={startsAt} onChange={setStartsAt} onCommit={commitTime} format="DD.MM.YYYY HH:mm"
+              labels={dateLabels} placeholder={t('date.hintTime')} disabled={busy} />
           </label>
         </>
       ) : (

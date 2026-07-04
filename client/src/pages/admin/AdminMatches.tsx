@@ -5,18 +5,16 @@ import { Fragment as ReactFragment, useState, type FormEvent } from 'react';
 import { TOURNAMENT_FORMAT } from '../../../../shared/tournament';
 import { adminApi } from '../../api/admin';
 import { api, ApiError } from '../../api/client';
-import { formatDayTime, formatTime, parseDayTime } from '../../lib/format';
+import { DateField } from '../../components/DateField';
+import { useDateLabels } from '../../lib/dateLabels';
+import { formatTime } from '../../lib/format';
 import { useMatchStore, selectOrder } from '../../stores/matchStore';
 import { useRosterStore, selectGroups, selectTeams } from '../../stores/rosterStore';
 import { useI18n } from '../../i18n';
 import { useAdminTournament } from './AdminLayout';
 
-/** dd.mm.yyyy hh:mm input -> ISO instant; unparseable aborts the submit. */
-function toIso(raw: string, invalidMsg: string): string {
-  const iso = parseDayTime(raw);
-  if (iso === null) throw new ApiError(0, 'INVALID', invalidMsg);
-  return iso;
-}
+/** Wire (ISO) date-time template used across the games panel. */
+const DATETIME_FORMAT = 'DD.MM.YYYY HH:mm';
 
 /** Which card of the panel an error belongs to — every failure surfaces
  * inside the section whose data was being manipulated, not page-wide. */
@@ -35,6 +33,7 @@ enum PanelSection {
  * tables collapsed. */
 export function AdminMatches() {
   const { t } = useI18n();
+  const dateLabels = useDateLabels();
   const { tournament } = useAdminTournament();
   const [errors, setErrors] = useState<Partial<Record<PanelSection, string>>>({});
   const order = useMatchStore(selectOrder);
@@ -58,12 +57,12 @@ export function AdminMatches() {
   const [editGroupName, setEditGroupName] = useState('');
   // Inline match reschedule (kick-off + court).
   const [editMatchId, setEditMatchId] = useState<string | null>(null);
-  const [editStartsAt, setEditStartsAt] = useState('');
+  const [editStartsAt, setEditStartsAt] = useState<string | null>(null);
   const [editField, setEditField] = useState('');
   const [homeId, setHomeId] = useState('');
   const [awayId, setAwayId] = useState('');
   const [field, setField] = useState('');
-  const [startsAt, setStartsAt] = useState('');
+  const [startsAt, setStartsAt] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const groupNameById = (id: string | null) => groups.find((g) => g.id === id)?.name ?? '—';
@@ -174,11 +173,12 @@ export function AdminMatches() {
   async function onCreateMatch(e: FormEvent) {
     e.preventDefault();
     await run(PanelSection.NewGame, async () => {
-      await adminApi.createMatch({ homeId, awayId, startsAt: toIso(startsAt, t('date.invalidTime')), field: field.trim() });
+      if (!startsAt) throw new ApiError(0, 'INVALID', t('date.invalidTime'));
+      await adminApi.createMatch({ homeId, awayId, startsAt, field: field.trim() });
       setHomeId('');
       setAwayId('');
       setField('');
-      setStartsAt('');
+      setStartsAt(null);
     }, 'adminMatches.errorCreateMatch');
   }
 
@@ -376,8 +376,8 @@ export function AdminMatches() {
           </label>
           <label className="field">
             <span>{t('adminMatches.start')}</span>
-            <input className="input" value={startsAt} placeholder={t('date.hintTime')} maxLength={16}
-              onChange={(e) => setStartsAt(e.target.value)} required />
+            <DateField value={startsAt} onChange={setStartsAt} format={DATETIME_FORMAT} labels={dateLabels}
+              required placeholder={t('date.hintTime')} />
           </label>
           <button className="btn btn--primary" disabled={busy} type="submit">{t('adminMatches.createGame')}</button>
         </form>
@@ -422,8 +422,8 @@ export function AdminMatches() {
                           <input className="input" value={editField} maxLength={40}
                             onChange={(e) => setEditField(e.target.value)}
                             placeholder={t('adminMatches.fieldPlaceholder')} aria-label={t('adminMatches.fieldLabel')} />
-                          <input className="input" value={editStartsAt} placeholder={t('date.hintTime')} maxLength={16}
-                            onChange={(e) => setEditStartsAt(e.target.value)} aria-label={t('adminMatches.start')} />
+                          <DateField value={editStartsAt} onChange={setEditStartsAt} format={DATETIME_FORMAT}
+                            labels={dateLabels} placeholder={t('date.hintTime')} ariaLabel={t('adminMatches.start')} />
                         </div>
                       ) : (
                         <span>{m.field ? `${m.field} · ` : ''}{formatTime(m.startsAt)}</span>
@@ -436,10 +436,11 @@ export function AdminMatches() {
                     <td className="table__actions">
                       {editing ? (
                         <>
-                          <button className="btn btn--sm btn--primary" disabled={busy || editStartsAt === ''}
+                          <button className="btn btn--sm btn--primary" disabled={busy || !editStartsAt}
                             onClick={() => void run(PanelSection.Matches, async () => {
+                              if (!editStartsAt) throw new ApiError(0, 'INVALID', t('date.invalidTime'));
                               await api.updateMatch(id, {
-                                startsAt: toIso(editStartsAt, t('date.invalidTime')),
+                                startsAt: editStartsAt,
                                 field: editField.trim(),
                                 expectedRev: m.rev,
                               });
@@ -450,7 +451,7 @@ export function AdminMatches() {
                       ) : (
                         <>
                           <button className="btn btn--sm"
-                            onClick={() => { setEditMatchId(id); setEditStartsAt(formatDayTime(m.startsAt)); setEditField(m.field); }}>{t('adminMatches.edit')}</button>
+                            onClick={() => { setEditMatchId(id); setEditStartsAt(m.startsAt); setEditField(m.field); }}>{t('adminMatches.edit')}</button>
                           <button className="btn btn--sm btn--danger"
                             onClick={() => void run(PanelSection.Matches, () => adminApi.deleteMatch(id), 'adminMatches.errorDeleteMatch')}>{t('adminMatches.delete')}</button>
                         </>
