@@ -22,6 +22,18 @@ function resolveJwtSecret(): string {
   return generated;
 }
 
+function resolveAdminPassword(): string {
+  const fromEnv = process.env.ADMIN_PASSWORD?.trim();
+  if (fromEnv) return fromEnv;
+
+  // Same rule as JWT_SECRET: a wiped/fresh production database reseeds the
+  // admin account, so the well-known dev password must never reach prod.
+  if (isProd) {
+    throw new Error('ADMIN_PASSWORD must be set in production. Refusing to start.');
+  }
+  return 'admin123';
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** All environment-derived settings, resolved once at boot. */
@@ -41,7 +53,7 @@ export const config = {
   bcryptCost: 12,
   /** Global account cap — blunts registration flooding. */
   maxUsers: 500,
-  /** Password of the seeded admin (first boot / empty users table only). On a
-   * public deploy the well-known dev default MUST be overridden. */
-  adminPassword: process.env.ADMIN_PASSWORD?.trim() || 'admin123',
+  /** Password of the seeded admin (first boot / empty users table only).
+   * Required in production; dev falls back to the well-known default. */
+  adminPassword: resolveAdminPassword(),
 };

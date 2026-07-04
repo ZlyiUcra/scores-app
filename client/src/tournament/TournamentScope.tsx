@@ -3,6 +3,7 @@ import { Navigate, Outlet, useParams } from 'react-router-dom';
 import type { Tournament } from '../../../shared/types';
 import { useTournamentStore } from '../stores/tournamentStore';
 import { useTournamentFeed } from './useTournamentFeed';
+import { LoadError } from '../components/LoadError';
 import { useI18n } from '../i18n';
 
 /** What every page under /t/:tournamentId can rely on. */
@@ -35,11 +36,15 @@ export function TournamentScope() {
   const { t } = useI18n();
   const tournaments = useTournamentStore((s) => s.tournaments);
   const loaded = useTournamentStore((s) => s.loaded);
+  const listError = useTournamentStore((s) => s.error);
   const tournament = tournaments.find((x) => x.id === tournamentId);
 
-  useTournamentFeed(tournament?.id ?? null);
+  const { error: feedError, reload } = useTournamentFeed(tournament?.id ?? null);
 
-  if (!loaded) return <div className="splash">{t('app.loading')}</div>;
+  if (!loaded) {
+    if (listError) return <LoadError onRetry={() => void useTournamentStore.getState().load()} />;
+    return <div className="splash">{t('app.loading')}</div>;
+  }
   if (!tournament) return <Navigate to="/tournaments" replace />;
 
   const readOnly = tournament.status === 'finished';
@@ -50,7 +55,7 @@ export function TournamentScope() {
         <span className={`chip chip--${tournament.status}`}>{t(`tournaments.${tournament.status}`)}</span>
         {readOnly && <span className="muted tour-bar__note">{t('tournaments.readOnly')}</span>}
       </div>
-      <Outlet />
+      {feedError ? <LoadError onRetry={reload} /> : <Outlet />}
     </TournamentContext.Provider>
   );
 }

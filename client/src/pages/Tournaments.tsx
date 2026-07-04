@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { Tournament, TournamentStatus } from '../../../shared/types';
-import { api } from '../api/client';
 import { formatDay } from '../lib/format';
-import { useTournamentStore, selectTournaments, selectLoaded } from '../stores/tournamentStore';
+import { useTournamentStore, selectTournaments, selectLoaded, selectError } from '../stores/tournamentStore';
+import { LoadError } from '../components/LoadError';
 import { useI18n } from '../i18n';
 
 function TournamentCard({ tour }: { tour: Tournament }) {
@@ -28,15 +28,16 @@ export function Tournaments() {
   const { t } = useI18n();
   const tournaments = useTournamentStore(selectTournaments);
   const loaded = useTournamentStore(selectLoaded);
+  const error = useTournamentStore(selectError);
 
   useEffect(() => {
-    api
-      .listTournaments()
-      .then(({ tournaments: list, defaultId }) => useTournamentStore.getState().setTournaments(list, defaultId))
-      .catch((err) => console.error(err));
+    void useTournamentStore.getState().load();
   }, []);
 
-  if (!loaded) return <div className="splash">{t('app.loading')}</div>;
+  if (!loaded) {
+    if (error) return <LoadError onRetry={() => void useTournamentStore.getState().load()} />;
+    return <div className="splash">{t('app.loading')}</div>;
+  }
 
   const sections: TournamentStatus[] = ['active', 'upcoming', 'finished'];
   return (

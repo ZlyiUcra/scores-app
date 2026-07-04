@@ -1,6 +1,6 @@
 {
   "header": { "logout": "Log out", "menu": "Menu" },
-  "app": { "loading": "Loading…" },
+  "app": { "loading": "Loading…", "loadError": "Could not load data. Check your connection.", "retry": "Retry" },
   "role": { "admin": "admin", "viewer": "viewer" },
   "login": {
     "subtitle": "Local football tournament",

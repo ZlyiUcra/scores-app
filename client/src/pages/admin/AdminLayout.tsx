@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Navigate, Outlet, Link } from 'react-router-dom';
 import type { Tournament } from '../../../../shared/types';
-import { api } from '../../api/client';
 import { useAuth } from '../../auth/AuthContext';
 import { useTournamentStore } from '../../stores/tournamentStore';
 import { useTournamentFeed } from '../../tournament/useTournamentFeed';
+import { LoadError } from '../../components/LoadError';
 import { useI18n } from '../../i18n';
 
 /** The tournament every admin action on Games/Squads applies to. */
@@ -35,15 +35,13 @@ export function AdminLayout() {
   const tournaments = useTournamentStore((s) => s.tournaments);
   const defaultId = useTournamentStore((s) => s.defaultId);
   const loaded = useTournamentStore((s) => s.loaded);
+  const listError = useTournamentStore((s) => s.error);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Refresh the list on entry (tournaments have no socket event) — the admin
   // may have just created one elsewhere or its status may have changed.
   useEffect(() => {
-    api
-      .listTournaments()
-      .then(({ tournaments: list, defaultId: def }) => useTournamentStore.getState().setTournaments(list, def))
-      .catch((err) => console.error(err));
+    void useTournamentStore.getState().load();
   }, []);
 
   // Until the admin picks one, follow the server's default tournament. An id
@@ -51,12 +49,15 @@ export function AdminLayout() {
   const tournament =
     tournaments.find((x) => x.id === selectedId) ?? tournaments.find((x) => x.id === defaultId) ?? null;
 
-  useTournamentFeed(tournament?.id ?? null);
+  const { error: feedError, reload } = useTournamentFeed(tournament?.id ?? null);
 
   // Client-side guard is defense-in-depth only — the server's requireAdmin on
   // /api/admin is the real boundary. A non-admin who reaches here sees nothing.
   if (!isAdmin) return <Navigate to="/" replace />;
-  if (!loaded || !tournament) return <div className="splash">{t('app.loading')}</div>;
+  if (!loaded || !tournament) {
+    if (listError && !loaded) return <LoadError onRetry={() => void useTournamentStore.getState().load()} />;
+    return <div className="splash">{t('app.loading')}</div>;
+  }
 
   return (
     <div className="admin-area">
@@ -93,7 +94,7 @@ export function AdminLayout() {
         )}
       </div>
       <AdminTournamentContext.Provider value={{ tournament }}>
-        <Outlet />
+        {feedError ? <LoadError onRetry={reload} /> : <Outlet />}
       </AdminTournamentContext.Provider>
     </div>
   );

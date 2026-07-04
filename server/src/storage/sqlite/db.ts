@@ -26,6 +26,10 @@ export function openDatabase(dataDir: string): SqliteContext {
   fs.mkdirSync(dataDir, { recursive: true });
   const db = new DatabaseSync(path.join(dataDir, 'scores.db'));
 
+  // WAL + NORMAL: the persist() pattern rewrites whole tables per mutation,
+  // so journal mode dominates per-click write latency.
+  db.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL;');
+
   // Dev-only schema evolution: an older `teams` table stored a `group` string and
   // had no groups table. Groups are now first-class and teams reference them by
   // `groupId`. If we see the old shape, drop the tournament tables so they reseed

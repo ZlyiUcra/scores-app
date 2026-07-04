@@ -72,6 +72,7 @@ body {
 
 /* ---------- App shell ---------- */
 .splash { min-height: 100vh; display: grid; place-items: center; color: var(--muted); }
+.load-error { grid-auto-flow: row; gap: 0.75rem; text-align: center; }
 .app { min-height: 100vh; }
 .header {
   position: sticky; top: 0; z-index: 10;

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Routes, Route, Navigate, Link, NavLink, matchPath, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
-import { api } from './api/client';
-import { useTournamentStore, selectDefaultId, selectLoaded, selectTournaments } from './stores/tournamentStore';
+import { useTournamentStore, selectDefaultId, selectError, selectLoaded, selectTournaments } from './stores/tournamentStore';
+import { LoadError } from './components/LoadError';
 import { TournamentScope } from './tournament/TournamentScope';
 import { useI18n, LANGS } from './i18n';
 import { Login } from './pages/Login';
@@ -118,7 +118,11 @@ function Landing() {
   const { t } = useI18n();
   const tournaments = useTournamentStore(selectTournaments);
   const loaded = useTournamentStore(selectLoaded);
-  if (!loaded) return <div className="splash">{t('app.loading')}</div>;
+  const error = useTournamentStore(selectError);
+  if (!loaded) {
+    if (error) return <LoadError onRetry={() => void useTournamentStore.getState().load()} />;
+    return <div className="splash">{t('app.loading')}</div>;
+  }
   const active = tournaments.filter((x) => x.status === 'active');
   if (active.length === 1) return <Navigate to={`/t/${active[0].id}`} replace />;
   return <Navigate to="/tournaments" replace />;
@@ -148,14 +152,7 @@ export function App() {
   // TournamentScope layout route, not here.
   useEffect(() => {
     if (!user) return;
-    let alive = true;
-    api
-      .listTournaments()
-      .then(({ tournaments, defaultId }) => alive && useTournamentStore.getState().setTournaments(tournaments, defaultId))
-      .catch((err) => console.error(err));
-    return () => {
-      alive = false;
-    };
+    void useTournamentStore.getState().load();
   }, [user]);
 
   if (loading) return <div className="splash">{t('app.loading')}</div>;

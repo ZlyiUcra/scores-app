@@ -101,6 +101,13 @@ export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ te
     await assertTournamentEditable(team.tournamentId);
     await assertBracketNotStarted(team.tournamentId);
 
+    // Matches derive their group from the two teams sharing one — regrouping
+    // a team that already has fixtures would silently orphan those matches
+    // from the standings. The admin UI hides the control; this enforces it.
+    if (input.groupId !== team.groupId && (await matchRepository.countByTeam(teamId)) > 0) {
+      throw new AppError('TEAM_HAS_FIXTURES', 'A team with fixtures cannot change its group.', 409);
+    }
+
     if (input.groupId === null) {
       return { team: await teamRepository.assign(teamId, null, null), tournamentId: team.tournamentId };
     }

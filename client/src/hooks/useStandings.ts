@@ -20,7 +20,7 @@ function matchSignature(byId: Record<string, Match>): string {
 function rosterSignature(groups: Group[], teams: Team[]): string {
   const g = groups.map((x) => `${x.id}:${x.name}`).join(',');
   const t = teams
-    .map((x) => `${x.id}:${x.groupId ?? ''}`)
+    .map((x) => `${x.id}:${x.name}:${x.shortName}:${x.groupId ?? ''}`)
     .sort()
     .join(',');
   return `${g}||${t}`;
