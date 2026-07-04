@@ -147,7 +147,10 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
               <li>
                 <strong>Admin - Jogos</strong>: crie grupos e equipas; uma equipa pode
                 entrar num grupo ao ser criada ou mais tarde, mas apenas enquanto não tem
-                jogos. O botão «Jogos (n)» gera os jogos em falta (todos contra todos) com
+                jogos. Um grupo tem no máximo cinco equipas (e precisa de pelo menos duas
+                para se jogar); quando está cheio, deixa de aparecer na lista de escolha de
+                grupo ao adicionar ou mover uma equipa. O botão «Jogos (n)» gera os jogos em
+                falta (todos contra todos) com
                 horas provisórias - as horas e o campo editam-se na própria tabela.
               </li>
               <li>

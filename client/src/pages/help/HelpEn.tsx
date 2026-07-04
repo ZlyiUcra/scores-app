@@ -145,7 +145,9 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
               <li>
                 <strong>Admin - Games</strong>: create groups and teams; a team can be
                 placed into a group at creation or later, but only while it has no
-                fixtures. The "Games (n)" button generates the missing round-robin
+                fixtures. A group holds at most five teams (and at least two to be
+                played); once it is full it drops out of the group picker when you
+                add or move a team. The "Games (n)" button generates the missing round-robin
                 fixtures with placeholder kick-off times - edit times and courts inline
                 in the games table.
               </li>

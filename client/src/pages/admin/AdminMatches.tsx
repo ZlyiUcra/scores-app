@@ -248,7 +248,9 @@ export function AdminMatches() {
             <select className="input" value={teamGroupId} aria-label={t('adminMatches.colGroup')}
               onChange={(e) => setTeamGroupId(e.target.value)}>
               <option value="">{t('adminMatches.noGroup')}</option>
-              {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+              {/* A full group (max teams already) is not a valid target — the
+                  server rejects it, so keep it out of the picker entirely. */}
+              {groups.filter((g) => countInGroup(g.id) < TOURNAMENT_FORMAT.maxPerGroup).map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
             <button className="btn btn--primary" disabled={busy} type="submit">{t('adminMatches.addTeam')}</button>
           </form>
@@ -293,7 +295,12 @@ export function AdminMatches() {
                                   <select className="input" value={editTeamGroupId} aria-label={t('adminMatches.colGroup')}
                                     onChange={(e) => setEditTeamGroupId(e.target.value)}>
                                     <option value="">{t('adminMatches.noGroup')}</option>
-                                    {groups.map((gr) => <option key={gr.id} value={gr.id}>{gr.name}</option>)}
+                                    {/* Hide full groups, but always keep this team's
+                                        current group (it counts itself, so it may read
+                                        as full while still being a valid no-op target). */}
+                                    {groups
+                                      .filter((gr) => countInGroup(gr.id) < TOURNAMENT_FORMAT.maxPerGroup || gr.id === tm.groupId)
+                                      .map((gr) => <option key={gr.id} value={gr.id}>{gr.name}</option>)}
                                   </select>
                                 )}
                               </div>
