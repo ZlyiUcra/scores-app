@@ -3,7 +3,7 @@ import type { Match, MatchUpdate } from '../../../shared/types.js';
 import type { StoredMatch } from '../storage/contracts.js';
 import { groupRepository, matchRepository, teamRepository } from '../storage/index.js';
 import type { CreateMatchInput, GoalInput, UpdateMatchInput } from '../validation.js';
-import { AppError } from '../errors.js';
+import { AppError, requireFound } from '../errors.js';
 import { assertBracketNotStarted } from './bracketLock.js';
 import { assertTournamentEditable } from './tournamentLock.js';
 import { withMutationLock } from './mutationLock.js';
@@ -29,9 +29,7 @@ function assertFreshRev(current: StoredMatch, expectedRev?: number): void {
 }
 
 async function getStored(id: string): Promise<StoredMatch> {
-  const m = await matchRepository.getStored(id);
-  if (!m) throw new AppError('NOT_FOUND', `Match ${id} not found.`, 404);
-  return m;
+  return requireFound(await matchRepository.getStored(id), `Match ${id} not found.`);
 }
 
 /** A tournament's matches as resolved DTOs (teams embedded) — the
@@ -42,9 +40,7 @@ export function listMatches(tournamentId: string): Promise<Match[]> {
 
 /** One match as a resolved DTO. Throws NOT_FOUND for an unknown id. */
 export async function getMatch(id: string): Promise<Match> {
-  const m = await matchRepository.get(id);
-  if (!m) throw new AppError('NOT_FOUND', `Match ${id} not found.`, 404);
-  return m;
+  return requireFound(await matchRepository.get(id), `Match ${id} not found.`);
 }
 
 /** Apply a partial edit (scores/status/schedule) with optimistic concurrency.
@@ -191,10 +187,7 @@ function roundRobinPairs(ids: string[]): Array<[string, string]> {
  */
 export function generateGroupFixtures(groupId: string): Promise<{ matches: Match[]; tournamentId: string }> {
   return withMutationLock(async () => {
-    const group = await groupRepository.getStored(groupId);
-    if (!group) {
-      throw new AppError('NOT_FOUND', `Group ${groupId} not found.`, 404);
-    }
+    const group = requireFound(await groupRepository.getStored(groupId), `Group ${groupId} not found.`);
     await assertTournamentEditable(group.tournamentId);
     await assertBracketNotStarted(group.tournamentId);
 

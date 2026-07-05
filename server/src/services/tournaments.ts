@@ -7,7 +7,7 @@ import {
   tournamentRepository,
 } from '../storage/index.js';
 import type { CreateTournamentInput, UpdateTournamentInput } from '../validation.js';
-import { AppError } from '../errors.js';
+import { AppError, requireFound } from '../errors.js';
 import { withMutationLock } from './mutationLock.js';
 
 /** All tournaments in stable creation order. */
@@ -17,9 +17,7 @@ export function listTournaments(): Promise<Tournament[]> {
 
 /** One tournament. Throws NOT_FOUND for an unknown id. */
 export async function getTournament(id: string): Promise<Tournament> {
-  const t = await tournamentRepository.get(id);
-  if (!t) throw new AppError('NOT_FOUND', `Tournament ${id} not found.`, 404);
-  return t;
+  return requireFound(await tournamentRepository.get(id), `Tournament ${id} not found.`);
 }
 
 /**

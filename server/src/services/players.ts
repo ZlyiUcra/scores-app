@@ -1,7 +1,7 @@
 import type { Player } from '../../../shared/types.js';
 import { playerRepository, teamRepository } from '../storage/index.js';
 import type { CreatePlayerInput, UpdatePlayerInput } from '../validation.js';
-import { AppError } from '../errors.js';
+import { AppError, requireFound } from '../errors.js';
 import { assertTournamentEditable } from './tournamentLock.js';
 import { withMutationLock } from './mutationLock.js';
 
@@ -18,8 +18,7 @@ async function assertNumberFree(teamId: string, number: number | null | undefine
 
 /** The owning team's tournament (the player's scope). */
 async function tournamentOfTeam(teamId: string): Promise<string> {
-  const team = await teamRepository.getStored(teamId);
-  if (!team) throw new AppError('NOT_FOUND', `Team ${teamId} not found.`, 404);
+  const team = requireFound(await teamRepository.getStored(teamId), `Team ${teamId} not found.`);
   return team.tournamentId;
 }
 
@@ -40,8 +39,7 @@ export function createPlayer(teamId: string, input: CreatePlayerInput): Promise<
 /** Admin: edit a player (name/number/position). */
 export function updatePlayer(id: string, input: UpdatePlayerInput): Promise<{ player: Player; tournamentId: string }> {
   return withMutationLock(async () => {
-    const player = await playerRepository.get(id);
-    if (!player) throw new AppError('NOT_FOUND', `Player ${id} not found.`, 404);
+    const player = requireFound(await playerRepository.get(id), `Player ${id} not found.`);
     const tournamentId = await tournamentOfTeam(player.teamId);
     await assertTournamentEditable(tournamentId);
     if (input.number !== undefined) await assertNumberFree(player.teamId, input.number, id);
@@ -52,8 +50,7 @@ export function updatePlayer(id: string, input: UpdatePlayerInput): Promise<{ pl
 /** Admin: remove a player. Returns the owning tournament. */
 export function removePlayer(id: string): Promise<string> {
   return withMutationLock(async () => {
-    const player = await playerRepository.get(id);
-    if (!player) throw new AppError('NOT_FOUND', `Player ${id} not found.`, 404);
+    const player = requireFound(await playerRepository.get(id), `Player ${id} not found.`);
     const tournamentId = await tournamentOfTeam(player.teamId);
     await assertTournamentEditable(tournamentId);
     await playerRepository.remove(id);

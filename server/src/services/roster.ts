@@ -2,7 +2,7 @@ import type { Group, Roster, Team } from '../../../shared/types.js';
 import { TOURNAMENT_FORMAT } from '../../../shared/tournament.js';
 import { groupRepository, matchRepository, playerRepository, teamRepository } from '../storage/index.js';
 import type { AssignTeamInput } from '../validation.js';
-import { AppError } from '../errors.js';
+import { AppError, requireFound } from '../errors.js';
 import { assertBracketNotStarted } from './bracketLock.js';
 import { assertTournamentEditable } from './tournamentLock.js';
 import { withMutationLock } from './mutationLock.js';
@@ -47,8 +47,7 @@ export function updateTeam(
   patch: { name?: string; shortName?: string },
 ): Promise<{ team: Team; tournamentId: string }> {
   return withMutationLock(async () => {
-    const stored = await teamRepository.getStored(id);
-    if (!stored) throw new AppError('NOT_FOUND', `Team ${id} not found.`, 404);
+    const stored = requireFound(await teamRepository.getStored(id), `Team ${id} not found.`);
     await assertTournamentEditable(stored.tournamentId);
     return { team: await teamRepository.update(id, patch), tournamentId: stored.tournamentId };
   });
@@ -66,8 +65,7 @@ export function createGroup(tournamentId: string, name: string): Promise<Group> 
 /** Admin: rename a group. Cosmetic (id-based), so allowed even mid-knockout. */
 export function updateGroup(id: string, name: string): Promise<{ group: Group; tournamentId: string }> {
   return withMutationLock(async () => {
-    const stored = await groupRepository.getStored(id);
-    if (!stored) throw new AppError('NOT_FOUND', `Group ${id} not found.`, 404);
+    const stored = requireFound(await groupRepository.getStored(id), `Group ${id} not found.`);
     await assertTournamentEditable(stored.tournamentId);
     return { group: await groupRepository.update(id, name), tournamentId: stored.tournamentId };
   });
@@ -76,8 +74,7 @@ export function updateGroup(id: string, name: string): Promise<{ group: Group; t
 /** Admin: remove an empty group. Returns the owning tournament. */
 export function removeGroup(id: string): Promise<string> {
   return withMutationLock(async () => {
-    const stored = await groupRepository.getStored(id);
-    if (!stored) throw new AppError('NOT_FOUND', `Group ${id} not found.`, 404);
+    const stored = requireFound(await groupRepository.getStored(id), `Group ${id} not found.`);
     await assertTournamentEditable(stored.tournamentId);
     await assertBracketNotStarted(stored.tournamentId);
     if ((await teamRepository.countInGroup(id)) > 0) {
@@ -96,8 +93,7 @@ export function removeGroup(id: string): Promise<string> {
  */
 export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ team: Team; tournamentId: string }> {
   return withMutationLock(async () => {
-    const team = await teamRepository.getStored(teamId);
-    if (!team) throw new AppError('NOT_FOUND', `Team ${teamId} not found.`, 404);
+    const team = requireFound(await teamRepository.getStored(teamId), `Team ${teamId} not found.`);
     await assertTournamentEditable(team.tournamentId);
     await assertBracketNotStarted(team.tournamentId);
 
@@ -136,8 +132,7 @@ export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ te
  * The team's players are removed with it. Returns the owning tournament. */
 export function removeTeam(id: string): Promise<string> {
   return withMutationLock(async () => {
-    const stored = await teamRepository.getStored(id);
-    if (!stored) throw new AppError('NOT_FOUND', `Team ${id} not found.`, 404);
+    const stored = requireFound(await teamRepository.getStored(id), `Team ${id} not found.`);
     await assertTournamentEditable(stored.tournamentId);
     await assertBracketNotStarted(stored.tournamentId);
     const used = await matchRepository.countByTeam(id);
