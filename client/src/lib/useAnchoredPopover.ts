@@ -60,7 +60,7 @@ export function useAnchoredPopover(opts: {
     const inside = (n: Node | null) =>
       !!n && (!!anchorRef.current?.contains(n) || !!popRef.current?.contains(n));
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.code === 'Escape') onClose();
     };
     const onDown = (e: MouseEvent) => {
       if (!inside(e.target as Node)) onClose();
