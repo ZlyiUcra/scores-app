@@ -5,21 +5,27 @@ import { useBracketStore } from './stores/bracketStore';
 import { useRosterStore } from './stores/rosterStore';
 
 let socket: Socket<ServerToClientEvents> | null = null;
+/** The tournament the live socket (if any) is bound to. */
+let currentTournamentId: string | null = null;
 
 /**
  * Connect the live feed for ONE tournament. The httpOnly auth cookie is sent
  * automatically on the handshake (same origin via the Vite proxy); the
  * tournament id rides the handshake auth payload, joining that tournament's
  * room. Server pushes a full snapshot on connect (resync) then compact diffs.
- * Switching tournaments = disconnect + connect with the other id.
+ *
+ * Idempotent for the same tournament, and safe to call with a different id
+ * while already connected: the old socket is torn down and a fresh one opens
+ * into the new room, so callers do not depend on effect-cleanup order to
+ * switch tournaments.
  */
 export function connectSocket(tournamentId: string): void {
-  // Guard against a double-connect. NOTE: this also means a live socket is
-  // NOT re-pointed at a different tournament — the id only takes effect on a
-  // fresh connection. Switching tournaments therefore REQUIRES a
-  // disconnectSocket() first (useTournamentFeed's effect cleanup does exactly
-  // that before reconnecting with the new id).
-  if (socket) return;
+  if (socket && currentTournamentId === tournamentId) return;
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+  currentTournamentId = tournamentId;
   socket = io({ withCredentials: true, auth: { tournamentId } });
 
   socket.on('connect', () => useMatchStore.getState().setConnected(true));
@@ -49,5 +55,6 @@ export function connectSocket(tournamentId: string): void {
 export function disconnectSocket(): void {
   socket?.disconnect();
   socket = null;
+  currentTournamentId = null;
   useMatchStore.getState().setConnected(false);
 }
