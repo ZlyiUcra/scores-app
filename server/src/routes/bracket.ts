@@ -6,6 +6,7 @@ import { parseOrThrow, updateBracketSchema } from '../validation.js';
 import { listBracket, resetBracket, updateBracketSlot } from '../services/bracket.js';
 import { broadcastBracket } from '../socket.js';
 import { requestTournamentId } from './scope.js';
+import { AppErrorCode } from '../errors.js';
 
 /** /api/bracket — knockout view for any logged-in user; slot writes and the
  * full reset are admin-only and re-broadcast the resolved bracket. All routes
@@ -18,7 +19,7 @@ const bracketMutationLimiter = rateLimit({
   limit: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: { code: 'RATE_LIMITED', message: 'Too many bracket actions. Slow down.' } },
+  message: { error: { code: AppErrorCode.RateLimited, message: 'Too many bracket actions. Slow down.' } },
 });
 
 // Read: any logged-in user.

@@ -22,7 +22,7 @@ const loginLimiter = rateLimit({
   limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: { code: 'RATE_LIMITED', message: 'Too many attempts. Try again shortly.' } },
+  message: { error: { code: AppErrorCode.RateLimited, message: 'Too many attempts. Try again shortly.' } },
 });
 
 const registerLimiter = rateLimit({
@@ -30,7 +30,7 @@ const registerLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: { code: 'RATE_LIMITED', message: 'Too many attempts. Try again shortly.' } },
+  message: { error: { code: AppErrorCode.RateLimited, message: 'Too many attempts. Try again shortly.' } },
 });
 
 /**

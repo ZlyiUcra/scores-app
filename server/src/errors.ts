@@ -22,6 +22,7 @@ export enum AppErrorCode {
   LastTournament = 'LAST_TOURNAMENT',
   NotFound = 'NOT_FOUND',
   NumberTaken = 'NUMBER_TAKEN',
+  RateLimited = 'RATE_LIMITED',
   RevConflict = 'REV_CONFLICT',
   SelfLockout = 'SELF_LOCKOUT',
   SlotNotReady = 'SLOT_NOT_READY',

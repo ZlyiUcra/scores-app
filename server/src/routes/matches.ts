@@ -6,6 +6,7 @@ import { applyGoal, applyUpdate, getMatch, listMatches } from '../services/match
 import { listBracket } from '../services/bracket.js';
 import { broadcastBracket, broadcastMatchUpdate } from '../socket.js';
 import { requestTournamentId } from './scope.js';
+import { AppErrorCode } from '../errors.js';
 
 /** /api/matches — reads for any logged-in user; live score/status edits are
  * admin-only and each write broadcasts a compact diff plus a bracket refresh
@@ -24,7 +25,7 @@ const matchMutationLimiter = rateLimit({
   limit: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: { code: 'RATE_LIMITED', message: 'Too many match actions. Slow down.' } },
+  message: { error: { code: AppErrorCode.RateLimited, message: 'Too many match actions. Slow down.' } },
 });
 
 // Reads require a logged-in user (any role).
