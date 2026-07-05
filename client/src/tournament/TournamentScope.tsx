@@ -41,11 +41,28 @@ export function TournamentScope() {
 
   const { error: feedError, reload } = useTournamentFeed(tournament?.id ?? null);
 
+  // The list is cached for the session and re-fetched on only a few page
+  // mounts, so an id missing now may exist on the server (created after our
+  // last fetch). Give the list ONE re-fetch per id before treating the id as
+  // unknown, instead of bouncing a fresh deep link straight to /tournaments.
+  const verifiedMiss = React.useRef<Set<string>>(new Set());
+  const [verifying, setVerifying] = React.useState(false);
+  React.useEffect(() => {
+    if (!loaded || tournament || listError) return;
+    if (verifiedMiss.current.has(tournamentId)) return;
+    verifiedMiss.current.add(tournamentId);
+    setVerifying(true);
+    void useTournamentStore.getState().load().finally(() => setVerifying(false));
+  }, [loaded, tournament, listError, tournamentId]);
+
   if (!loaded) {
     if (listError) return <LoadError onRetry={() => void useTournamentStore.getState().load()} />;
     return <div className="splash">{t('app.loading')}</div>;
   }
-  if (!tournament) return <Navigate to="/tournaments" replace />;
+  if (!tournament) {
+    if (verifying) return <div className="splash">{t('app.loading')}</div>;
+    return <Navigate to="/tournaments" replace />;
+  }
 
   const readOnly = tournament.status === 'finished';
   return (
