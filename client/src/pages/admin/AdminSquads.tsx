@@ -2,7 +2,8 @@ import { useMemo, useState, type FormEvent } from 'react';
 import type { Player } from '../../../../shared/types';
 import { adminApi } from '../../api/admin';
 import { ApiError } from '../../api/client';
-import { useRosterStore, selectPlayers, selectTeams, bySquadOrder } from '../../stores/rosterStore';
+import { useRosterStore, selectGroups, selectPlayers, selectTeams, bySquadOrder } from '../../stores/rosterStore';
+import { TeamSelect } from '../../components/TeamSelect';
 import { useI18n } from '../../i18n';
 
 /** Admin squads panel: pick a team, then add / inline-edit / delete its
@@ -14,6 +15,7 @@ export function AdminSquads() {
   // Teams + players come from the live roster store (updated via socket after
   // every mutation), so we never hand-refetch.
   const teams = useRosterStore(selectTeams);
+  const groups = useRosterStore(selectGroups);
   const players = useRosterStore(selectPlayers);
 
   const [teamId, setTeamId] = useState('');
@@ -82,11 +84,15 @@ export function AdminSquads() {
         <h3>{t('adminSquads.title')}</h3>
         <label className="field">
           <span>{t('adminSquads.team')}</span>
-          <select className="input" value={teamId}
-            onChange={(e) => { setTeamId(e.target.value); setEditId(null); }}>
-            <option value="">{t('adminSquads.selectTeam')}</option>
-            {teams.map((tm) => <option key={tm.id} value={tm.id}>{tm.name}</option>)}
-          </select>
+          <TeamSelect
+            teams={teams}
+            groups={groups}
+            value={teamId}
+            onChange={(next) => { setTeamId(next); setEditId(null); }}
+            placeholder={t('adminSquads.selectTeam')}
+            ungroupedLabel={t('adminSquads.ungrouped')}
+            ariaLabel={t('adminSquads.team')}
+          />
         </label>
         {!teamId && <p>{t('adminSquads.pickTeam')}</p>}
       </section>

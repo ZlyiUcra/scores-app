@@ -97,7 +97,11 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
 
       <section className="card">
         <h3>Equipas</h3>
-        <p>Escolha uma equipa para ver o plantel: nomes, números e posições dos jogadores.</p>
+        <p>
+          Escolha uma equipa para ver o plantel: nomes, números e posições dos jogadores.
+          O seletor agrupa as equipas pelo seu grupo - toque no título de um grupo para o
+          abrir ou fechar; as equipas sem grupo aparecem em "Sem grupo".
+        </p>
       </section>
 
       {isAdmin && (

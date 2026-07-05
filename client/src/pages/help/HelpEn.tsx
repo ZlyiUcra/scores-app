@@ -94,7 +94,11 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
 
       <section className="card">
         <h3>Teams</h3>
-        <p>Pick a team to see its squad: player names, jersey numbers and positions.</p>
+        <p>
+          Pick a team to see its squad: player names, jersey numbers and positions.
+          The picker groups teams by their group - tap a group heading to fold it open
+          or shut; any team not yet in a group appears under "No group".
+        </p>
       </section>
 
       {isAdmin && (

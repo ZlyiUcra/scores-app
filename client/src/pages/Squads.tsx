@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useRosterStore, selectGroups, selectPlayers, selectTeams, bySquadOrder } from '../stores/rosterStore';
+import { TeamSelect } from '../components/TeamSelect';
 import { useI18n } from '../i18n';
 
 /** Public read-only squads: pick a team, see who plays in it. */
@@ -20,11 +21,15 @@ export function Squads() {
   return (
     <div className="stack">
       <h2 className="section-title">{t('squads.title')}</h2>
-      <select className="input" value={teamId} onChange={(e) => setTeamId(e.target.value)}
-        aria-label={t('squads.selectTeam')}>
-        <option value="">{t('squads.selectTeam')}</option>
-        {teams.map((tm) => <option key={tm.id} value={tm.id}>{tm.name}</option>)}
-      </select>
+      <TeamSelect
+        teams={teams}
+        groups={groups}
+        value={teamId}
+        onChange={setTeamId}
+        placeholder={t('squads.selectTeam')}
+        ungroupedLabel={t('squads.ungrouped')}
+        ariaLabel={t('squads.selectTeam')}
+      />
 
       {!team && <p>{t('squads.pickTeam')}</p>}
 
