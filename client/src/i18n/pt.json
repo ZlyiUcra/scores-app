@@ -1,7 +1,7 @@
 {
   "header": { "logout": "Terminar sessão", "menu": "Menu" },
   "app": { "loading": "A carregar…", "loadError": "Não foi possível carregar os dados. Verifique a ligação.", "retry": "Tentar novamente" },
-  "common": { "deleteConfirm": "Eliminar? Não pode ser desfeito." },
+  "common": { "deleteConfirm": "Eliminar? Não pode ser desfeito.", "confirm": "Confirmar", "cancel": "Cancelar" },
   "role": { "admin": "administrador", "viewer": "espectador" },
   "login": {
     "subtitle": "Torneio de futebol local",

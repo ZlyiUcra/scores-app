@@ -5,6 +5,8 @@ import { ApiError } from '../../api/client';
 import { formatDay } from '../../lib/format';
 import { useAuth } from '../../auth/AuthContext';
 import { useI18n } from '../../i18n';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 const PAGE_SIZE = 10;
 
@@ -19,6 +21,7 @@ export function AdminUsers() {
   const [data, setData] = useState<Paginated<AdminUserView> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const { request, dialog } = useConfirmDialog();
 
   const load = useCallback(async () => {
     try {
@@ -95,7 +98,7 @@ export function AdminUsers() {
                       {u.role === 'admin' ? t('adminUsers.demote') : t('adminUsers.promote')}
                     </button>
                     <button className="btn btn--sm btn--danger" disabled={busy || isSelf}
-                      onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; act(u.id, () => adminApi.deleteUser(u.id)); }}>
+                      onClick={() => request({ message: t('common.deleteConfirm'), tone: 'danger', onConfirm: () => act(u.id, () => adminApi.deleteUser(u.id)) })}>
                       {t('adminUsers.delete')}
                     </button>
                   </td>
@@ -114,6 +117,8 @@ export function AdminUsers() {
         <span className="muted">{t('adminUsers.page', { page, total: totalPages })}</span>
         <button className="btn btn--sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>{t('adminUsers.next')}</button>
       </div>
+
+      {dialog && <ConfirmDialog {...dialog} />}
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useBracketStore, selectBracket } from '../stores/bracketStore';
 import { Bracket } from '../components/Bracket';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { adminApi } from '../api/admin';
 import { ApiError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 
@@ -17,6 +19,7 @@ export function Knockout() {
   const { tournament, readOnly } = useTournament();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { request, dialog } = useConfirmDialog();
 
   // Any projected side means the whole page is a live projection.
   const preview = view.matches.some(
@@ -25,8 +28,7 @@ export function Knockout() {
 
   // The bracket-wide reset lives HERE — the knockout pages are the one and
   // only place playoff state is managed (the /admin/bracket panel is gone).
-  async function onReset() {
-    if (!window.confirm(t('adminBracket.resetConfirm'))) return;
+  async function doReset() {
     setBusy(true);
     setError(null);
     try {
@@ -38,12 +40,16 @@ export function Knockout() {
     }
   }
 
+  function onReset() {
+    request({ message: t('adminBracket.resetConfirm'), tone: 'danger', onConfirm: () => { void doReset(); } });
+  }
+
   return (
     <div className="ko-page">
       <div className="list__head">
         <h2>{t('nav.knockout')}</h2>
         {isAdmin && !readOnly && (
-          <button className="btn btn--sm btn--danger" disabled={busy} onClick={() => void onReset()}>
+          <button className="btn btn--sm btn--danger" disabled={busy} onClick={onReset}>
             {t('adminBracket.reset')}
           </button>
         )}
@@ -52,6 +58,7 @@ export function Knockout() {
       {preview && <p className="ko-preview-note">{t('bracket.previewNote')}</p>}
       <Bracket view={view} />
       <p className="muted ko-note">{t('bracket.note')}</p>
+      {dialog && <ConfirmDialog {...dialog} />}
     </div>
   );
 }

@@ -5,7 +5,9 @@ import { Fragment as ReactFragment, useState, type FormEvent } from 'react';
 import { TOURNAMENT_FORMAT } from '../../../../shared/tournament';
 import { adminApi } from '../../api/admin';
 import { api, ApiError } from '../../api/client';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { DateField } from '../../components/DateField';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { useDateLabels } from '../../lib/dateLabels';
 import { formatTime } from '../../lib/format';
 import { useMatchStore, selectOrder } from '../../stores/matchStore';
@@ -36,6 +38,7 @@ export function AdminMatches() {
   const dateLabels = useDateLabels();
   const { tournament } = useAdminTournament();
   const [errors, setErrors] = useState<Partial<Record<PanelSection, string>>>({});
+  const { request, dialog } = useConfirmDialog();
   const order = useMatchStore(selectOrder);
   const byId = useMatchStore((s) => s.byId);
   // Groups + teams come from the live roster store (updated via socket after
@@ -227,7 +230,7 @@ export function AdminMatches() {
                         )}
                         <button className="btn btn--sm" onClick={() => { setEditGroupId(g.id); setEditGroupName(g.name); }}>{t('adminMatches.edit')}</button>
                         <button className="btn btn--sm btn--danger" title={t('adminMatches.deleteGroupTitle')}
-                          onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(PanelSection.Groups, () => adminApi.deleteGroup(g.id), 'adminMatches.errorDeleteGroup'); }}>{t('adminMatches.delete')}</button>
+                          onClick={() => request({ message: t('common.deleteConfirm'), tone: 'danger', onConfirm: () => { void run(PanelSection.Groups, () => adminApi.deleteGroup(g.id), 'adminMatches.errorDeleteGroup'); } })}>{t('adminMatches.delete')}</button>
                       </>
                     )}
                   </div>
@@ -327,7 +330,7 @@ export function AdminMatches() {
                               <>
                                 <button className="btn btn--sm" onClick={() => { setEditId(tm.id); setEditName(tm.name); setEditShort(tm.shortName); setEditTeamGroupId(tm.groupId ?? ''); }}>{t('adminMatches.edit')}</button>
                                 <button className="btn btn--sm btn--danger"
-                                  onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(PanelSection.Teams, () => adminApi.deleteTeam(tm.id), 'adminMatches.errorDeleteTeam'); }}>{t('adminMatches.delete')}</button>
+                                  onClick={() => request({ message: t('common.deleteConfirm'), tone: 'danger', onConfirm: () => { void run(PanelSection.Teams, () => adminApi.deleteTeam(tm.id), 'adminMatches.errorDeleteTeam'); } })}>{t('adminMatches.delete')}</button>
                               </>
                             )}
                           </td>
@@ -453,7 +456,7 @@ export function AdminMatches() {
                           <button className="btn btn--sm"
                             onClick={() => { setEditMatchId(id); setEditStartsAt(m.startsAt); setEditField(m.field); }}>{t('adminMatches.edit')}</button>
                           <button className="btn btn--sm btn--danger"
-                            onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(PanelSection.Matches, () => adminApi.deleteMatch(id), 'adminMatches.errorDeleteMatch'); }}>{t('adminMatches.delete')}</button>
+                            onClick={() => request({ message: t('common.deleteConfirm'), tone: 'danger', onConfirm: () => { void run(PanelSection.Matches, () => adminApi.deleteMatch(id), 'adminMatches.errorDeleteMatch'); } })}>{t('adminMatches.delete')}</button>
                         </>
                       )}
                     </td>
@@ -467,6 +470,7 @@ export function AdminMatches() {
           </table>
         </div>
       </details>
+      {dialog && <ConfirmDialog {...dialog} />}
     </div>
   );
 }

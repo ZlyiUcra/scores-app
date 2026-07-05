@@ -1,7 +1,7 @@
 {
   "header": { "logout": "Log out", "menu": "Menu" },
   "app": { "loading": "Loading…", "loadError": "Could not load data. Check your connection.", "retry": "Retry" },
-  "common": { "deleteConfirm": "Delete? This cannot be undone." },
+  "common": { "deleteConfirm": "Delete? This cannot be undone.", "confirm": "Confirm", "cancel": "Cancel" },
   "role": { "admin": "admin", "viewer": "viewer" },
   "login": {
     "subtitle": "Local football tournament",

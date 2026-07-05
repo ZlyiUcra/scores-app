@@ -4,7 +4,9 @@ import { adminApi } from '../../api/admin';
 import { ApiError } from '../../api/client';
 import { useRosterStore, selectGroups, selectPlayers, selectTeams, bySquadOrder } from '../../stores/rosterStore';
 import { TeamSelect } from '../../components/TeamSelect';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useI18n } from '../../i18n';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 /** Admin squads panel: pick a team, then add / inline-edit / delete its
  * players. Purely descriptive data — no effect on standings or seeding. */
@@ -17,6 +19,7 @@ export function AdminSquads() {
   const teams = useRosterStore(selectTeams);
   const groups = useRosterStore(selectGroups);
   const players = useRosterStore(selectPlayers);
+  const { request, dialog } = useConfirmDialog();
 
   const [teamId, setTeamId] = useState('');
   const [name, setName] = useState('');
@@ -174,7 +177,7 @@ export function AdminSquads() {
                               <>
                                 <button className="btn btn--sm" onClick={() => startEdit(p)}>{t('adminSquads.edit')}</button>
                                 <button className="btn btn--sm btn--danger" disabled={busy}
-                                  onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(() => adminApi.deletePlayer(p.id), 'adminSquads.errorDelete'); }}>{t('adminSquads.delete')}</button>
+                                  onClick={() => request({ message: t('common.deleteConfirm'), tone: 'danger', onConfirm: () => { void run(() => adminApi.deletePlayer(p.id), 'adminSquads.errorDelete'); } })}>{t('adminSquads.delete')}</button>
                               </>
                             )}
                           </td>
@@ -188,6 +191,8 @@ export function AdminSquads() {
           </section>
         </>
       )}
+
+      {dialog && <ConfirmDialog {...dialog} />}
     </div>
   );
 }
