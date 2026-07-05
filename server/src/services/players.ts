@@ -1,7 +1,7 @@
 import type { Player } from '../../../shared/types.js';
 import { playerRepository, teamRepository } from '../storage/index.js';
 import type { CreatePlayerInput, UpdatePlayerInput } from '../validation.js';
-import { AppError, requireFound } from '../errors.js';
+import { AppError, AppErrorCode, requireFound } from '../errors.js';
 import { assertTournamentEditable } from './tournamentLock.js';
 import { withMutationLock } from './mutationLock.js';
 
@@ -12,7 +12,7 @@ import { withMutationLock } from './mutationLock.js';
 async function assertNumberFree(teamId: string, number: number | null | undefined, exceptId?: string): Promise<void> {
   if (number == null) return;
   if (await playerRepository.numberInUse(teamId, number, exceptId)) {
-    throw new AppError('NUMBER_TAKEN', `Number ${number} is already used in this team.`, 409);
+    throw new AppError(AppErrorCode.NumberTaken, `Number ${number} is already used in this team.`, 409);
   }
 }
 

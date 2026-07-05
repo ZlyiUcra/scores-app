@@ -1,7 +1,7 @@
 import type { AdminUserView, Paginated, Role } from '../../../shared/types.js';
 import { userRepository } from '../storage/index.js';
 import { toAdminUserView } from '../storage/mapping.js';
-import { AppError, requireFound } from '../errors.js';
+import { AppError, AppErrorCode, requireFound } from '../errors.js';
 import { withMutationLock } from './mutationLock.js';
 
 /** Validated query for the paginated admin user list (q = username filter). */
@@ -39,7 +39,7 @@ export async function listUsers(query: ListUsersQuery): Promise<Paginated<AdminU
 async function assertActorIsActiveAdmin(actorId: string): Promise<void> {
   const actor = await userRepository.getById(actorId);
   if (!actor || !actor.active || actor.role !== 'admin') {
-    throw new AppError('FORBIDDEN', 'Admin role required.', 403);
+    throw new AppError(AppErrorCode.Forbidden, 'Admin role required.', 403);
   }
 }
 
@@ -48,7 +48,7 @@ async function assertActorIsActiveAdmin(actorId: string): Promise<void> {
  * an active admin and supplies the verb for the message. */
 async function assertNotLastActiveAdmin(removesActiveAdmin: boolean, message: string): Promise<void> {
   if (removesActiveAdmin && (await userRepository.countActiveAdmins()) <= 1) {
-    throw new AppError('LAST_ADMIN', message, 409);
+    throw new AppError(AppErrorCode.LastAdmin, message, 409);
   }
 }
 
@@ -68,7 +68,7 @@ export function updateUser(
     const losesAdmin = user.role === 'admin' && user.active && (willBeRole !== 'admin' || !willBeActive);
 
     if (id === actorId && losesAdmin) {
-      throw new AppError('SELF_LOCKOUT', 'You cannot demote or deactivate your own admin account.', 400);
+      throw new AppError(AppErrorCode.SelfLockout, 'You cannot demote or deactivate your own admin account.', 400);
     }
     await assertNotLastActiveAdmin(losesAdmin, 'Cannot remove the last active admin.');
     return toAdminUserView(await userRepository.update(id, patch));
@@ -81,7 +81,7 @@ export function deleteUser(id: string, actorId: string): Promise<void> {
     await assertActorIsActiveAdmin(actorId);
     const user = requireFound(await userRepository.getById(id), 'User not found.');
     if (id === actorId) {
-      throw new AppError('SELF_LOCKOUT', 'You cannot delete your own account.', 400);
+      throw new AppError(AppErrorCode.SelfLockout, 'You cannot delete your own account.', 400);
     }
     await assertNotLastActiveAdmin(user.role === 'admin' && user.active, 'Cannot delete the last active admin.');
     await userRepository.remove(id);

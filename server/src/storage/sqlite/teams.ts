@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import type { Team } from '../../../../shared/types.js';
 import type { SeedTeam } from '../../../../shared/tournament.js';
-import { AppError } from '../../errors.js';
+import { AppError, AppErrorCode } from '../../errors.js';
 import type { StoredTeam, TeamRepository } from '../contracts.js';
 import { toSeedTeam, toTeamDto } from '../mapping.js';
 import type { SqliteContext } from './db.js';
@@ -96,14 +96,14 @@ export class SqliteTeamRepository implements TeamRepository {
     } catch (err) {
       console.error('[teams] persist failed during create:', err);
       this.byId.delete(team.id);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not save the team. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the team. Try again.', 500);
     }
     return toTeamDto(team);
   }
 
   async update(id: string, patch: { name?: string; shortName?: string }): Promise<Team> {
     const team = this.byId.get(id);
-    if (!team) throw new AppError('NOT_FOUND', `Team ${id} not found.`, 404);
+    if (!team) throw new AppError(AppErrorCode.NotFound, `Team ${id} not found.`, 404);
     const prev = { name: team.name, shortName: team.shortName };
     if (patch.name !== undefined) team.name = patch.name.trim();
     if (patch.shortName !== undefined) team.shortName = patch.shortName.trim().toUpperCase();
@@ -113,14 +113,14 @@ export class SqliteTeamRepository implements TeamRepository {
       console.error('[teams] persist failed during update:', err);
       team.name = prev.name;
       team.shortName = prev.shortName;
-      throw new AppError('STORE_WRITE_FAILED', 'Could not update the team. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not update the team. Try again.', 500);
     }
     return toTeamDto(team);
   }
 
   async assign(id: string, groupId: string | null, groupAddedAt: string | null): Promise<Team> {
     const team = this.byId.get(id);
-    if (!team) throw new AppError('NOT_FOUND', `Team ${id} not found.`, 404);
+    if (!team) throw new AppError(AppErrorCode.NotFound, `Team ${id} not found.`, 404);
     const prev = { groupId: team.groupId, groupAddedAt: team.groupAddedAt };
     team.groupId = groupId;
     team.groupAddedAt = groupAddedAt;
@@ -130,21 +130,21 @@ export class SqliteTeamRepository implements TeamRepository {
       console.error('[teams] persist failed during assign:', err);
       team.groupId = prev.groupId;
       team.groupAddedAt = prev.groupAddedAt;
-      throw new AppError('STORE_WRITE_FAILED', 'Could not update the team. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not update the team. Try again.', 500);
     }
     return toTeamDto(team);
   }
 
   async remove(id: string): Promise<void> {
     const removed = this.byId.get(id);
-    if (!removed) throw new AppError('NOT_FOUND', `Team ${id} not found.`, 404);
+    if (!removed) throw new AppError(AppErrorCode.NotFound, `Team ${id} not found.`, 404);
     this.byId.delete(id);
     try {
       this.persist();
     } catch (err) {
       console.error('[teams] persist failed during remove:', err);
       this.byId.set(id, removed); // roll back
-      throw new AppError('STORE_WRITE_FAILED', 'Could not remove the team. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not remove the team. Try again.', 500);
     }
   }
 }

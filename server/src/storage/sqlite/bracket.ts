@@ -1,6 +1,6 @@
 import type { BracketSlotId, MatchStatus } from '../../../../shared/types.js';
 import { emptyBracketResult, type BracketResult } from '../../../../shared/tournament.js';
-import { AppError } from '../../errors.js';
+import { AppError, AppErrorCode } from '../../errors.js';
 import type { BracketRepository } from '../contracts.js';
 import type { SqliteContext } from './db.js';
 
@@ -107,7 +107,7 @@ export class SqliteBracketRepository implements BracketRepository {
       console.error('[bracket] persist failed during save:', err);
       if (prev) slots.set(slot, prev);
       else slots.delete(slot);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not save the knockout result. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the knockout result. Try again.', 500);
     }
   }
 
@@ -120,7 +120,7 @@ export class SqliteBracketRepository implements BracketRepository {
     } catch (err) {
       console.error('[bracket] persist failed during reset:', err);
       this.byTournament.set(tournamentId, prev);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not reset the bracket. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not reset the bracket. Try again.', 500);
     }
   }
 

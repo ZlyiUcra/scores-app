@@ -7,7 +7,7 @@ import {
   tournamentRepository,
 } from '../storage/index.js';
 import type { CreateTournamentInput, UpdateTournamentInput } from '../validation.js';
-import { AppError, requireFound } from '../errors.js';
+import { AppError, AppErrorCode, requireFound } from '../errors.js';
 import { withMutationLock } from './mutationLock.js';
 
 /** All tournaments in stable creation order. */
@@ -67,7 +67,7 @@ export function removeTournament(id: string): Promise<void> {
   return withMutationLock(async () => {
     await getTournament(id); // NOT_FOUND for unknown ids before any guard fires
     if ((await tournamentRepository.list()).length <= 1) {
-      throw new AppError('LAST_TOURNAMENT', 'The last tournament cannot be deleted.', 409);
+      throw new AppError(AppErrorCode.LastTournament, 'The last tournament cannot be deleted.', 409);
     }
     const used =
       (await groupRepository.countByTournament(id)) > 0 ||
@@ -76,7 +76,7 @@ export function removeTournament(id: string): Promise<void> {
       (await bracketRepository.hasAny(id));
     if (used) {
       throw new AppError(
-        'TOURNAMENT_IN_USE',
+        AppErrorCode.TournamentInUse,
         'Remove the tournament\'s groups, teams and games before deleting it.',
         409,
       );

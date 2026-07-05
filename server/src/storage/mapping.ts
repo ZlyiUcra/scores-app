@@ -1,6 +1,6 @@
 import type { AdminUserView, AuthUser, Match, Team, Tournament } from '../../../shared/types.js';
 import type { SeedTeam } from '../../../shared/tournament.js';
-import { AppError } from '../errors.js';
+import { AppError, AppErrorCode } from '../errors.js';
 import type { StoredMatch, StoredTeam, StoredTournament, StoredUser } from './contracts.js';
 
 // Driver-neutral DTO shaping. Every storage driver funnels its rows through
@@ -47,7 +47,7 @@ export function resolveMatch(m: StoredMatch, getTeam: (id: string) => Team | und
   const away = getTeam(m.awayId);
   if (!home || !away) {
     // Should never happen: team deletion is blocked while referenced.
-    throw new AppError('DATA_INTEGRITY', `Match ${m.id} references a missing team.`, 500);
+    throw new AppError(AppErrorCode.DataIntegrity, `Match ${m.id} references a missing team.`, 500);
   }
   return {
     id: m.id,

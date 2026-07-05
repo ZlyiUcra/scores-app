@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import type { NextFunction, Request, Response } from 'express';
 import type { AuthUser } from '../../shared/types.js';
 import { config } from './config.js';
-import { AppError } from './errors.js';
+import { AppError, AppErrorCode } from './errors.js';
 import { userRepository } from './storage/index.js';
 import { toPublicUser } from './storage/mapping.js';
 import { withMutationLock } from './services/mutationLock.js';
@@ -29,7 +29,7 @@ export async function verifyCredentials(username: string, password: string): Pro
   // Password is correct but the account was deactivated by an admin — block the
   // login itself (not just later requests) with a clear, non-generic message.
   if (!found.active) {
-    throw new AppError('ACCOUNT_DISABLED', 'Your account has been deactivated. Contact an administrator.', 403);
+    throw new AppError(AppErrorCode.AccountDisabled, 'Your account has been deactivated. Contact an administrator.', 403);
   }
   return toPublicUser(found);
 }
@@ -43,10 +43,10 @@ export async function createUser(username: string, password: string): Promise<Au
   const passwordHash = await bcrypt.hash(password, config.bcryptCost);
   return withMutationLock(async () => {
     if (await userRepository.findByUsername(username)) {
-      throw new AppError('USERNAME_TAKEN', 'This username is already taken.', 409);
+      throw new AppError(AppErrorCode.UsernameTaken, 'This username is already taken.', 409);
     }
     if ((await userRepository.count()) >= config.maxUsers) {
-      throw new AppError('USER_LIMIT', 'Registration is temporarily closed.', 503);
+      throw new AppError(AppErrorCode.UserLimit, 'Registration is temporarily closed.', 503);
     }
     const created = await userRepository.create({ username, passwordHash, role: 'user' });
     return toPublicUser(created);

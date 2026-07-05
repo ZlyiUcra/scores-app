@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { Player } from '../../../../shared/types.js';
-import { AppError } from '../../errors.js';
+import { AppError, AppErrorCode } from '../../errors.js';
 import type { PlayerRepository } from '../contracts.js';
 import type { SqliteContext } from './db.js';
 
@@ -77,14 +77,14 @@ export class SqlitePlayerRepository implements PlayerRepository {
     } catch (err) {
       console.error('[players] persist failed during create:', err);
       this.byId.delete(player.id);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not save the player. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the player. Try again.', 500);
     }
     return player;
   }
 
   async update(id: string, patch: { name?: string; number?: number | null; position?: string | null }): Promise<Player> {
     const player = this.byId.get(id);
-    if (!player) throw new AppError('NOT_FOUND', `Player ${id} not found.`, 404);
+    if (!player) throw new AppError(AppErrorCode.NotFound, `Player ${id} not found.`, 404);
     const prev = { name: player.name, number: player.number, position: player.position };
     if (patch.name !== undefined) player.name = patch.name.trim();
     if (patch.number !== undefined) player.number = patch.number;
@@ -96,21 +96,21 @@ export class SqlitePlayerRepository implements PlayerRepository {
       player.name = prev.name;
       player.number = prev.number;
       player.position = prev.position;
-      throw new AppError('STORE_WRITE_FAILED', 'Could not update the player. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not update the player. Try again.', 500);
     }
     return player;
   }
 
   async remove(id: string): Promise<void> {
     const removed = this.byId.get(id);
-    if (!removed) throw new AppError('NOT_FOUND', `Player ${id} not found.`, 404);
+    if (!removed) throw new AppError(AppErrorCode.NotFound, `Player ${id} not found.`, 404);
     this.byId.delete(id);
     try {
       this.persist();
     } catch (err) {
       console.error('[players] persist failed during remove:', err);
       this.byId.set(id, removed);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not remove the player. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not remove the player. Try again.', 500);
     }
   }
 
@@ -126,7 +126,7 @@ export class SqlitePlayerRepository implements PlayerRepository {
     } catch (err) {
       console.error('[players] persist failed during removeByTeam:', err);
       for (let i = 0; i < removed.length; i++) this.byId.set(removed[i].id, removed[i]);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not remove the team\'s players. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not remove the team\'s players. Try again.', 500);
     }
   }
 }

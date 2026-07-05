@@ -1,5 +1,5 @@
 import type { Match, MatchStatus } from '../../../../shared/types.js';
-import { AppError } from '../../errors.js';
+import { AppError, AppErrorCode } from '../../errors.js';
 import type { MatchRepository, StoredMatch } from '../contracts.js';
 import { resolveMatch } from '../mapping.js';
 import type { SqliteContext } from './db.js';
@@ -97,21 +97,21 @@ export class SqliteMatchRepository implements MatchRepository {
       console.error('[matches] persist failed during save:', err);
       if (prev) this.matches.set(match.id, prev);
       else this.matches.delete(match.id);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not save the match. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the match. Try again.', 500);
     }
     return this.resolve(match);
   }
 
   async remove(id: string): Promise<void> {
     const prev = this.matches.get(id);
-    if (!prev) throw new AppError('NOT_FOUND', `Match ${id} not found.`, 404);
+    if (!prev) throw new AppError(AppErrorCode.NotFound, `Match ${id} not found.`, 404);
     this.matches.delete(id);
     try {
       this.persist();
     } catch (err) {
       console.error('[matches] persist failed during remove:', err);
       this.matches.set(id, prev);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not remove the match. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not remove the match. Try again.', 500);
     }
   }
 

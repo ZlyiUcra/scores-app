@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { Tournament, TournamentStatus } from '../../../../shared/types.js';
-import { AppError } from '../../errors.js';
+import { AppError, AppErrorCode } from '../../errors.js';
 import type { StoredTournament, TournamentRepository } from '../contracts.js';
 import { toTournamentDto } from '../mapping.js';
 import type { SqliteContext } from './db.js';
@@ -72,7 +72,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
     } catch (err) {
       console.error('[tournaments] persist failed during create:', err);
       this.byId.delete(tournament.id);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not save the tournament. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the tournament. Try again.', 500);
     }
     return toTournamentDto(tournament);
   }
@@ -82,7 +82,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
     patch: { name?: string; startsAt?: string | null; endsAt?: string | null; status?: TournamentStatus },
   ): Promise<Tournament> {
     const tournament = this.byId.get(id);
-    if (!tournament) throw new AppError('NOT_FOUND', `Tournament ${id} not found.`, 404);
+    if (!tournament) throw new AppError(AppErrorCode.NotFound, `Tournament ${id} not found.`, 404);
     const prev = { ...tournament };
     if (patch.name !== undefined) tournament.name = patch.name.trim();
     if (patch.startsAt !== undefined) tournament.startsAt = patch.startsAt;
@@ -93,21 +93,21 @@ export class SqliteTournamentRepository implements TournamentRepository {
     } catch (err) {
       console.error('[tournaments] persist failed during update:', err);
       this.byId.set(id, prev);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not update the tournament. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not update the tournament. Try again.', 500);
     }
     return toTournamentDto(tournament);
   }
 
   async remove(id: string): Promise<void> {
     const prev = this.byId.get(id);
-    if (!prev) throw new AppError('NOT_FOUND', `Tournament ${id} not found.`, 404);
+    if (!prev) throw new AppError(AppErrorCode.NotFound, `Tournament ${id} not found.`, 404);
     this.byId.delete(id);
     try {
       this.persist();
     } catch (err) {
       console.error('[tournaments] persist failed during remove:', err);
       this.byId.set(id, prev);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not remove the tournament. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not remove the tournament. Try again.', 500);
     }
   }
 }

@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import { resolveTournamentId } from '../services/tournaments.js';
-import { AppError } from '../errors.js';
+import { AppError, AppErrorCode } from '../errors.js';
 
 /**
  * The tournament a request addresses: the optional `?tournamentId=` query
@@ -12,7 +12,7 @@ export async function requestTournamentId(req: Request): Promise<string> {
   const raw = req.query.tournamentId;
   if (raw === undefined) return resolveTournamentId(undefined);
   if (typeof raw !== 'string' || raw.length === 0 || raw.length > 64) {
-    throw new AppError('BAD_REQUEST', 'Invalid tournamentId.', 400);
+    throw new AppError(AppErrorCode.BadRequest, 'Invalid tournamentId.', 400);
   }
   return resolveTournamentId(raw);
 }

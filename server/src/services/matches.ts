@@ -3,7 +3,7 @@ import type { Match, MatchUpdate } from '../../../shared/types.js';
 import type { StoredMatch } from '../storage/contracts.js';
 import { groupRepository, matchRepository, teamRepository } from '../storage/index.js';
 import type { CreateMatchInput, GoalInput, UpdateMatchInput } from '../validation.js';
-import { AppError, requireFound } from '../errors.js';
+import { AppError, AppErrorCode, requireFound } from '../errors.js';
 import { assertBracketNotStarted } from './bracketLock.js';
 import { assertTournamentEditable } from './tournamentLock.js';
 import { withMutationLock } from './mutationLock.js';
@@ -21,7 +21,7 @@ function toUpdate(m: StoredMatch): MatchUpdate {
 function assertFreshRev(current: StoredMatch, expectedRev?: number): void {
   if (expectedRev !== undefined && expectedRev !== current.rev) {
     throw new AppError(
-      'REV_CONFLICT',
+      AppErrorCode.RevConflict,
       `Stale update: expected rev ${expectedRev} but current is ${current.rev}.`,
       409,
     );
@@ -81,7 +81,7 @@ export function applyGoal(id: string, input: GoalInput): Promise<{ update: Match
     const field = input.team === 'home' ? 'homeScore' : 'awayScore';
     const nextScore = current[field] + input.delta;
     if (nextScore < 0) {
-      throw new AppError('INVALID', 'Score cannot go below zero.', 400);
+      throw new AppError(AppErrorCode.Invalid, 'Score cannot go below zero.', 400);
     }
 
     const next: StoredMatch = {
@@ -100,18 +100,18 @@ export function applyGoal(id: string, input: GoalInput): Promise<{ update: Match
  * generateGroupFixtures (already inside the lock). */
 async function createMatchInner(input: CreateMatchInput): Promise<{ match: Match; tournamentId: string }> {
   if (input.homeId === input.awayId) {
-    throw new AppError('INVALID', 'A team cannot play itself.', 400);
+    throw new AppError(AppErrorCode.Invalid, 'A team cannot play itself.', 400);
   }
   const home = await teamRepository.getStored(input.homeId);
   const away = await teamRepository.getStored(input.awayId);
   if (!home) {
-    throw new AppError('INVALID', 'Home team does not exist.', 400);
+    throw new AppError(AppErrorCode.Invalid, 'Home team does not exist.', 400);
   }
   if (!away) {
-    throw new AppError('INVALID', 'Away team does not exist.', 400);
+    throw new AppError(AppErrorCode.Invalid, 'Away team does not exist.', 400);
   }
   if (!home.groupId || !away.groupId || home.groupId !== away.groupId) {
-    throw new AppError('INVALID', 'Both teams must be in the same group.', 400);
+    throw new AppError(AppErrorCode.Invalid, 'Both teams must be in the same group.', 400);
   }
   await assertTournamentEditable(home.tournamentId);
   await assertBracketNotStarted(home.tournamentId);
@@ -197,7 +197,7 @@ export function generateGroupFixtures(groupId: string): Promise<{ matches: Match
       .filter((tm) => tm.groupId === groupId)
       .sort((a, b) => (a.groupAddedAt ?? '').localeCompare(b.groupAddedAt ?? '') || a.id.localeCompare(b.id));
     if (members.length < 2) {
-      throw new AppError('INVALID', 'A group needs at least two teams to generate games.', 400);
+      throw new AppError(AppErrorCode.Invalid, 'A group needs at least two teams to generate games.', 400);
     }
 
     const covered = new Set<string>();

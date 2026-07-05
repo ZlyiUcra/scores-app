@@ -2,7 +2,7 @@ import type { Group, Roster, Team } from '../../../shared/types.js';
 import { TOURNAMENT_FORMAT } from '../../../shared/tournament.js';
 import { groupRepository, matchRepository, playerRepository, teamRepository } from '../storage/index.js';
 import type { AssignTeamInput } from '../validation.js';
-import { AppError, requireFound } from '../errors.js';
+import { AppError, AppErrorCode, requireFound } from '../errors.js';
 import { assertBracketNotStarted } from './bracketLock.js';
 import { assertTournamentEditable } from './tournamentLock.js';
 import { withMutationLock } from './mutationLock.js';
@@ -78,7 +78,7 @@ export function removeGroup(id: string): Promise<string> {
     await assertTournamentEditable(stored.tournamentId);
     await assertBracketNotStarted(stored.tournamentId);
     if ((await teamRepository.countInGroup(id)) > 0) {
-      throw new AppError('GROUP_IN_USE', 'Remove the group\'s teams before deleting it.', 409);
+      throw new AppError(AppErrorCode.GroupInUse, 'Remove the group\'s teams before deleting it.', 409);
     }
     await groupRepository.remove(id);
     return stored.tournamentId;
@@ -101,7 +101,7 @@ export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ te
     // a team that already has fixtures would silently orphan those matches
     // from the standings. The admin UI hides the control; this enforces it.
     if (input.groupId !== team.groupId && (await matchRepository.countByTeam(teamId)) > 0) {
-      throw new AppError('TEAM_HAS_FIXTURES', 'A team with fixtures cannot change its group.', 409);
+      throw new AppError(AppErrorCode.TeamHasFixtures, 'A team with fixtures cannot change its group.', 409);
     }
 
     if (input.groupId === null) {
@@ -111,11 +111,11 @@ export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ te
     if (!group || group.tournamentId !== team.tournamentId) {
       // A group of ANOTHER tournament is as nonexistent as an unknown id —
       // teams never cross tournaments.
-      throw new AppError('INVALID', 'Group does not exist.', 400);
+      throw new AppError(AppErrorCode.Invalid, 'Group does not exist.', 400);
     }
     const alreadyInTarget = team.groupId === input.groupId;
     if (!alreadyInTarget && (await teamRepository.countInGroup(input.groupId)) >= TOURNAMENT_FORMAT.maxPerGroup) {
-      throw new AppError('GROUP_FULL', `A group can have at most ${TOURNAMENT_FORMAT.maxPerGroup} teams.`, 409);
+      throw new AppError(AppErrorCode.GroupFull, `A group can have at most ${TOURNAMENT_FORMAT.maxPerGroup} teams.`, 409);
     }
     // Re-added/moved teams get a fresh seeding key (only reachable while the
     // bracket has NOT started, per the guard above).
@@ -137,7 +137,7 @@ export function removeTeam(id: string): Promise<string> {
     await assertBracketNotStarted(stored.tournamentId);
     const used = await matchRepository.countByTeam(id);
     if (used > 0) {
-      throw new AppError('TEAM_IN_USE', `Team is referenced by ${used} match(es) and cannot be removed.`, 409);
+      throw new AppError(AppErrorCode.TeamInUse, `Team is referenced by ${used} match(es) and cannot be removed.`, 409);
     }
     await teamRepository.remove(id);
     await playerRepository.removeByTeam(id); // cascade the squad

@@ -1,10 +1,40 @@
 /**
  * Single typed error contract shared across services and routes.
  * The Express error middleware maps any AppError to { error: { code, message } }.
+ *
+ * `code` is a string enum so every throw site and the wire value stay in sync;
+ * the enum VALUES are the exact strings clients see in the error envelope, so
+ * changing a key is safe while changing a value is a wire-format change.
  */
+export enum AppErrorCode {
+  AccountDisabled = 'ACCOUNT_DISABLED',
+  BadRequest = 'BAD_REQUEST',
+  BracketStarted = 'BRACKET_STARTED',
+  DataIntegrity = 'DATA_INTEGRITY',
+  DrawUnresolved = 'DRAW_UNRESOLVED',
+  Forbidden = 'FORBIDDEN',
+  GroupFull = 'GROUP_FULL',
+  GroupInUse = 'GROUP_IN_USE',
+  Invalid = 'INVALID',
+  LastAdmin = 'LAST_ADMIN',
+  LastTournament = 'LAST_TOURNAMENT',
+  NotFound = 'NOT_FOUND',
+  NumberTaken = 'NUMBER_TAKEN',
+  RevConflict = 'REV_CONFLICT',
+  SelfLockout = 'SELF_LOCKOUT',
+  SlotNotReady = 'SLOT_NOT_READY',
+  StoreWriteFailed = 'STORE_WRITE_FAILED',
+  TeamHasFixtures = 'TEAM_HAS_FIXTURES',
+  TeamInUse = 'TEAM_IN_USE',
+  TournamentFinished = 'TOURNAMENT_FINISHED',
+  TournamentInUse = 'TOURNAMENT_IN_USE',
+  UserLimit = 'USER_LIMIT',
+  UsernameTaken = 'USERNAME_TAKEN',
+}
+
 export class AppError extends Error {
   constructor(
-    public code: string,
+    public code: AppErrorCode,
     message: string,
     public status: number,
   ) {
@@ -18,6 +48,6 @@ export class AppError extends Error {
  * boilerplate repeated across the service reads; the message stays caller-specific.
  */
 export function requireFound<T>(value: T | null | undefined, message: string): T {
-  if (value == null) throw new AppError('NOT_FOUND', message, 404);
+  if (value == null) throw new AppError(AppErrorCode.NotFound, message, 404);
   return value;
 }

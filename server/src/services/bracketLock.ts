@@ -1,5 +1,5 @@
 import { bracketRepository } from '../storage/index.js';
-import { AppError } from '../errors.js';
+import { AppError, AppErrorCode } from '../errors.js';
 
 /**
  * Group results (and group membership, since it drives seeding and bracket
@@ -16,7 +16,7 @@ import { AppError } from '../errors.js';
 export async function assertBracketNotStarted(tournamentId: string): Promise<void> {
   if (await bracketRepository.hasStarted(tournamentId)) {
     throw new AppError(
-      'BRACKET_STARTED',
+      AppErrorCode.BracketStarted,
       'Reset the knockout stage before changing groups, teams or group matches.',
       409,
     );

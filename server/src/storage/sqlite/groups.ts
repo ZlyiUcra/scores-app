@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { Group } from '../../../../shared/types.js';
-import { AppError } from '../../errors.js';
+import { AppError, AppErrorCode } from '../../errors.js';
 import type { GroupRepository, StoredGroup } from '../contracts.js';
 import type { SqliteContext } from './db.js';
 
@@ -70,14 +70,14 @@ export class SqliteGroupRepository implements GroupRepository {
     } catch (err) {
       console.error('[groups] persist failed during create:', err);
       this.byId.delete(group.id);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not save the group. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the group. Try again.', 500);
     }
     return toDto(group);
   }
 
   async update(id: string, name: string): Promise<Group> {
     const group = this.byId.get(id);
-    if (!group) throw new AppError('NOT_FOUND', `Group ${id} not found.`, 404);
+    if (!group) throw new AppError(AppErrorCode.NotFound, `Group ${id} not found.`, 404);
     const prev = group.name;
     group.name = name.trim();
     try {
@@ -85,21 +85,21 @@ export class SqliteGroupRepository implements GroupRepository {
     } catch (err) {
       console.error('[groups] persist failed during update:', err);
       group.name = prev;
-      throw new AppError('STORE_WRITE_FAILED', 'Could not rename the group. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not rename the group. Try again.', 500);
     }
     return toDto(group);
   }
 
   async remove(id: string): Promise<void> {
     const prev = this.byId.get(id);
-    if (!prev) throw new AppError('NOT_FOUND', `Group ${id} not found.`, 404);
+    if (!prev) throw new AppError(AppErrorCode.NotFound, `Group ${id} not found.`, 404);
     this.byId.delete(id);
     try {
       this.persist();
     } catch (err) {
       console.error('[groups] persist failed during remove:', err);
       this.byId.set(id, prev);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not remove the group. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not remove the group. Try again.', 500);
     }
   }
 }

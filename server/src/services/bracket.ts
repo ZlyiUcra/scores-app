@@ -7,7 +7,7 @@ import {
 } from '../../../shared/tournament.js';
 import { bracketRepository, groupRepository, matchRepository, teamRepository } from '../storage/index.js';
 import type { UpdateBracketInput } from '../validation.js';
-import { AppError } from '../errors.js';
+import { AppError, AppErrorCode } from '../errors.js';
 import { assertTournamentEditable } from './tournamentLock.js';
 import { withMutationLock } from './mutationLock.js';
 
@@ -46,7 +46,7 @@ async function currentSlotIds(tournamentId: string): Promise<Set<BracketSlotId>>
 
 async function assertSlot(tournamentId: string, slotRaw: string): Promise<BracketSlotId> {
   if (!(await currentSlotIds(tournamentId)).has(slotRaw)) {
-    throw new AppError('NOT_FOUND', `Unknown knockout slot ${slotRaw}.`, 404);
+    throw new AppError(AppErrorCode.NotFound, `Unknown knockout slot ${slotRaw}.`, 404);
   }
   return slotRaw;
 }
@@ -74,7 +74,7 @@ export function updateBracketSlot(
     const current = await bracketRepository.get(tournamentId, slot);
     if (input.expectedRev !== undefined && input.expectedRev !== current.rev) {
       throw new AppError(
-        'REV_CONFLICT',
+        AppErrorCode.RevConflict,
         `Stale update: expected rev ${input.expectedRev} but current is ${current.rev}.`,
         409,
       );
@@ -99,14 +99,14 @@ export function updateBracketSlot(
     // an unknown id.
     const homeOverride = next.homeOverrideId != null ? await teamRepository.getStored(next.homeOverrideId) : null;
     if (next.homeOverrideId != null && (!homeOverride || homeOverride.tournamentId !== tournamentId)) {
-      throw new AppError('NOT_FOUND', `Override team ${next.homeOverrideId} not found.`, 404);
+      throw new AppError(AppErrorCode.NotFound, `Override team ${next.homeOverrideId} not found.`, 404);
     }
     const awayOverride = next.awayOverrideId != null ? await teamRepository.getStored(next.awayOverrideId) : null;
     if (next.awayOverrideId != null && (!awayOverride || awayOverride.tournamentId !== tournamentId)) {
-      throw new AppError('NOT_FOUND', `Override team ${next.awayOverrideId} not found.`, 404);
+      throw new AppError(AppErrorCode.NotFound, `Override team ${next.awayOverrideId} not found.`, 404);
     }
     if (next.homeOverrideId != null && next.homeOverrideId === next.awayOverrideId) {
-      throw new AppError('INVALID', 'A team cannot play itself.', 400);
+      throw new AppError(AppErrorCode.Invalid, 'A team cannot play itself.', 400);
     }
 
     // A slot can only be played once its two sides resolve to two DIFFERENT
@@ -125,10 +125,10 @@ export function updateBracketSlot(
       );
       const bm = view.matches.find((b) => b.slot === slot);
       if (!bm || !('team' in bm.home) || !('team' in bm.away)) {
-        throw new AppError('SLOT_NOT_READY', 'This knockout match has no teams yet.', 409);
+        throw new AppError(AppErrorCode.SlotNotReady, 'This knockout match has no teams yet.', 409);
       }
       if (bm.home.team.id === bm.away.team.id) {
-        throw new AppError('INVALID', 'Both sides of this match resolve to the same team.', 400);
+        throw new AppError(AppErrorCode.Invalid, 'Both sides of this match resolve to the same team.', 400);
       }
     }
 
@@ -136,7 +136,7 @@ export function updateBracketSlot(
     if (next.status === 'finished' && next.homeScore === next.awayScore) {
       if (next.homePens == null || next.awayPens == null || next.homePens === next.awayPens) {
         throw new AppError(
-          'DRAW_UNRESOLVED',
+          AppErrorCode.DrawUnresolved,
           'A level knockout match needs a penalty result to decide a winner.',
           400,
         );

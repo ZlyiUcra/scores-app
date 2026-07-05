@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import type { Role } from '../../../../shared/types.js';
-import { AppError } from '../../errors.js';
+import { AppError, AppErrorCode } from '../../errors.js';
 import type { StoredUser, UserRepository } from '../contracts.js';
 import { normalizeUsername } from '../mapping.js';
 import type { SqliteContext } from './db.js';
@@ -154,14 +154,14 @@ export class SqliteUserRepository implements UserRepository {
       console.error('[users] persist failed during create:', err);
       this.byUsernameLower.delete(user.usernameLower);
       this.byId.delete(user.id);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not save the account. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the account. Try again.', 500);
     }
     return user;
   }
 
   async update(id: string, patch: { active?: boolean; role?: Role }): Promise<StoredUser> {
     const user = this.byId.get(id);
-    if (!user) throw new AppError('NOT_FOUND', 'User not found.', 404);
+    if (!user) throw new AppError(AppErrorCode.NotFound, 'User not found.', 404);
     const prev = { active: user.active, role: user.role };
     if (patch.active !== undefined) user.active = patch.active;
     if (patch.role !== undefined) user.role = patch.role;
@@ -171,14 +171,14 @@ export class SqliteUserRepository implements UserRepository {
       console.error('[users] persist failed during update:', err);
       user.active = prev.active;
       user.role = prev.role;
-      throw new AppError('STORE_WRITE_FAILED', 'Could not update the user. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not update the user. Try again.', 500);
     }
     return user;
   }
 
   async remove(id: string): Promise<void> {
     const user = this.byId.get(id);
-    if (!user) throw new AppError('NOT_FOUND', 'User not found.', 404);
+    if (!user) throw new AppError(AppErrorCode.NotFound, 'User not found.', 404);
     this.byId.delete(id);
     this.byUsernameLower.delete(user.usernameLower);
     try {
@@ -187,7 +187,7 @@ export class SqliteUserRepository implements UserRepository {
       console.error('[users] persist failed during remove:', err);
       this.byId.set(id, user);
       this.byUsernameLower.set(user.usernameLower, user);
-      throw new AppError('STORE_WRITE_FAILED', 'Could not delete the user. Try again.', 500);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not delete the user. Try again.', 500);
     }
   }
 }
