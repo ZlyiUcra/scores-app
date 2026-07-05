@@ -1,7 +1,7 @@
 import type { AdminUserView, Paginated, Role } from '../../../shared/types.js';
 import { userRepository } from '../storage/index.js';
 import { toAdminUserView } from '../storage/mapping.js';
-import { AppError } from '../errors.js';
+import { AppError, requireFound } from '../errors.js';
 import { withMutationLock } from './mutationLock.js';
 
 /** Validated query for the paginated admin user list (q = username filter). */
@@ -43,6 +43,15 @@ async function assertActorIsActiveAdmin(actorId: string): Promise<void> {
   }
 }
 
+/** Refuse an action that would drop the LAST active admin. Shared by update
+ * (demote/deactivate) and delete; the caller decides whether its action removes
+ * an active admin and supplies the verb for the message. */
+async function assertNotLastActiveAdmin(removesActiveAdmin: boolean, message: string): Promise<void> {
+  if (removesActiveAdmin && (await userRepository.countActiveAdmins()) <= 1) {
+    throw new AppError('LAST_ADMIN', message, 409);
+  }
+}
+
 /** Admin: patch a user's active/role. Self-lockout and last-admin guards run
  * here, inside the mutation lock, atomically with the write. */
 export function updateUser(
@@ -52,8 +61,7 @@ export function updateUser(
 ): Promise<AdminUserView> {
   return withMutationLock(async () => {
     await assertActorIsActiveAdmin(actorId);
-    const user = await userRepository.getById(id);
-    if (!user) throw new AppError('NOT_FOUND', 'User not found.', 404);
+    const user = requireFound(await userRepository.getById(id), 'User not found.');
 
     const willBeActive = patch.active ?? user.active;
     const willBeRole = patch.role ?? user.role;
@@ -62,9 +70,7 @@ export function updateUser(
     if (id === actorId && losesAdmin) {
       throw new AppError('SELF_LOCKOUT', 'You cannot demote or deactivate your own admin account.', 400);
     }
-    if (losesAdmin && (await userRepository.countActiveAdmins()) <= 1) {
-      throw new AppError('LAST_ADMIN', 'Cannot remove the last active admin.', 409);
-    }
+    await assertNotLastActiveAdmin(losesAdmin, 'Cannot remove the last active admin.');
     return toAdminUserView(await userRepository.update(id, patch));
   });
 }
@@ -73,14 +79,11 @@ export function updateUser(
 export function deleteUser(id: string, actorId: string): Promise<void> {
   return withMutationLock(async () => {
     await assertActorIsActiveAdmin(actorId);
-    const user = await userRepository.getById(id);
-    if (!user) throw new AppError('NOT_FOUND', 'User not found.', 404);
+    const user = requireFound(await userRepository.getById(id), 'User not found.');
     if (id === actorId) {
       throw new AppError('SELF_LOCKOUT', 'You cannot delete your own account.', 400);
     }
-    if (user.role === 'admin' && user.active && (await userRepository.countActiveAdmins()) <= 1) {
-      throw new AppError('LAST_ADMIN', 'Cannot delete the last active admin.', 409);
-    }
+    await assertNotLastActiveAdmin(user.role === 'admin' && user.active, 'Cannot delete the last active admin.');
     await userRepository.remove(id);
   });
 }
