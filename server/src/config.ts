@@ -34,6 +34,20 @@ function resolveAdminPassword(): string {
   return 'admin123';
 }
 
+function resolveMaxUsers(): number {
+  const fromEnv = process.env.MAX_USERS?.trim();
+  if (!fromEnv) return 500;
+
+  const parsed = Number(fromEnv);
+  // A malformed cap would silently disable or invert the guard, so fall back
+  // to the safe default instead of trusting a bad value.
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    console.warn(`[config] MAX_USERS="${fromEnv}" is not a positive integer - using 500.`);
+    return 500;
+  }
+  return parsed;
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** All environment-derived settings, resolved once at boot. */
@@ -51,8 +65,9 @@ export const config = {
   dataDir: process.env.DATA_DIR ?? path.join(__dirname, '..', 'data'),
   /** Cost for every bcrypt hash (auth + seeded accounts). */
   bcryptCost: 12,
-  /** Global account cap — blunts registration flooding. */
-  maxUsers: 500,
+  /** Global account cap - blunts registration flooding. Override via MAX_USERS
+   * to size it to the real event (defaults to 500). */
+  maxUsers: resolveMaxUsers(),
   /** Password of the seeded admin (first boot / empty users table only).
    * Required in production; dev falls back to the well-known default. */
   adminPassword: resolveAdminPassword(),
