@@ -447,16 +447,23 @@ export function resolveBracket(
   const bySlot = new Map<BracketSlotId, { round: Round; home: SeedRef; away: SeedRef }>();
   for (let i = 0; i < structure.length; i++) bySlot.set(structure[i].slot, structure[i]);
 
+  // Participants are wire-facing: emit plain Team objects so the server-only
+  // seeding key (groupAddedAt) never reaches clients. SeedTeam is still used
+  // above for size/qualification/ordering, and winner/loser below are derived
+  // from these participants, so they stay clean too.
+  const toWireTeam = (s: SeedTeam): Team => ({ id: s.id, name: s.name, shortName: s.shortName, groupId: s.groupId });
   const teamById = new Map<string, Team>();
-  for (let i = 0; i < seedTeams.length; i++) teamById.set(seedTeams[i].id, seedTeams[i]);
+  for (let i = 0; i < seedTeams.length; i++) teamById.set(seedTeams[i].id, toWireTeam(seedTeams[i]));
+  const cleanQualifiers = qualifiers ? qualifiers.map(toWireTeam) : null;
+  const cleanPreviewQualifiers = previewQualifiers ? previewQualifiers.map(toWireTeam) : null;
 
   const outcomeMemo = new Map<BracketSlotId, { winner: Team; loser: Team } | null>();
 
   function resolveSeed(seed: SeedRef): BracketParticipant {
     switch (seed.kind) {
       case 'qualifier':
-        if (qualifiers) return { team: qualifiers[seed.index] };
-        if (previewQualifiers) return { seed, projected: previewQualifiers[seed.index] };
+        if (cleanQualifiers) return { team: cleanQualifiers[seed.index] };
+        if (cleanPreviewQualifiers) return { seed, projected: cleanPreviewQualifiers[seed.index] };
         return { seed };
       case 'winner': {
         const out = slotOutcome(seed.slot);
