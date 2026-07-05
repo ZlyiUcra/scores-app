@@ -2,7 +2,7 @@ import React from 'react';
 import { api } from '../api/client';
 import { connectSocket, disconnectSocket } from '../socket';
 import { useMatchStore } from '../stores/matchStore';
-import { useBracketStore } from '../stores/bracketStore';
+import { useBracketStore, EMPTY_BRACKET } from '../stores/bracketStore';
 import { useRosterStore } from '../stores/rosterStore';
 
 /** A failed feed load and the retry that re-runs it. */
@@ -33,7 +33,7 @@ export function useTournamentFeed(tournamentId: string | null): FeedState {
     let alive = true;
     setError(false);
     useMatchStore.getState().setSnapshot([]);
-    useBracketStore.getState().setBracket({ formable: false, reason: null, size: 0, matches: [] });
+    useBracketStore.getState().setBracket(EMPTY_BRACKET);
     useRosterStore.getState().setRoster({ groups: [], teams: [], players: [] });
     // All three must land for a usable screen — one failure surfaces a retry.
     Promise.all([

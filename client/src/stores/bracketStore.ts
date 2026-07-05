@@ -11,11 +11,13 @@ interface BracketState {
   setBracket: (view: BracketView) => void;
 }
 
-const EMPTY: BracketView = { formable: false, reason: null, size: 0, matches: [] };
+/** The starting/reset knockout view: nothing formed yet. Shared so a feed
+ * teardown resets to the exact same shape the store initializes with. */
+export const EMPTY_BRACKET: BracketView = { formable: false, reason: null, size: 0, matches: [] };
 
 /** Holds the latest server-pushed knockout view (starts empty/unformable). */
 export const useBracketStore = create<BracketState>((set) => ({
-  view: EMPTY,
+  view: EMPTY_BRACKET,
   setBracket: (view) => set({ view }),
 }));
 
