@@ -19,6 +19,18 @@ import { defaultTournamentId, resolveTournamentId } from './services/tournaments
 
 let io: Server<ClientToServerEvents, ServerToClientEvents> | null = null;
 
+/**
+ * Last bracket snapshot broadcast per tournament, serialized. A group-match
+ * goal almost never changes the derived bracket, yet the score route rebuilds
+ * and rebroadcasts the whole ~15-20KB view on every goal; this lets
+ * broadcastBracket skip the emit when the view is byte-identical to the last
+ * one sent, so N viewers do not each receive an unchanged snapshot per goal.
+ * Late joiners are unaffected — they get a fresh snapshot from the resync on
+ * connect. A stale entry (server restart, tournament deletion) is harmless: an
+ * empty cache just means the next broadcast always emits.
+ */
+const lastBracketJson = new Map<string, string>();
+
 /** Room per user id, so admin actions can target one user's live sockets. */
 function userRoom(userId: string): string {
   return `user:${userId}`;
@@ -131,6 +143,9 @@ export function broadcastMatchRemoved(tournamentId: string, matchId: string): vo
  * can change: a knockout result is entered, or a group result/roster change
  * may re-seed it. */
 export function broadcastBracket(tournamentId: string, bracket: BracketView): void {
+  const json = JSON.stringify(bracket);
+  if (lastBracketJson.get(tournamentId) === json) return; // unchanged since last broadcast — skip the fan-out
+  lastBracketJson.set(tournamentId, json);
   io?.to(tournamentRoom(tournamentId)).emit(SOCKET_EVENTS.bracketSnapshot, bracket);
 }
 
