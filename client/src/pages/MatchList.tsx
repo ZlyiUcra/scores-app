@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { useMatchStore, selectOrder, selectConnected, selectMatch } from '../stores/matchStore';
+import { useMatchStore, selectByGroup, selectConnected, selectMatch } from '../stores/matchStore';
 import { useRosterStore, selectGroups } from '../stores/rosterStore';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
@@ -34,13 +34,10 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
 /** Results page: every group game clustered by group, each row linking to the
  * game's own page. The header shows the live-connection state. */
 export function MatchList() {
-  const order = useMatchStore(selectOrder);
-  const byId = useMatchStore((s) => s.byId);
+  const byGroup = useMatchStore(selectByGroup);
   const connected = useMatchStore(selectConnected);
   const groups = useRosterStore(selectGroups);
   const { t } = useI18n();
-
-  const idsByGroup = (groupId: string) => order.filter((id) => byId[id]?.group === groupId);
 
   return (
     <div className="list">
@@ -56,7 +53,7 @@ export function MatchList() {
       ) : (
         <div className="groups-grid">
           {groups.map((g) => {
-            const ids = idsByGroup(g.id);
+            const ids = byGroup[g.id] ?? [];
             return (
               <section className="group-card" key={g.id}>
                 <h3 className="group-card__title">{g.name}</h3>

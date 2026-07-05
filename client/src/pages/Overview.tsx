@@ -11,7 +11,14 @@ import { useI18n } from '../i18n';
 export function Overview() {
   const { t } = useI18n();
   const tables = useStandings();
-  const byId = useMatchStore((s) => s.byId);
+  // Primitive selectors: the header counts re-render only when a count actually
+  // changes, not on every goal that leaves the finished-count the same.
+  const total = useMatchStore((s) => s.order.length);
+  const played = useMatchStore((s) => {
+    let n = 0;
+    for (const id of s.order) if (s.byId[id]?.status === 'finished') n++;
+    return n;
+  });
   const groups = useRosterStore((s) => s.groups);
   const teams = useRosterStore((s) => s.teams);
 
@@ -41,13 +48,6 @@ export function Overview() {
     }
   }
   const contestedRank = contested.length > 0 ? contested[0].row.rank : null;
-
-  let total = 0;
-  let played = 0;
-  for (const m of Object.values(byId)) {
-    total++;
-    if (m.status === 'finished') played++;
-  }
 
   return (
     <div className="overview">
