@@ -2,9 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { CalendarGrid } from './CalendarGrid';
 import { useAnchoredPopover } from '../lib/useAnchoredPopover';
-import { DEFAULT_DATE_LABELS, type DateLabels, decodeValue, parseDate, renderDate } from '../lib/dateFormat';
-
-const p2 = (n: number) => String(n).padStart(2, '0');
+import { DEFAULT_DATE_LABELS, type DateLabels, decodeValue, p2, parseDate, renderDate } from '../lib/dateFormat';
 
 export type DateRange = { start: string | null; end: string | null };
 

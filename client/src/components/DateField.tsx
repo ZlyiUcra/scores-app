@@ -10,12 +10,11 @@ import {
   encodeValue,
   formatHasTime,
   formatIsTwelveHour,
+  p2,
   parseDate,
   renderDate,
+  to12,
 } from '../lib/dateFormat';
-
-const p2 = (n: number) => String(n).padStart(2, '0');
-const to12 = (h24: number) => ((h24 + 11) % 12) + 1;
 
 type Props = {
   /** Canonical value: an ISO instant when `format` has a time, else a date-only

@@ -1,4 +1,4 @@
-const p2 = (n: number) => String(n).padStart(2, '0');
+import { p2 } from './dateFormat';
 
 /** "19h30" — the app-wide kickoff-time format; empty when unset/invalid. */
 export function formatTime(iso: string): string {

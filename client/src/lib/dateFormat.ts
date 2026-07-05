@@ -8,7 +8,8 @@
 // HH hour 24h, hh hour 12h, mm minute, A meridiem. Anything else is a literal
 // separator. Examples: "DD.MM.YYYY", "DD.MM.YYYY HH:mm", "MM/DD/YYYY hh:mm A".
 
-const p2 = (n: number) => String(n).padStart(2, '0');
+/** Zero-pad to two digits (shared by the pickers and the app format helpers). */
+export const p2 = (n: number) => String(n).padStart(2, '0');
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** Text shown for calendar/weekday chrome. English defaults live in DEFAULT_DATE_LABELS. */
@@ -83,7 +84,7 @@ export function formatIsTwelveHour(format: string): boolean {
 }
 
 /** 0-23 -> 1-12 for the 12-hour token. */
-const to12 = (h24: number) => ((h24 + 11) % 12) + 1;
+export const to12 = (h24: number) => ((h24 + 11) % 12) + 1;
 
 /** DateParts -> display text in the template's shape. */
 export function renderDate(parts: DateParts, format: string, labels: DateLabels): string {
