@@ -182,14 +182,10 @@ export interface PlayerRepository {
   list(): Promise<Player[]>;
   /** Player by id, or undefined. */
   get(id: string): Promise<Player | undefined>;
-  /** All players of one team (a squad), unordered - display sorting is client-side. */
-  listByTeam(teamId: string): Promise<Player[]>;
   /** All players across the given teams, one pass over the store. The roster
    * snapshot uses this instead of list() + a JS filter, so the whole collection
    * isn't copied when only one tournament's teams are needed. Unordered. */
   listByTeams(teamIds: Set<string>): Promise<Player[]>;
-  /** Squad size of a team. */
-  countInTeam(teamId: string): Promise<number>;
   /** Is a jersey number already taken in a team (optionally ignoring one player)? */
   numberInUse(teamId: string, number: number, exceptId?: string): Promise<boolean>;
   /** Insert a player with a fresh uuid. */
