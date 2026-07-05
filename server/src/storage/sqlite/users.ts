@@ -14,13 +14,13 @@ interface LegacyUserFile {
 
 /**
  * SQLite accounts: full collection in two Maps (by id, by lowercased
- * username), persist = rewrite-all inside a transaction. PLAIN CRUD — all
+ * username), persist = rewrite-all inside a transaction. PLAIN CRUD - all
  * domain guards (uniqueness, cap, last-admin, self-lockout) live in services
  * under the mutation lock; the UNIQUE(usernameLower) column is the DB-level
  * backstop only.
  *
  * First boot on an empty users table imports the pre-SQLite users.json if one
- * exists (fail-closed on a corrupt file — accounts could be in it). Seeding
+ * exists (fail-closed on a corrupt file - accounts could be in it). Seeding
  * fresh operator accounts is the driver-neutral bootstrap's job, not ours.
  */
 export class SqliteUserRepository implements UserRepository {
@@ -138,7 +138,7 @@ export class SqliteUserRepository implements UserRepository {
 
   async create(input: { username: string; passwordHash: string; role: Role }): Promise<StoredUser> {
     const user: StoredUser = {
-      id: crypto.randomUUID(), // never positional — id collisions = auth as someone else
+      id: crypto.randomUUID(), // never positional - id collisions = auth as someone else
       username: input.username.trim(),
       usernameLower: normalizeUsername(input.username),
       role: input.role,

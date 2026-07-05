@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { AppError, AppErrorCode } from './errors.js';
 
-// Zod schemas live on the server — the trust boundary. Every mutation body is
+// Zod schemas live on the server - the trust boundary. Every mutation body is
 // validated here; unknown keys are stripped, scores are bounded integers.
 
-/** Court/pitch label — untrusted free text stored and broadcast to all clients,
+/** Court/pitch label - untrusted free text stored and broadcast to all clients,
  * so it is length- and charset-bounded. Empty is allowed. */
 const fieldLabel = z
   .string()
@@ -12,7 +12,7 @@ const fieldLabel = z
   .max(40, 'Field name is too long.')
   .regex(/^[\p{L}\p{N} .'\-]*$/u, 'Field contains invalid characters.');
 
-/** Login body. Bounds only — no format hints that would aid enumeration. */
+/** Login body. Bounds only - no format hints that would aid enumeration. */
 export const loginSchema = z
   .object({
     username: z.string().min(1).max(64),
@@ -39,7 +39,7 @@ export const RESERVED_USERNAMES = new Set([
 /** Self-signup body: username/password rules plus a reserved-name blocklist. */
 export const registerSchema = z
   .object({
-    // NOTE: no `role` field — the server always assigns 'user'. Accepting a
+    // NOTE: no `role` field - the server always assigns 'user'. Accepting a
     // role here would be a privilege-escalation hole.
     username: z
       .string()
@@ -98,7 +98,7 @@ const tournamentName = z
   .max(60, 'Tournament name must be at most 60 characters.')
   .regex(/^[\p{L}\p{N} .'\-]+$/u, 'Tournament name contains invalid characters.');
 
-/** Planned tournament dates are DATE-ONLY (YYYY-MM-DD) — they describe a
+/** Planned tournament dates are DATE-ONLY (YYYY-MM-DD) - they describe a
  * period of the year, not a kickoff instant, so no time/zone component. */
 const tournamentDate = z.string().date('Must be a date (YYYY-MM-DD).').nullable();
 
@@ -119,7 +119,7 @@ export const createTournamentSchema = z
   });
 
 /** Patch-tournament body: any subset of name/dates/status, but not empty.
- * NOTE: no cross-field date check here — a partial patch cannot see the
+ * NOTE: no cross-field date check here - a partial patch cannot see the
  * stored counterpart, and planned dates are informational anyway. */
 export const updateTournamentSchema = z
   .object({
@@ -174,7 +174,7 @@ export const createGroupSchema = z
   .strict();
 
 // Add/move a team to a group, or remove it (groupId: null). NOTE: no
-// `groupAddedAt` — the seeding key is stamped server-side, never client-supplied.
+// `groupAddedAt` - the seeding key is stamped server-side, never client-supplied.
 export const assignTeamSchema = z
   .object({
     groupId: z.string().min(1).max(64).nullable(),
@@ -252,7 +252,7 @@ export const updateBracketSchema = z
 
 // ---- Admin: user management ----
 
-// Strict allowlist — accepting anything else (e.g. passwordHash) would be a
+// Strict allowlist - accepting anything else (e.g. passwordHash) would be a
 // mass-assignment hole. Role change goes through this same guarded path.
 export const updateUserSchema = z
   .object({
@@ -286,7 +286,7 @@ export function parseOrThrow<T>(schema: z.ZodType<T>, input: unknown, fallback: 
   return result.data;
 }
 
-// Inferred input types — the schemas above are the single source of truth.
+// Inferred input types - the schemas above are the single source of truth.
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateTournamentInput = z.infer<typeof createTournamentSchema>;
 export type UpdateTournamentInput = z.infer<typeof updateTournamentSchema>;

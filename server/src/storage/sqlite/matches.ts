@@ -7,7 +7,7 @@ import type { SqliteTeamRepository } from './teams.js';
 
 /** SQLite matches: full collection in a Map, persist = rewrite-all inside a
  * transaction. Resolved DTOs embed teams via the team repository's sync Map
- * lookup — the sqlite flavor of "one joined read". */
+ * lookup - the sqlite flavor of "one joined read". */
 export class SqliteMatchRepository implements MatchRepository {
   private matches = new Map<string, StoredMatch>();
 

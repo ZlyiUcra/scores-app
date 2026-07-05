@@ -8,7 +8,7 @@ import { broadcastBracket } from '../socket.js';
 import { requestTournamentId } from './scope.js';
 import { AppErrorCode } from '../errors.js';
 
-/** /api/bracket — knockout view for any logged-in user; slot writes and the
+/** /api/bracket - knockout view for any logged-in user; slot writes and the
  * full reset are admin-only and re-broadcast the resolved bracket. All routes
  * are tournament-scoped (slot ids repeat across tournaments), resolved from
  * the optional `?tournamentId=` with the default-tournament fallback. */
@@ -39,7 +39,7 @@ bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, async (req, 
     const parsed = parseOrThrow(updateBracketSchema, req.body, 'Invalid body.');
     const tournamentId = await requestTournamentId(req);
     const bracket = await updateBracketSlot(tournamentId, req.params.slot, parsed);
-    // Rewiring who plays is the highest-impact bracket write — leave a trace.
+    // Rewiring who plays is the highest-impact bracket write - leave a trace.
     if (parsed.homeOverrideId !== undefined || parsed.awayOverrideId !== undefined) {
       const pins = { home: parsed.homeOverrideId, away: parsed.awayOverrideId };
       audit(req.user!.id, `bracket.override(${JSON.stringify(pins)})`, req.params.slot);

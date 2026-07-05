@@ -9,7 +9,7 @@ import { adminMatchesRouter } from './matches.js';
 /** Everything under /api/admin, composed from the per-domain sub-routers. */
 export const adminRouter = Router();
 
-// The admin trust boundary is applied ONCE here — every sub-router below is
+// The admin trust boundary is applied ONCE here - every sub-router below is
 // admin-only, so no route can accidentally ship unguarded.
 adminRouter.use(requireAdmin);
 

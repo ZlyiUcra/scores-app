@@ -7,7 +7,7 @@
  *
  * Rules (see also storage/contracts.ts):
  *  - Only route-facing service entry points take the lock. It is NOT
- *    reentrant — a locked function calling another locked function deadlocks
+ *    reentrant - a locked function calling another locked function deadlocks
  *    (generateGroupFixtures -> createMatch is the canonical case; internal
  *    helpers must stay lock-free).
  *  - Broadcast payload recomputation stays OUTSIDE the lock (routes do it
@@ -19,7 +19,7 @@ let tail: Promise<unknown> = Promise.resolve();
 
 export function withMutationLock<T>(fn: () => Promise<T>): Promise<T> {
   const run = tail.then(fn);
-  // The queue itself must survive a rejected mutation — swallow here (tail
+  // The queue itself must survive a rejected mutation - swallow here (tail
   // never rejects); the caller still gets the rejection through `run`.
   tail = run.catch(() => undefined);
   return run;

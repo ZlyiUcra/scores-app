@@ -10,7 +10,7 @@ import { SqliteBracketRepository } from "./bracket.js";
 
 /**
  * Build the SQLite storage: open/migrate the database, then construct the
- * repositories in one explicit place (matches needs teams for DTO embedding —
+ * repositories in one explicit place (matches needs teams for DTO embedding -
  * no import-order accidents). Async so a future driver with an async connect
  * fits the same seam.
  */

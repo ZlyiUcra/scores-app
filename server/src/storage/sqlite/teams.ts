@@ -41,7 +41,7 @@ export class SqliteTeamRepository implements TeamRepository {
     });
   }
 
-  /** Driver-internal SYNC lookup (the sqlite "join") — matches.ts only. */
+  /** Driver-internal SYNC lookup (the sqlite "join") - matches.ts only. */
   getDtoSync(id: string): Team | undefined {
     const t = this.byId.get(id);
     return t ? toTeamDto(t) : undefined;

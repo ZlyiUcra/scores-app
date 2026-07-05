@@ -29,7 +29,7 @@ export async function runBootstrap(storage: Storage): Promise<void> {
   await seedUsers(storage);
 }
 
-/** Demo groups/teams/matches/players — ONLY when all three collections are
+/** Demo groups/teams/matches/players - ONLY when all three collections are
  * empty across the board, i.e. a genuinely fresh database. A customized
  * roster (even a partially cleared one) is left alone: seeding into it could
  * create matches pointing at foreign teams. */
@@ -76,7 +76,7 @@ async function seedDemoRoster(storage: Storage, tournamentId: string): Promise<v
   }
 
   // Round-robin within each group. Group A is fully played, B is in progress,
-  // C is upcoming — so both resolved and symbolic bracket slots show.
+  // C is upcoming - so both resolved and symbolic bracket slots show.
   const iso = (offsetMin: number) => new Date(now + offsetMin * 60_000).toISOString();
   const fixture = (
     group: number,
@@ -127,7 +127,7 @@ async function seedDemoRoster(storage: Storage, tournamentId: string): Promise<v
   }
 }
 
-/** Seeded operators — only on a completely empty account table (a legacy
+/** Seeded operators - only on a completely empty account table (a legacy
  * users.json import, when present, runs first inside the driver and makes
  * this a no-op). Reserved usernames (validation.ts) keep strangers from
  * squatting these names. On a public deploy the well-known dev password MUST

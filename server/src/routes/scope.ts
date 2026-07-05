@@ -5,7 +5,7 @@ import { AppError, AppErrorCode } from '../errors.js';
 /**
  * The tournament a request addresses: the optional `?tournamentId=` query
  * param, validated (404 for an unknown id), falling back to the default
- * (latest active) tournament when absent — which is what the pre-tournament
+ * (latest active) tournament when absent - which is what the pre-tournament
  * client always does. Every scoped route funnels through here.
  */
 export async function requestTournamentId(req: Request): Promise<string> {

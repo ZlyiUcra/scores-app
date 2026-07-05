@@ -6,7 +6,7 @@ import { listBracket } from '../../services/bracket.js';
 import { broadcastBracket, broadcastMatchCreated, broadcastMatchRemoved } from '../../socket.js';
 import { adminMutationLimiter } from './mutationLimiter.js';
 
-/** Admin match lifecycle: create/delete only — score edits stay on the public
+/** Admin match lifecycle: create/delete only - score edits stay on the public
  * /api/matches routes. The tournament is derived from the match's teams, never
  * supplied. Mounted under /api/admin (auth applied in the parent). */
 export const adminMatchesRouter = Router();

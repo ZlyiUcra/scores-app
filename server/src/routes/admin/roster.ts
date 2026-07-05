@@ -19,12 +19,12 @@ import { broadcastBracket, broadcastMatchSnapshot, broadcastRoster } from '../..
 import { requestTournamentId } from '../scope.js';
 import { adminMutationLimiter } from './mutationLimiter.js';
 
-/** Admin roster management: groups, teams and group membership — the entities
+/** Admin roster management: groups, teams and group membership - the entities
  * bracket seeding is derived from, hence the bracket rebroadcasts. Creations
  * and listings are tournament-scoped (`?tournamentId=`, default fallback);
  * id-addressed mutations derive the tournament from the entity so broadcasts
  * always land in the right room. Broadcast payloads are recomputed AFTER the
- * awaited service call — outside the mutation lock, deliberately.
+ * awaited service call - outside the mutation lock, deliberately.
  * Mounted under /api/admin (auth in parent). */
 export const adminRosterRouter = Router();
 

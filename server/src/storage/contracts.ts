@@ -13,7 +13,7 @@ import type {
 import type { BracketResult, SeedTeam } from '../../../shared/tournament.js';
 
 /**
- * Storage contracts — the portability seam. Everything here is pure types:
+ * Storage contracts - the portability seam. Everything here is pure types:
  * no SQL, no driver imports, no node:sqlite. A storage driver (storage/sqlite
  * today, a future storage/postgres) implements these interfaces; services and
  * routes never see anything below them.
@@ -22,7 +22,7 @@ import type { BracketResult, SeedTeam } from '../../../shared/tournament.js';
  * atomicity. Check-then-write invariants (uniqueness, last-admin, group caps,
  * bracket locks) are the SERVICE layer's job and are serialized by the global
  * mutation lock (services/mutationLock.ts). Two rules keep that sound:
- *  1. No non-repository `await` between a guard and its write — hash
+ *  1. No non-repository `await` between a guard and its write - hash
  *     passwords, fetch nothing, before entering the locked section.
  *  2. Only route-facing service entry points take the lock (it is not
  *     reentrant); internal service helpers stay lock-free.
@@ -46,7 +46,7 @@ export interface StoredTeam {
   name: string;
   shortName: string;
   groupId: string | null;
-  /** When the team was added to its current group — the knockout seeding key.
+  /** When the team was added to its current group - the knockout seeding key.
    * Server-set only; never leaves the server. Null while unassigned. */
   groupAddedAt: string | null;
 }
@@ -67,7 +67,7 @@ export interface StoredTournament extends Tournament {
 /**
  * Persisted match shape: references teams by id (TeamRepository is the source
  * of truth). `group` is derived from the teams at creation. The public `Match`
- * DTO embeds resolved Team objects — resolution is the DRIVER's job so it can
+ * DTO embeds resolved Team objects - resolution is the DRIVER's job so it can
  * be a single joined read (see storage/mapping.ts for the shared shaping).
  */
 export interface StoredMatch {
@@ -93,7 +93,7 @@ export interface StoredUser extends AuthUser {
 }
 
 /**
- * Tournament registry — the top-level container. Every group/team/match/
+ * Tournament registry - the top-level container. Every group/team/match/
  * bracket row references a tournament by id. Bootstrap guarantees at least
  * one tournament exists before the server accepts requests. Emptiness guards
  * for removal live in the SERVICE.
@@ -121,7 +121,7 @@ export interface TournamentRepository {
 }
 
 /**
- * Group registry — first-class entity, admin-created, scoped to a tournament.
+ * Group registry - first-class entity, admin-created, scoped to a tournament.
  * Teams reference a group by id. Group ids stay GLOBALLY unique, so
  * id-addressed reads need no tournament.
  */
@@ -136,14 +136,14 @@ export interface GroupRepository {
   countByTournament(tournamentId: string): Promise<number>;
   /** Create a group with a fresh uuid; name arrives pre-validated. */
   create(tournamentId: string, name: string): Promise<Group>;
-  /** Rename a group (cosmetic — id-based references stay valid). */
+  /** Rename a group (cosmetic - id-based references stay valid). */
   update(id: string, name: string): Promise<Group>;
   /** Delete a group. Emptiness (no member teams) is the SERVICE's guard. */
   remove(id: string): Promise<void>;
 }
 
 /**
- * Team registry — the single source of truth for team identity and group
+ * Team registry - the single source of truth for team identity and group
  * membership, scoped to a tournament (teams never move between tournaments).
  * Teams are created WITHOUT a group and added to one later, which stamps
  * `groupAddedAt` (the seeding key). Team ids stay GLOBALLY unique.
@@ -168,12 +168,12 @@ export interface TeamRepository {
   /** Set/clear a team's group. `groupAddedAt` is server-set here (null clears). */
   assign(id: string, groupId: string | null, groupAddedAt: string | null): Promise<Team>;
   /** Delete a team. Referential integrity (matches/players) is the SERVICE's
-   * job — this is a plain store removal with persist-or-rollback. */
+   * job - this is a plain store removal with persist-or-rollback. */
   remove(id: string): Promise<void>;
 }
 
 /**
- * Squad registry — players belong to a team by id. Purely descriptive (no
+ * Squad registry - players belong to a team by id. Purely descriptive (no
  * effect on standings/seeding). Jersey-number uniqueness within a team is the
  * SERVICE's guard (drivers may back it with a constraint additionally).
  */
@@ -182,7 +182,7 @@ export interface PlayerRepository {
   list(): Promise<Player[]>;
   /** Player by id, or undefined. */
   get(id: string): Promise<Player | undefined>;
-  /** All players of one team (a squad), unordered — display sorting is client-side. */
+  /** All players of one team (a squad), unordered - display sorting is client-side. */
   listByTeam(teamId: string): Promise<Player[]>;
   /** All players across the given teams, one pass over the store. The roster
    * snapshot uses this instead of list() + a JS filter, so the whole collection
@@ -203,7 +203,7 @@ export interface PlayerRepository {
 }
 
 /** Persistence seam for group matches. Matches are tournament-scoped; ids stay
- * GLOBALLY unique. Reads return RESOLVED DTOs (teams embedded) — one joined
+ * GLOBALLY unique. Reads return RESOLVED DTOs (teams embedded) - one joined
  * read per call, never a lookup per row. */
 export interface MatchRepository {
   /** A tournament's resolved matches (teams embedded) for read/broadcast. */
@@ -224,7 +224,7 @@ export interface MatchRepository {
 }
 
 /**
- * Account store — PLAIN CRUD plus the queries the domain guards need. All
+ * Account store - PLAIN CRUD plus the queries the domain guards need. All
  * domain rules (username uniqueness, user cap, self-lockout, last-admin) are
  * enforced by services INSIDE the mutation lock, not here.
  */
@@ -233,7 +233,7 @@ export interface UserRepository {
   findByUsername(username: string): Promise<StoredUser | undefined>;
   /** Lookup by id (per-request re-load that makes revocation instant). */
   getById(id: string): Promise<StoredUser | undefined>;
-  /** Every stored user, server-only shape — callers project before responding. */
+  /** Every stored user, server-only shape - callers project before responding. */
   listAll(): Promise<StoredUser[]>;
   /** Total stored accounts (registration-cap guard input). */
   count(): Promise<number>;
@@ -249,7 +249,7 @@ export interface UserRepository {
 }
 
 /**
- * Bracket store — per tournament, a partial map of slotId -> result (the key
+ * Bracket store - per tournament, a partial map of slotId -> result (the key
  * is the (tournamentId, slot) pair). Deliberately narrow: aside from the
  * sanctioned per-side overrides (validated in the service), it can only set a
  * slot's RESULT, so the seed/format integrity can't be bypassed here. Which

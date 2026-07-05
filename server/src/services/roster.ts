@@ -9,7 +9,7 @@ import { withMutationLock } from './mutationLock.js';
 
 // Groups and teams are mutually entangled (assignment checks the group,
 // group removal checks its teams), with Team as the hub that also reaches
-// into players (cascade) and matches (integrity check) — via storage only.
+// into players (cascade) and matches (integrity check) - via storage only.
 // Everything is tournament-scoped; id-addressed mutations derive the
 // tournament from the entity and RETURN it so routes can scope broadcasts.
 
@@ -32,7 +32,7 @@ export async function getRoster(tournamentId: string): Promise<Roster> {
   return { groups: await groupRepository.list(tournamentId), teams, players };
 }
 
-/** Admin: create a team in a tournament (no group — assigned separately). */
+/** Admin: create a team in a tournament (no group - assigned separately). */
 export function createTeam(tournamentId: string, input: { name: string; shortName: string }): Promise<Team> {
   return withMutationLock(async () => {
     await assertTournamentEditable(tournamentId);
@@ -97,7 +97,7 @@ export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ te
     await assertTournamentEditable(team.tournamentId);
     await assertBracketNotStarted(team.tournamentId);
 
-    // Matches derive their group from the two teams sharing one — regrouping
+    // Matches derive their group from the two teams sharing one - regrouping
     // a team that already has fixtures would silently orphan those matches
     // from the standings. The admin UI hides the control; this enforces it.
     if (input.groupId !== team.groupId && (await matchRepository.countByTeam(teamId)) > 0) {
@@ -109,7 +109,7 @@ export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ te
     }
     const group = await groupRepository.getStored(input.groupId);
     if (!group || group.tournamentId !== team.tournamentId) {
-      // A group of ANOTHER tournament is as nonexistent as an unknown id —
+      // A group of ANOTHER tournament is as nonexistent as an unknown id -
       // teams never cross tournaments.
       throw new AppError(AppErrorCode.Invalid, 'Group does not exist.', 400);
     }
@@ -128,7 +128,7 @@ export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ te
 
 /** Admin: remove a team, only if no match references it. NOTE: the countByTeam
  * check below is an INDEPENDENT integrity guard (match history must not point
- * at a deleted team) — it is NOT redundant with assertBracketNotStarted.
+ * at a deleted team) - it is NOT redundant with assertBracketNotStarted.
  * The team's players are removed with it. Returns the owning tournament. */
 export function removeTeam(id: string): Promise<string> {
   return withMutationLock(async () => {

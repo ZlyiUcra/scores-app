@@ -7,7 +7,7 @@ import { broadcastRoster } from '../../socket.js';
 import { adminMutationLimiter } from './mutationLimiter.js';
 
 /** Admin squad management: players are purely descriptive (no effect on
- * standings/seeding), so no bracket rebroadcasts here — squads ride the
+ * standings/seeding), so no bracket rebroadcasts here - squads ride the
  * roster snapshot of the owning team's tournament. Mounted under /api/admin
  * (auth applied in the parent). */
 export const adminPlayersRouter = Router();
@@ -25,7 +25,7 @@ adminPlayersRouter.post('/teams/:id/players', adminMutationLimiter, async (req, 
   }
 });
 
-// Edit a player (name/number/position). Team is not editable — delete + re-add.
+// Edit a player (name/number/position). Team is not editable - delete + re-add.
 adminPlayersRouter.patch('/players/:id', adminMutationLimiter, async (req, res, next) => {
   try {
     const parsed = parseOrThrow(updatePlayerSchema, req.body, 'Invalid body.');

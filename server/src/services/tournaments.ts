@@ -21,7 +21,7 @@ export async function getTournament(id: string): Promise<Tournament> {
 }
 
 /**
- * The tournament a request lands in when it names none — the compatibility
+ * The tournament a request lands in when it names none - the compatibility
  * seam that keeps the pre-tournament client working. The last-created ACTIVE
  * tournament wins (several can be active at once); with none active, the
  * last-created tournament overall. Bootstrap guarantees at least one exists
@@ -60,7 +60,7 @@ export function updateTournament(id: string, patch: UpdateTournamentInput): Prom
   return withMutationLock(() => tournamentRepository.update(id, patch));
 }
 
-/** Admin: remove a tournament — only an EMPTY one (no groups, teams, matches
+/** Admin: remove a tournament - only an EMPTY one (no groups, teams, matches
  * or knockout rows; mirrors the empty-group delete guard) and never the last
  * one, so the default-tournament resolution always has something to return. */
 export function removeTournament(id: string): Promise<void> {

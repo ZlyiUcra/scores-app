@@ -32,7 +32,7 @@ async function getStored(id: string): Promise<StoredMatch> {
   return requireFound(await matchRepository.getStored(id), `Match ${id} not found.`);
 }
 
-/** A tournament's matches as resolved DTOs (teams embedded) — the
+/** A tournament's matches as resolved DTOs (teams embedded) - the
  * read/broadcast shape. */
 export function listMatches(tournamentId: string): Promise<Match[]> {
   return matchRepository.list(tournamentId);
@@ -132,8 +132,8 @@ async function createMatchInner(input: CreateMatchInput): Promise<{ match: Match
   return { match, tournamentId: home.tournamentId };
 }
 
-/** Admin: create a new group match from two existing teams. The group — and
- * through it the tournament — is derived from the teams (both must share one
+/** Admin: create a new group match from two existing teams. The group - and
+ * through it the tournament - is derived from the teams (both must share one
  * group). Returns the full Match plus the owning tournament. */
 export function createMatch(input: CreateMatchInput): Promise<{ match: Match; tournamentId: string }> {
   return withMutationLock(() => createMatchInner(input));
@@ -158,7 +158,7 @@ function pairKey(a: string, b: string): string {
 /** Single round-robin pairings via the circle method: pairs come out grouped
  * in rounds where each team plays at most once, so sequential kick-off slots
  * naturally avoid back-to-back games for a team. Kept private here (single
- * caller) rather than in shared/ — the client has no use for it. */
+ * caller) rather than in shared/ - the client has no use for it. */
 function roundRobinPairs(ids: string[]): Array<[string, string]> {
   const arr = ids.slice();
   if (arr.length % 2 === 1) arr.push(''); // bye marker for odd team counts
@@ -178,12 +178,12 @@ function roundRobinPairs(ids: string[]): Array<[string, string]> {
 }
 
 /**
- * Admin: generate the missing single-round-robin fixtures for a group — every
+ * Admin: generate the missing single-round-robin fixtures for a group - every
  * unordered pair of its teams gets exactly one match. Pairs that already have
  * a match in this group (any status) are skipped, so the call is an idempotent
  * top-up after roster changes. Kick-off times are PLACEHOLDERS (sequential
  * half-hour slots from the next full hour, in circle-method round order) and
- * the field is left empty — both meant to be edited afterwards.
+ * the field is left empty - both meant to be edited afterwards.
  */
 export function generateGroupFixtures(groupId: string): Promise<{ matches: Match[]; tournamentId: string }> {
   return withMutationLock(async () => {

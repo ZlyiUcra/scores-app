@@ -4,7 +4,7 @@ import { AppError, AppErrorCode } from '../errors.js';
 import type { StoredMatch, StoredTeam, StoredTournament, StoredUser } from './contracts.js';
 
 // Driver-neutral DTO shaping. Every storage driver funnels its rows through
-// these, so the wire shapes have exactly ONE source of truth — a new driver
+// these, so the wire shapes have exactly ONE source of truth - a new driver
 // can never fork what a Team or a resolved Match looks like.
 
 /** Public team DTO (drops the server-only seeding key). */
@@ -17,17 +17,17 @@ export function toSeedTeam(t: StoredTeam): SeedTeam {
   return { ...toTeamDto(t), groupAddedAt: t.groupAddedAt };
 }
 
-/** Public tournament DTO (drops createdAt — an internal ordering key). */
+/** Public tournament DTO (drops createdAt - an internal ordering key). */
 export function toTournamentDto(t: StoredTournament): Tournament {
   return { id: t.id, name: t.name, startsAt: t.startsAt, endsAt: t.endsAt, status: t.status };
 }
 
-/** Public/session projection of an account — never leaks passwordHash. */
+/** Public/session projection of an account - never leaks passwordHash. */
 export function toPublicUser(u: StoredUser): AuthUser {
   return { id: u.id, username: u.username, role: u.role };
 }
 
-/** Admin-panel projection — adds createdAt/active but still no passwordHash. */
+/** Admin-panel projection - adds createdAt/active but still no passwordHash. */
 export function toAdminUserView(u: StoredUser): AdminUserView {
   return { id: u.id, username: u.username, role: u.role, active: u.active, createdAt: u.createdAt };
 }
@@ -40,7 +40,7 @@ export function normalizeUsername(raw: string): string {
 /**
  * Shape a stored match into the public Match DTO (teams embedded). The team
  * lookup is the driver's: a Map hit in the sqlite driver, the joined columns
- * of a single SELECT in a SQL driver — never a per-row query.
+ * of a single SELECT in a SQL driver - never a per-row query.
  */
 export function resolveMatch(m: StoredMatch, getTeam: (id: string) => Team | undefined): Match {
   const home = getTeam(m.homeId);

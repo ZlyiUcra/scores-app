@@ -18,7 +18,7 @@ function resolveJwtSecret(): string {
   // Dev convenience: random per-boot secret. Tokens invalidate on restart,
   // which is fine locally and avoids a committed default.
   const generated = crypto.randomBytes(32).toString('hex');
-  console.warn('[config] JWT_SECRET not set — using a random dev secret.');
+  console.warn('[config] JWT_SECRET not set - using a random dev secret.');
   return generated;
 }
 
@@ -60,7 +60,7 @@ export const config = {
   tokenTtlSeconds: 60 * 60 * 8, // 8h
   cookieName: 'scores_token',
   clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
-  /** Where the storage driver keeps its files — overridable so a host with a
+  /** Where the storage driver keeps its files - overridable so a host with a
    * persistent disk can point it at the mount. */
   dataDir: process.env.DATA_DIR ?? path.join(__dirname, '..', 'data'),
   /** Cost for every bcrypt hash (auth + seeded accounts). */

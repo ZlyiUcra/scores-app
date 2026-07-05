@@ -5,7 +5,7 @@ import { createTournament, removeTournament, updateTournament } from '../../serv
 import { adminMutationLimiter } from './mutationLimiter.js';
 
 /** Admin tournament lifecycle: create / rename / dates / status / delete.
- * No broadcasts — the tournament list is not pushed over the socket (clients
+ * No broadcasts - the tournament list is not pushed over the socket (clients
  * fetch it over REST); everything inside a tournament rides the existing
  * scoped events. Mounted under /api/admin (auth applied in the parent). */
 export const adminTournamentsRouter = Router();

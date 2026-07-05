@@ -13,11 +13,11 @@ import { withMutationLock } from './mutationLock.js';
 
 // Deliberately NOT guarded by assertBracketNotStarted: these writes are what
 // that lock protects everything else from, plus its escape hatch (reset).
-// The finished-tournament lock DOES apply — an archive rejects all writes.
+// The finished-tournament lock DOES apply - an archive rejects all writes.
 
 // includePreview here is DISPLAY-ONLY: while the groups are unfinished the
 // view annotates symbolic seeds with `projected` teams from the current
-// (live) standings. Write validation below resolves STRICTLY — never copy
+// (live) standings. Write validation below resolves STRICTLY - never copy
 // this option into the hypothetical check in updateBracketSlot.
 async function resolvedBracket(tournamentId: string): Promise<BracketView> {
   return resolveBracket(
@@ -55,13 +55,13 @@ async function assertSlot(tournamentId: string, slotRaw: string): Promise<Bracke
  * Admin: set one knockout slot's result and/or pin its participants. Enforces:
  * the slot exists for the current bracket size; an override references an
  * existing team and the two pins differ; participants are known (derived or
- * pinned) and resolve to two DIFFERENT teams before going live/finished — the
+ * pinned) and resolve to two DIFFERENT teams before going live/finished - the
  * same team may sit in two slots' pins transiently during a correction, but a
  * match can never start against itself; a finished match cannot end level
  * without a decisive penalty result. Returns the full knockout view.
  *
  * The three override checks below (existence, self-play, hypothetical
- * resolution) are only correct TOGETHER — do not split or share them.
+ * resolution) are only correct TOGETHER - do not split or share them.
  */
 export function updateBracketSlot(
   tournamentId: string,
@@ -94,7 +94,7 @@ export function updateBracketSlot(
     };
 
     // A pin must reference an existing team OF THIS TOURNAMENT (team deletion
-    // is locked while any override exists — see hasStarted — so a stored pin
+    // is locked while any override exists - see hasStarted - so a stored pin
     // can never dangle). A foreign tournament's team is as nonexistent here as
     // an unknown id.
     const homeOverride = next.homeOverrideId != null ? await teamRepository.getStored(next.homeOverrideId) : null;

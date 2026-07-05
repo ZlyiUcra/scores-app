@@ -8,12 +8,12 @@ import { broadcastBracket, broadcastMatchUpdate } from '../socket.js';
 import { requestTournamentId } from './scope.js';
 import { AppErrorCode } from '../errors.js';
 
-/** /api/matches — reads for any logged-in user; live score/status edits are
+/** /api/matches - reads for any logged-in user; live score/status edits are
  * admin-only and each write broadcasts a compact diff plus a bracket refresh
  * (a group result can re-seed the knockout). The list is tournament-scoped;
  * id-addressed routes need no scope (ids are global) and derive the
  * tournament for their broadcasts from the match itself.
- * Express 4 note: every await sits INSIDE the try — rejections must reach
+ * Express 4 note: every await sits INSIDE the try - rejections must reach
  * next(err) by hand, the framework won't route them. */
 export const matchesRouter = Router();
 
@@ -47,7 +47,7 @@ matchesRouter.get('/:id', requireAuth, async (req, res, next) => {
 
 // Writes require admin. Client-side hiding of these controls is UX only;
 // this middleware is the actual gate. Broadcast payloads (incl. the bracket
-// recompute) are built AFTER the service call returns — outside the lock.
+// recompute) are built AFTER the service call returns - outside the lock.
 matchesRouter.patch('/:id', requireAdmin, matchMutationLimiter, async (req, res, next) => {
   try {
     const parsed = parseOrThrow(updateMatchSchema, req.body, 'Invalid body.');

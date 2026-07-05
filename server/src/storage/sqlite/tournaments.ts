@@ -6,7 +6,7 @@ import { toTournamentDto } from '../mapping.js';
 import type { SqliteContext } from './db.js';
 
 /** SQLite tournaments: full collection in a Map, persist = rewrite-all inside
- * a transaction (driver-private detail — fine at this data size). */
+ * a transaction (driver-private detail - fine at this data size). */
 export class SqliteTournamentRepository implements TournamentRepository {
   private byId = new Map<string, StoredTournament>();
 

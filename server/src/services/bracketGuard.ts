@@ -5,8 +5,8 @@ import { AppError, AppErrorCode } from '../errors.js';
  * Group results (and group membership, since it drives seeding and bracket
  * size) feed the derived bracket. Once any knockout slot has a result OR a
  * pinned participant (override), changing a group match OR the group setup
- * could silently change who qualified — or delete/repoint the very team an
- * override references — while the entered knockout state stays attached to its
+ * could silently change who qualified - or delete/repoint the very team an
+ * override references - while the entered knockout state stays attached to its
  * slots: a divergence. So those mutations are blocked until the admin
  * explicitly resets the knockout stage.
  *

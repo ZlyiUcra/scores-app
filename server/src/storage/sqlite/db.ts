@@ -5,7 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 
 // SQLite driver internals. node:sqlite is synchronous (DatabaseSync), so the
 // repositories in this directory fulfill the async storage contracts with
-// plain sync bodies — no interleaving can happen inside a single call. It is
+// plain sync bodies - no interleaving can happen inside a single call. It is
 // an experimental Node API (emits one ExperimentalWarning on boot); no
 // third-party dependency.
 
@@ -15,12 +15,12 @@ export interface SqliteContext {
   db: DatabaseSync;
   dataDir: string;
   /** Run `fn` inside a transaction; rolls back on throw so a partial write
-   * never lands. NOT nestable — each repository persist() owns its own. */
+   * never lands. NOT nestable - each repository persist() owns its own. */
   transaction(fn: () => void): void;
 }
 
 /** Open (or create) the database file, apply schema + in-place migrations and
- * adopt pre-tournament legacy rows. Pure driver concern — nothing above the
+ * adopt pre-tournament legacy rows. Pure driver concern - nothing above the
  * storage layer knows any of this exists. */
 export function openDatabase(dataDir: string): SqliteContext {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -123,7 +123,7 @@ export function openDatabase(dataDir: string): SqliteContext {
 
   // Schema evolution: the dead `minute` column (a live-clock idea that never got
   // UI) was dropped from the model. An existing table still has it as NOT NULL,
-  // which would reject the column-less inserts — drop it in place.
+  // which would reject the column-less inserts - drop it in place.
   const matchesInfo = db.prepare('PRAGMA table_info(matches)').all() as Array<{ name: string }>;
   if (matchesInfo.some((c) => c.name === 'minute')) {
     db.exec('ALTER TABLE matches DROP COLUMN minute;');
@@ -131,7 +131,7 @@ export function openDatabase(dataDir: string): SqliteContext {
 
   // Schema evolution: tournaments became first-class, so groups/teams/matches
   // gained a tournamentId. ALTER can only add a NULLABLE column to an existing
-  // table; the backfill below fills it, and every insert supplies it — so the
+  // table; the backfill below fills it, and every insert supplies it - so the
   // nullable/NOT NULL divergence between evolved and fresh tables never shows.
   for (const table of ['groups', 'teams', 'matches']) {
     const info = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
@@ -142,7 +142,7 @@ export function openDatabase(dataDir: string): SqliteContext {
 
   // The bracket's key grew from `slot` to (tournamentId, slot). SQLite cannot
   // alter a primary key in place, so rebuild the table around the existing rows
-  // (copy, drop, rename — nothing is lost).
+  // (copy, drop, rename - nothing is lost).
   const bracketCols = db.prepare('PRAGMA table_info(bracket)').all() as Array<{ name: string }>;
   if (bracketCols.length > 0 && !bracketCols.some((c) => c.name === 'tournamentId')) {
     db.exec(`
@@ -170,7 +170,7 @@ export function openDatabase(dataDir: string): SqliteContext {
 
   // Legacy adoption: rows from before tournaments existed carry no
   // tournamentId. If any are present, make sure there is a tournament to adopt
-  // them into and backfill. A FRESH database has no orphans and skips this —
+  // them into and backfill. A FRESH database has no orphans and skips this -
   // its first tournament is created by the driver-neutral bootstrap instead.
   const orphanCount = (['groups', 'teams', 'matches', 'bracket'] as const).reduce((sum, table) => {
     const row = db

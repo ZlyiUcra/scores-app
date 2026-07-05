@@ -12,7 +12,7 @@ import {
   verifyCredentials,
 } from '../auth.js';
 
-/** /api/auth — login/register/logout/me. Sessions live in an httpOnly cookie;
+/** /api/auth - login/register/logout/me. Sessions live in an httpOnly cookie;
  * registration always creates the read-only viewer role. */
 export const authRouter = Router();
 
@@ -56,13 +56,13 @@ function issueSession(res: Response, user: AuthUser): void {
 authRouter.post('/login', sameOriginOnly, loginLimiter, async (req, res, next) => {
   try {
     const parsed = loginSchema.safeParse(req.body);
-    // Generic message — bounds only, no field hint that would aid enumeration.
+    // Generic message - bounds only, no field hint that would aid enumeration.
     if (!parsed.success) {
       throw new AppError(AppErrorCode.BadRequest, 'Invalid credentials payload.', 400);
     }
     const user = await verifyCredentials(parsed.data.username, parsed.data.password);
     if (!user) {
-      // Generic message — no user-enumeration.
+      // Generic message - no user-enumeration.
       throw new AppError(AppErrorCode.InvalidCredentials, 'Wrong username or password.', 401);
     }
     issueSession(res, user);
@@ -75,7 +75,7 @@ authRouter.post('/register', sameOriginOnly, registerLimiter, async (req, res, n
   try {
     // Surface the first field message so the form can guide the user.
     const parsed = parseOrThrow(registerSchema, req.body, 'Invalid input.');
-    // Role is forced to 'user' inside createUser — never taken from the body.
+    // Role is forced to 'user' inside createUser - never taken from the body.
     const user = await createUser(parsed.username, parsed.password);
     issueSession(res, user); // auto-login through the exact same path as login
   } catch (err) {

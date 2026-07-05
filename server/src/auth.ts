@@ -26,7 +26,7 @@ export async function verifyCredentials(username: string, password: string): Pro
   const hash = found?.passwordHash ?? DUMMY_HASH;
   const ok = await bcrypt.compare(password, hash);
   if (!found || !ok) return null;
-  // Password is correct but the account was deactivated by an admin — block the
+  // Password is correct but the account was deactivated by an admin - block the
   // login itself (not just later requests) with a clear, non-generic message.
   if (!found.active) {
     throw new AppError(AppErrorCode.AccountDisabled, 'Your account has been deactivated. Contact an administrator.', 403);
@@ -34,7 +34,7 @@ export async function verifyCredentials(username: string, password: string): Pro
   return toPublicUser(found);
 }
 
-/** Create a self-registered account. Role is ALWAYS 'user' — never client input.
+/** Create a self-registered account. Role is ALWAYS 'user' - never client input.
  * Uniqueness and the global cap are checked INSIDE the mutation lock (the same
  * queue as every other write), so two concurrent registers cannot race them;
  * the password is hashed BEFORE entering so the lock is never held across
@@ -67,7 +67,7 @@ export function signToken(user: AuthUser): string {
 }
 
 /** Verify a JWT and extract its claims. Returns null on ANY failure (expired,
- * tampered, malformed, wrong algorithm) — callers treat null as "not logged in". */
+ * tampered, malformed, wrong algorithm) - callers treat null as "not logged in". */
 export function verifyToken(token: string): AuthUser | null {
   try {
     // Pin the algorithm to block alg=none / algorithm-confusion attacks.
@@ -82,7 +82,7 @@ export function verifyToken(token: string): AuthUser | null {
 }
 
 /** Attach the session JWT as an httpOnly cookie (the ONLY place the token
- * lives — clients never see it, so XSS cannot exfiltrate a session). */
+ * lives - clients never see it, so XSS cannot exfiltrate a session). */
 export function setAuthCookie(res: Response, token: string): void {
   res.cookie(config.cookieName, token, {
     httpOnly: true, // JS can't read it -> XSS can't steal the token
@@ -112,7 +112,7 @@ declare global {
 
 /**
  * Resolve the CURRENT user from the cookie. Critically, we don't trust the
- * token's claims for role/active — we re-load the user from the store on every
+ * token's claims for role/active - we re-load the user from the store on every
  * request. That way deactivating, deleting, or demoting a user takes effect
  * immediately, even though their JWT is still cryptographically valid.
  */
@@ -126,14 +126,14 @@ export async function readUserFromCookies(cookies: Record<string, string> | unde
   return toPublicUser(fresh); // role reflects the store, not the (possibly stale) token
 }
 
-/** Same resolution from a raw Cookie header — the socket handshake path. */
+/** Same resolution from a raw Cookie header - the socket handshake path. */
 export async function readUserFromCookieHeader(header: string | undefined): Promise<AuthUser | null> {
   if (!header) return null;
   return readUserFromCookies(cookie.parse(header));
 }
 
 /** Middleware: any logged-in, active user. Populates req.user or answers 401.
- * Express 4 does NOT route rejected promises to the error middleware — every
+ * Express 4 does NOT route rejected promises to the error middleware - every
  * await here stays inside the try, and failures go through next(err). */
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -148,7 +148,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 }
 
-/** Middleware: admin role required — THE server-side gate for every mutation
+/** Middleware: admin role required - THE server-side gate for every mutation
  * under /api/admin (and any route that mounts it). 401 unauthenticated, 403
  * for a non-admin. Role comes from the store, not the token. */
 export async function requireAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {

@@ -25,7 +25,7 @@ let io: Server<ClientToServerEvents, ServerToClientEvents> | null = null;
  * and rebroadcasts the whole ~15-20KB view on every goal; this lets
  * broadcastBracket skip the emit when the view is byte-identical to the last
  * one sent, so N viewers do not each receive an unchanged snapshot per goal.
- * Late joiners are unaffected — they get a fresh snapshot from the resync on
+ * Late joiners are unaffected - they get a fresh snapshot from the resync on
  * connect. A stale entry (server restart, tournament deletion) is harmless: an
  * empty cache just means the next broadcast always emits.
  */
@@ -36,7 +36,7 @@ function userRoom(userId: string): string {
   return `user:${userId}`;
 }
 
-/** Room per tournament — every data event is scoped to one tournament, so a
+/** Room per tournament - every data event is scoped to one tournament, so a
  * client watching an archive never receives another tournament's updates. */
 function tournamentRoom(tournamentId: string): string {
   return `tournament:${tournamentId}`;
@@ -53,7 +53,7 @@ async function attachSocket(socket: Socket<ClientToServerEvents, ServerToClientE
   if (userId) await socket.join(userRoom(userId));
 
   // The tournament this socket watches. An unknown/absent id falls back to
-  // the default tournament (never an error — a stale id after a deletion
+  // the default tournament (never an error - a stale id after a deletion
   // must not kill live updates).
   const requested = (socket.handshake.auth as { tournamentId?: unknown }).tournamentId;
   let tournamentId: string;
@@ -64,7 +64,7 @@ async function attachSocket(socket: Socket<ClientToServerEvents, ServerToClientE
   }
   await socket.join(tournamentRoom(tournamentId));
 
-  // The three snapshots are independent reads for the same tournament — fetch
+  // The three snapshots are independent reads for the same tournament - fetch
   // them concurrently, then emit in a fixed order (matches, roster, bracket).
   const [snapshot, roster, bracket] = await Promise.all([
     listMatches(tournamentId),
@@ -83,7 +83,7 @@ async function attachSocket(socket: Socket<ClientToServerEvents, ServerToClientE
  * ONE tournament's room (`auth.tournamentId`, defaulting to the active
  * tournament for the pre-tournament client), gets that tournament's full
  * state snapshot (resync), and all subsequent traffic is server-pushed
- * diffs/snapshots — clients never mutate anything over the socket. To switch
+ * diffs/snapshots - clients never mutate anything over the socket. To switch
  * tournaments a client reconnects with a different `auth.tournamentId`.
  */
 export function initSocket(httpServer: HttpServer): void {
@@ -95,7 +95,7 @@ export function initSocket(httpServer: HttpServer): void {
 
   // Authenticate the handshake from the httpOnly cookie, re-loading the user
   // from the store (not trusting the token) so a deactivated/deleted account
-  // can't open a fresh socket. socket.io does NOT await an async middleware —
+  // can't open a fresh socket. socket.io does NOT await an async middleware -
   // the promise is bridged to next() explicitly so a rejection becomes a
   // failed handshake, never an unhandled rejection.
   io.use((socket, next) => {
@@ -144,7 +144,7 @@ export function broadcastMatchRemoved(tournamentId: string, matchId: string): vo
  * may re-seed it. */
 export function broadcastBracket(tournamentId: string, bracket: BracketView): void {
   const json = JSON.stringify(bracket);
-  if (lastBracketJson.get(tournamentId) === json) return; // unchanged since last broadcast — skip the fan-out
+  if (lastBracketJson.get(tournamentId) === json) return; // unchanged since last broadcast - skip the fan-out
   lastBracketJson.set(tournamentId, json);
   io?.to(tournamentRoom(tournamentId)).emit(SOCKET_EVENTS.bracketSnapshot, bracket);
 }
@@ -155,7 +155,7 @@ export function broadcastRoster(tournamentId: string, roster: Roster): void {
   io?.to(tournamentRoom(tournamentId)).emit(SOCKET_EVENTS.rosterSnapshot, roster);
 }
 
-/** Re-push the tournament's full match snapshot — used after a team rename so
+/** Re-push the tournament's full match snapshot - used after a team rename so
  * the team names embedded in every match DTO refresh for all clients. */
 export function broadcastMatchSnapshot(tournamentId: string, matches: Match[]): void {
   io?.to(tournamentRoom(tournamentId)).emit(SOCKET_EVENTS.matchSnapshot, matches);

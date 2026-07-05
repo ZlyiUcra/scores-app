@@ -12,7 +12,7 @@ export interface ListUsersQuery {
 }
 
 /**
- * Admin user listing — a COLD path (admin-only, human-triggered), so a plain
+ * Admin user listing - a COLD path (admin-only, human-triggered), so a plain
  * in-memory filter + stable sort + slice is fine at this scale. Sort is stable
  * by (username, id) so pages don't reorder between requests.
  */
@@ -34,7 +34,7 @@ export async function listUsers(query: ListUsersQuery): Promise<Paginated<AdminU
 
 /** The actor must STILL be an active admin at the moment the mutation runs.
  * requireAdmin checked before the request queued on the mutation lock; another
- * admin may have deactivated/demoted the actor while it waited — without this
+ * admin may have deactivated/demoted the actor while it waited - without this
  * re-check the parked mutation would still land. */
 async function assertActorIsActiveAdmin(actorId: string): Promise<void> {
   const actor = await userRepository.getById(actorId);
