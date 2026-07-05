@@ -132,44 +132,31 @@ export const updateTournamentSchema = z
 
 // ---- Admin: teams & matches ----
 
+// Team display name + short code. The charset allowlist blunts stored-XSS via
+// names that render in every client. Shared by create (both required) and
+// rename (each field optional).
+const teamName = z
+  .string()
+  .trim()
+  .min(2, 'Name must be at least 2 characters.')
+  .max(40, 'Name must be at most 40 characters.')
+  .regex(/^[\p{L}\p{N} .'\-]+$/u, 'Name contains invalid characters.');
+const teamShortName = z
+  .string()
+  .trim()
+  .min(2, 'Short name must be at least 2 characters.')
+  .max(5, 'Short name must be at most 5 characters.')
+  .regex(/^[\p{L}\p{N}]+$/u, 'Short name must be letters/digits only.');
+
 // A team is created WITHOUT a group; group is assigned separately.
 export const createTeamSchema = z
-  .object({
-    // Charset allowlist blunts stored-XSS via names that render in every client.
-    name: z
-      .string()
-      .trim()
-      .min(2, 'Name must be at least 2 characters.')
-      .max(40, 'Name must be at most 40 characters.')
-      .regex(/^[\p{L}\p{N} .'\-]+$/u, 'Name contains invalid characters.'),
-    shortName: z
-      .string()
-      .trim()
-      .min(2, 'Short name must be at least 2 characters.')
-      .max(5, 'Short name must be at most 5 characters.')
-      .regex(/^[\p{L}\p{N}]+$/u, 'Short name must be letters/digits only.'),
-  })
+  .object({ name: teamName, shortName: teamShortName })
   .strict();
 
 // Rename a team (name and/or code). id-based references stay intact, so this is
 // safe. Group membership is changed via the separate assign endpoint.
 export const updateTeamSchema = z
-  .object({
-    name: z
-      .string()
-      .trim()
-      .min(2, 'Name must be at least 2 characters.')
-      .max(40, 'Name must be at most 40 characters.')
-      .regex(/^[\p{L}\p{N} .'\-]+$/u, 'Name contains invalid characters.')
-      .optional(),
-    shortName: z
-      .string()
-      .trim()
-      .min(2, 'Short name must be at least 2 characters.')
-      .max(5, 'Short name must be at most 5 characters.')
-      .regex(/^[\p{L}\p{N}]+$/u, 'Short name must be letters/digits only.')
-      .optional(),
-  })
+  .object({ name: teamName.optional(), shortName: teamShortName.optional() })
   .strict()
   .refine((v) => v.name !== undefined || v.shortName !== undefined, { message: 'Nothing to update.' });
 
