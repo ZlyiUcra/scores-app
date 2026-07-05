@@ -1,7 +1,8 @@
 import { Router, type NextFunction, type Request, type Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import type { AuthUser } from '../../../shared/types.js';
-import { loginSchema, registerSchema } from '../validation.js';
+import { loginSchema, parseOrThrow, registerSchema } from '../validation.js';
+import { AppError, AppErrorCode } from '../errors.js';
 import {
   clearAuthCookie,
   createUser,
@@ -41,8 +42,7 @@ const registerLimiter = rateLimit({
 function sameOriginOnly(req: Request, res: Response, next: NextFunction): void {
   const site = req.get('sec-fetch-site');
   if (site && site !== 'same-origin' && site !== 'none') {
-    res.status(403).json({ error: { code: 'CROSS_ORIGIN', message: 'Cross-origin request rejected.' } });
-    return;
+    throw new AppError(AppErrorCode.CrossOrigin, 'Cross-origin request rejected.', 403);
   }
   next();
 }
@@ -54,17 +54,16 @@ function issueSession(res: Response, user: AuthUser): void {
 }
 
 authRouter.post('/login', sameOriginOnly, loginLimiter, async (req, res, next) => {
-  const parsed = loginSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'Invalid credentials payload.' } });
-    return;
-  }
   try {
+    const parsed = loginSchema.safeParse(req.body);
+    // Generic message — bounds only, no field hint that would aid enumeration.
+    if (!parsed.success) {
+      throw new AppError(AppErrorCode.BadRequest, 'Invalid credentials payload.', 400);
+    }
     const user = await verifyCredentials(parsed.data.username, parsed.data.password);
     if (!user) {
       // Generic message — no user-enumeration.
-      res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'Wrong username or password.' } });
-      return;
+      throw new AppError(AppErrorCode.InvalidCredentials, 'Wrong username or password.', 401);
     }
     issueSession(res, user);
   } catch (err) {
@@ -73,18 +72,14 @@ authRouter.post('/login', sameOriginOnly, loginLimiter, async (req, res, next) =
 });
 
 authRouter.post('/register', sameOriginOnly, registerLimiter, async (req, res, next) => {
-  const parsed = registerSchema.safeParse(req.body);
-  if (!parsed.success) {
-    // Surface the first field message so the form can guide the user.
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid input.' } });
-    return;
-  }
   try {
+    // Surface the first field message so the form can guide the user.
+    const parsed = parseOrThrow(registerSchema, req.body, 'Invalid input.');
     // Role is forced to 'user' inside createUser — never taken from the body.
-    const user = await createUser(parsed.data.username, parsed.data.password);
+    const user = await createUser(parsed.username, parsed.password);
     issueSession(res, user); // auto-login through the exact same path as login
   } catch (err) {
-    next(err); // AppError('USERNAME_TAKEN') -> 409 via the error middleware
+    next(err); // AppError(UsernameTaken) -> 409 via the error middleware
   }
 });
 
@@ -97,8 +92,7 @@ authRouter.get('/me', async (req, res, next) => {
   try {
     const user = await readUserFromCookies(req.cookies);
     if (!user) {
-      res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Not logged in.' } });
-      return;
+      throw new AppError(AppErrorCode.Unauthenticated, 'Not logged in.', 401);
     }
     res.json({ user });
   } catch (err) {

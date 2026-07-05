@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createMatchSchema } from '../../validation.js';
+import { createMatchSchema, parseOrThrow } from '../../validation.js';
 import { audit } from '../../audit.js';
 import { createMatch, removeMatch } from '../../services/matches.js';
 import { listBracket } from '../../services/bracket.js';
@@ -12,13 +12,9 @@ import { adminMutationLimiter } from './mutationLimiter.js';
 export const adminMatchesRouter = Router();
 
 adminMatchesRouter.post('/matches', adminMutationLimiter, async (req, res, next) => {
-  const parsed = createMatchSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const { match, tournamentId } = await createMatch(parsed.data);
+    const parsed = parseOrThrow(createMatchSchema, req.body, 'Invalid body.');
+    const { match, tournamentId } = await createMatch(parsed);
     broadcastMatchCreated(tournamentId, match); // appears live for everyone
     broadcastBracket(tournamentId, await listBracket(tournamentId)); // a new group match can change seeding
     audit(req.user!.id, 'match.create', match.id);

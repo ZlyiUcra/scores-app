@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AppError, AppErrorCode } from './errors.js';
 
 // Zod schemas live on the server — the trust boundary. Every mutation body is
 // validated here; unknown keys are stripped, scores are bounded integers.
@@ -269,6 +270,21 @@ export const listUsersQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
+
+/**
+ * Parse `input` against `schema`, returning the typed data, or throw a uniform
+ * BAD_REQUEST (400) carrying the first issue's message (or `fallback` when zod
+ * supplied none). Collapses the hand-rolled `safeParse + res.status(400).json`
+ * envelope repeated across the routes; the throw rides the route's try/catch +
+ * next(err) to the error middleware, so the wire shape is unchanged.
+ */
+export function parseOrThrow<T>(schema: z.ZodType<T>, input: unknown, fallback: string): T {
+  const result = schema.safeParse(input);
+  if (!result.success) {
+    throw new AppError(AppErrorCode.BadRequest, result.error.issues[0]?.message ?? fallback, 400);
+  }
+  return result.data;
+}
 
 // Inferred input types — the schemas above are the single source of truth.
 export type LoginInput = z.infer<typeof loginSchema>;

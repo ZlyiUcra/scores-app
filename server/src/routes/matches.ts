@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { requireAdmin, requireAuth } from '../auth.js';
-import { goalSchema, updateMatchSchema } from '../validation.js';
+import { goalSchema, parseOrThrow, updateMatchSchema } from '../validation.js';
 import { applyGoal, applyUpdate, getMatch, listMatches } from '../services/matches.js';
 import { listBracket } from '../services/bracket.js';
 import { broadcastBracket, broadcastMatchUpdate } from '../socket.js';
@@ -48,13 +48,9 @@ matchesRouter.get('/:id', requireAuth, async (req, res, next) => {
 // this middleware is the actual gate. Broadcast payloads (incl. the bracket
 // recompute) are built AFTER the service call returns — outside the lock.
 matchesRouter.patch('/:id', requireAdmin, matchMutationLimiter, async (req, res, next) => {
-  const parsed = updateMatchSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const { update, tournamentId } = await applyUpdate(req.params.id, parsed.data);
+    const parsed = parseOrThrow(updateMatchSchema, req.body, 'Invalid body.');
+    const { update, tournamentId } = await applyUpdate(req.params.id, parsed);
     broadcastMatchUpdate(tournamentId, update);
     // A group result may complete a group and re-seed the bracket.
     broadcastBracket(tournamentId, await listBracket(tournamentId));
@@ -65,13 +61,9 @@ matchesRouter.patch('/:id', requireAdmin, matchMutationLimiter, async (req, res,
 });
 
 matchesRouter.post('/:id/goal', requireAdmin, matchMutationLimiter, async (req, res, next) => {
-  const parsed = goalSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const { update, tournamentId } = await applyGoal(req.params.id, parsed.data);
+    const parsed = parseOrThrow(goalSchema, req.body, 'Invalid body.');
+    const { update, tournamentId } = await applyGoal(req.params.id, parsed);
     broadcastMatchUpdate(tournamentId, update);
     broadcastBracket(tournamentId, await listBracket(tournamentId));
     res.json({ update });

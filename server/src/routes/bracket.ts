@@ -2,7 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { requireAdmin, requireAuth } from '../auth.js';
 import { audit } from '../audit.js';
-import { updateBracketSchema } from '../validation.js';
+import { parseOrThrow, updateBracketSchema } from '../validation.js';
 import { listBracket, resetBracket, updateBracketSlot } from '../services/bracket.js';
 import { broadcastBracket } from '../socket.js';
 import { requestTournamentId } from './scope.js';
@@ -34,17 +34,13 @@ bracketRouter.get('/', requireAuth, async (req, res, next) => {
 // from the URL; override ids in the body are the one sanctioned way to place a
 // team manually (validated in the service).
 bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, async (req, res, next) => {
-  const parsed = updateBracketSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
+    const parsed = parseOrThrow(updateBracketSchema, req.body, 'Invalid body.');
     const tournamentId = await requestTournamentId(req);
-    const bracket = await updateBracketSlot(tournamentId, req.params.slot, parsed.data);
+    const bracket = await updateBracketSlot(tournamentId, req.params.slot, parsed);
     // Rewiring who plays is the highest-impact bracket write — leave a trace.
-    if (parsed.data.homeOverrideId !== undefined || parsed.data.awayOverrideId !== undefined) {
-      const pins = { home: parsed.data.homeOverrideId, away: parsed.data.awayOverrideId };
+    if (parsed.homeOverrideId !== undefined || parsed.awayOverrideId !== undefined) {
+      const pins = { home: parsed.homeOverrideId, away: parsed.awayOverrideId };
       audit(req.user!.id, `bracket.override(${JSON.stringify(pins)})`, req.params.slot);
     }
     broadcastBracket(tournamentId, bracket);

@@ -139,8 +139,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   try {
     const user = await readUserFromCookies(req.cookies);
     if (!user) {
-      res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Login required.' } });
-      return;
+      throw new AppError(AppErrorCode.Unauthenticated, 'Login required.', 401);
     }
     req.user = user;
     next();
@@ -156,12 +155,10 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
   try {
     const user = req.user ?? (await readUserFromCookies(req.cookies));
     if (!user) {
-      res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Login required.' } });
-      return;
+      throw new AppError(AppErrorCode.Unauthenticated, 'Login required.', 401);
     }
     if (user.role !== 'admin') {
-      res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Admin role required.' } });
-      return;
+      throw new AppError(AppErrorCode.Forbidden, 'Admin role required.', 403);
     }
     req.user = user;
     next();

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createPlayerSchema, updatePlayerSchema } from '../../validation.js';
+import { createPlayerSchema, parseOrThrow, updatePlayerSchema } from '../../validation.js';
 import { audit } from '../../audit.js';
 import { createPlayer, removePlayer, updatePlayer } from '../../services/players.js';
 import { getRoster } from '../../services/roster.js';
@@ -14,13 +14,9 @@ export const adminPlayersRouter = Router();
 
 // Add a player to a team. The team comes from the URL, never the body.
 adminPlayersRouter.post('/teams/:id/players', adminMutationLimiter, async (req, res, next) => {
-  const parsed = createPlayerSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const { player, tournamentId } = await createPlayer(req.params.id, parsed.data);
+    const parsed = parseOrThrow(createPlayerSchema, req.body, 'Invalid body.');
+    const { player, tournamentId } = await createPlayer(req.params.id, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId)); // squads ride the roster snapshot
     audit(req.user!.id, 'player.create', player.id);
     res.status(201).json({ player });
@@ -31,15 +27,11 @@ adminPlayersRouter.post('/teams/:id/players', adminMutationLimiter, async (req, 
 
 // Edit a player (name/number/position). Team is not editable — delete + re-add.
 adminPlayersRouter.patch('/players/:id', adminMutationLimiter, async (req, res, next) => {
-  const parsed = updatePlayerSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const { player, tournamentId } = await updatePlayer(req.params.id, parsed.data);
+    const parsed = parseOrThrow(updatePlayerSchema, req.body, 'Invalid body.');
+    const { player, tournamentId } = await updatePlayer(req.params.id, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
-    audit(req.user!.id, `player.update(${JSON.stringify(parsed.data)})`, req.params.id);
+    audit(req.user!.id, `player.update(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ player });
   } catch (err) {
     next(err);

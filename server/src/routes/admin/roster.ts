@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { assignTeamSchema, createGroupSchema, createTeamSchema, updateTeamSchema } from '../../validation.js';
+import { assignTeamSchema, createGroupSchema, createTeamSchema, parseOrThrow, updateTeamSchema } from '../../validation.js';
 import { audit } from '../../audit.js';
 import { generateGroupFixtures, listMatches } from '../../services/matches.js';
 import {
@@ -39,14 +39,10 @@ adminRosterRouter.get('/groups', async (req, res, next) => {
 });
 
 adminRosterRouter.post('/groups', adminMutationLimiter, async (req, res, next) => {
-  const parsed = createGroupSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
+    const parsed = parseOrThrow(createGroupSchema, req.body, 'Invalid body.');
     const tournamentId = await requestTournamentId(req);
-    const group = await createGroup(tournamentId, parsed.data.name);
+    const group = await createGroup(tournamentId, parsed.name);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
     broadcastBracket(tournamentId, await listBracket(tournamentId));
     audit(req.user!.id, 'group.create', group.id);
@@ -58,13 +54,9 @@ adminRosterRouter.post('/groups', adminMutationLimiter, async (req, res, next) =
 
 // Rename a group (reuses the create-group body shape: just { name }).
 adminRosterRouter.patch('/groups/:id', adminMutationLimiter, async (req, res, next) => {
-  const parsed = createGroupSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const { group, tournamentId } = await updateGroup(req.params.id, parsed.data.name);
+    const parsed = parseOrThrow(createGroupSchema, req.body, 'Invalid body.');
+    const { group, tournamentId } = await updateGroup(req.params.id, parsed.name);
     broadcastRoster(tournamentId, await getRoster(tournamentId)); // group name shows in standings + match rows
     audit(req.user!.id, 'group.update', req.params.id);
     res.json({ group });
@@ -108,14 +100,10 @@ adminRosterRouter.get('/teams', async (req, res, next) => {
 });
 
 adminRosterRouter.post('/teams', adminMutationLimiter, async (req, res, next) => {
-  const parsed = createTeamSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
+    const parsed = parseOrThrow(createTeamSchema, req.body, 'Invalid body.');
     const tournamentId = await requestTournamentId(req);
-    const team = await createTeam(tournamentId, parsed.data);
+    const team = await createTeam(tournamentId, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
     audit(req.user!.id, 'team.create', team.id);
     res.status(201).json({ team });
@@ -126,17 +114,13 @@ adminRosterRouter.post('/teams', adminMutationLimiter, async (req, res, next) =>
 
 // Rename a team (name and/or code).
 adminRosterRouter.patch('/teams/:id', adminMutationLimiter, async (req, res, next) => {
-  const parsed = updateTeamSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const { team, tournamentId } = await updateTeam(req.params.id, parsed.data);
+    const parsed = parseOrThrow(updateTeamSchema, req.body, 'Invalid body.');
+    const { team, tournamentId } = await updateTeam(req.params.id, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId)); // standings names
     broadcastMatchSnapshot(tournamentId, await listMatches(tournamentId)); // names embedded in match DTOs
     broadcastBracket(tournamentId, await listBracket(tournamentId)); // names embedded in resolved bracket
-    audit(req.user!.id, `team.update(${JSON.stringify(parsed.data)})`, req.params.id);
+    audit(req.user!.id, `team.update(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ team });
   } catch (err) {
     next(err);
@@ -145,16 +129,12 @@ adminRosterRouter.patch('/teams/:id', adminMutationLimiter, async (req, res, nex
 
 // Add/move a team to a group, or remove it from its group (groupId: null).
 adminRosterRouter.patch('/teams/:id/group', adminMutationLimiter, async (req, res, next) => {
-  const parsed = assignTeamSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const { team, tournamentId } = await assignTeam(req.params.id, parsed.data);
+    const parsed = parseOrThrow(assignTeamSchema, req.body, 'Invalid body.');
+    const { team, tournamentId } = await assignTeam(req.params.id, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
     broadcastBracket(tournamentId, await listBracket(tournamentId)); // membership changes bracket seeding/size
-    audit(req.user!.id, `team.assign(${JSON.stringify(parsed.data)})`, req.params.id);
+    audit(req.user!.id, `team.assign(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ team });
   } catch (err) {
     next(err);

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createTournamentSchema, updateTournamentSchema } from '../../validation.js';
+import { createTournamentSchema, parseOrThrow, updateTournamentSchema } from '../../validation.js';
 import { audit } from '../../audit.js';
 import { createTournament, removeTournament, updateTournament } from '../../services/tournaments.js';
 import { adminMutationLimiter } from './mutationLimiter.js';
@@ -11,13 +11,9 @@ import { adminMutationLimiter } from './mutationLimiter.js';
 export const adminTournamentsRouter = Router();
 
 adminTournamentsRouter.post('/tournaments', adminMutationLimiter, async (req, res, next) => {
-  const parsed = createTournamentSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const tournament = await createTournament(parsed.data);
+    const parsed = parseOrThrow(createTournamentSchema, req.body, 'Invalid body.');
+    const tournament = await createTournament(parsed);
     audit(req.user!.id, 'tournament.create', tournament.id);
     res.status(201).json({ tournament });
   } catch (err) {
@@ -26,14 +22,10 @@ adminTournamentsRouter.post('/tournaments', adminMutationLimiter, async (req, re
 });
 
 adminTournamentsRouter.patch('/tournaments/:id', adminMutationLimiter, async (req, res, next) => {
-  const parsed = updateTournamentSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: { code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid body.' } });
-    return;
-  }
   try {
-    const tournament = await updateTournament(req.params.id, parsed.data);
-    audit(req.user!.id, `tournament.update(${JSON.stringify(parsed.data)})`, req.params.id);
+    const parsed = parseOrThrow(updateTournamentSchema, req.body, 'Invalid body.');
+    const tournament = await updateTournament(req.params.id, parsed);
+    audit(req.user!.id, `tournament.update(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ tournament });
   } catch (err) {
     next(err);
