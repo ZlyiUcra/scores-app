@@ -2,7 +2,7 @@ import type { Player } from '../../../shared/types.js';
 import { playerRepository, teamRepository } from '../storage/index.js';
 import type { CreatePlayerInput, UpdatePlayerInput } from '../validation.js';
 import { AppError, AppErrorCode, requireFound } from '../errors.js';
-import { assertTournamentEditable } from './tournamentLock.js';
+import { assertTournamentEditable } from './tournamentGuard.js';
 import { withMutationLock } from './mutationLock.js';
 
 // Squads are purely descriptive (no effect on standings/seeding), so none of

@@ -3,8 +3,8 @@ import { TOURNAMENT_FORMAT } from '../../../shared/tournament.js';
 import { groupRepository, matchRepository, playerRepository, teamRepository } from '../storage/index.js';
 import type { AssignTeamInput } from '../validation.js';
 import { AppError, AppErrorCode, requireFound } from '../errors.js';
-import { assertBracketNotStarted } from './bracketLock.js';
-import { assertTournamentEditable } from './tournamentLock.js';
+import { assertBracketNotStarted } from './bracketGuard.js';
+import { assertTournamentEditable } from './tournamentGuard.js';
 import { withMutationLock } from './mutationLock.js';
 
 // Groups and teams are mutually entangled (assignment checks the group,

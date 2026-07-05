@@ -8,7 +8,7 @@ import {
 import { bracketRepository, groupRepository, matchRepository, teamRepository } from '../storage/index.js';
 import type { UpdateBracketInput } from '../validation.js';
 import { AppError, AppErrorCode } from '../errors.js';
-import { assertTournamentEditable } from './tournamentLock.js';
+import { assertTournamentEditable } from './tournamentGuard.js';
 import { withMutationLock } from './mutationLock.js';
 
 // Deliberately NOT guarded by assertBracketNotStarted: these writes are what

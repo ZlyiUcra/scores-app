@@ -4,8 +4,8 @@ import type { StoredMatch } from '../storage/contracts.js';
 import { groupRepository, matchRepository, teamRepository } from '../storage/index.js';
 import type { CreateMatchInput, GoalInput, UpdateMatchInput } from '../validation.js';
 import { AppError, AppErrorCode, requireFound } from '../errors.js';
-import { assertBracketNotStarted } from './bracketLock.js';
-import { assertTournamentEditable } from './tournamentLock.js';
+import { assertBracketNotStarted } from './bracketGuard.js';
+import { assertTournamentEditable } from './tournamentGuard.js';
 import { withMutationLock } from './mutationLock.js';
 
 function toUpdate(m: StoredMatch): MatchUpdate {
