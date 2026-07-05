@@ -52,11 +52,17 @@ async function attachSocket(socket: Socket<ClientToServerEvents, ServerToClientE
   }
   await socket.join(tournamentRoom(tournamentId));
 
-  const snapshot: Match[] = await listMatches(tournamentId);
+  // The three snapshots are independent reads for the same tournament — fetch
+  // them concurrently, then emit in a fixed order (matches, roster, bracket).
+  const [snapshot, roster, bracket] = await Promise.all([
+    listMatches(tournamentId),
+    getRoster(tournamentId),
+    listBracket(tournamentId),
+  ]);
   socket.emit(SOCKET_EVENTS.matchSnapshot, snapshot);
   // Roster (groups + teams) drives client standings; the bracket is derived.
-  socket.emit(SOCKET_EVENTS.rosterSnapshot, await getRoster(tournamentId));
-  socket.emit(SOCKET_EVENTS.bracketSnapshot, await listBracket(tournamentId));
+  socket.emit(SOCKET_EVENTS.rosterSnapshot, roster);
+  socket.emit(SOCKET_EVENTS.bracketSnapshot, bracket);
 }
 
 /**
