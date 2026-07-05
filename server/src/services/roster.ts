@@ -28,7 +28,7 @@ export function listGroups(tournamentId: string): Promise<Group[]> {
 export async function getRoster(tournamentId: string): Promise<Roster> {
   const teams = await teamRepository.list(tournamentId);
   const teamIds = new Set(teams.map((t) => t.id));
-  const players = (await playerRepository.list()).filter((p) => teamIds.has(p.teamId));
+  const players = await playerRepository.listByTeams(teamIds);
   return { groups: await groupRepository.list(tournamentId), teams, players };
 }
 

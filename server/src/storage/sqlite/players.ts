@@ -42,6 +42,14 @@ export class SqlitePlayerRepository implements PlayerRepository {
     return Array.from(this.byId.values()).filter((p) => p.teamId === teamId);
   }
 
+  async listByTeams(teamIds: Set<string>): Promise<Player[]> {
+    const out: Player[] = [];
+    for (const p of this.byId.values()) {
+      if (teamIds.has(p.teamId)) out.push(p);
+    }
+    return out;
+  }
+
   async countInTeam(teamId: string): Promise<number> {
     let n = 0;
     for (const p of this.byId.values()) if (p.teamId === teamId) n++;
