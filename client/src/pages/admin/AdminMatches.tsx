@@ -227,7 +227,7 @@ export function AdminMatches() {
                         )}
                         <button className="btn btn--sm" onClick={() => { setEditGroupId(g.id); setEditGroupName(g.name); }}>{t('adminMatches.edit')}</button>
                         <button className="btn btn--sm btn--danger" title={t('adminMatches.deleteGroupTitle')}
-                          onClick={() => void run(PanelSection.Groups, () => adminApi.deleteGroup(g.id), 'adminMatches.errorDeleteGroup')}>{t('adminMatches.delete')}</button>
+                          onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(PanelSection.Groups, () => adminApi.deleteGroup(g.id), 'adminMatches.errorDeleteGroup'); }}>{t('adminMatches.delete')}</button>
                       </>
                     )}
                   </div>
@@ -327,7 +327,7 @@ export function AdminMatches() {
                               <>
                                 <button className="btn btn--sm" onClick={() => { setEditId(tm.id); setEditName(tm.name); setEditShort(tm.shortName); setEditTeamGroupId(tm.groupId ?? ''); }}>{t('adminMatches.edit')}</button>
                                 <button className="btn btn--sm btn--danger"
-                                  onClick={() => void run(PanelSection.Teams, () => adminApi.deleteTeam(tm.id), 'adminMatches.errorDeleteTeam')}>{t('adminMatches.delete')}</button>
+                                  onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(PanelSection.Teams, () => adminApi.deleteTeam(tm.id), 'adminMatches.errorDeleteTeam'); }}>{t('adminMatches.delete')}</button>
                               </>
                             )}
                           </td>
@@ -453,7 +453,7 @@ export function AdminMatches() {
                           <button className="btn btn--sm"
                             onClick={() => { setEditMatchId(id); setEditStartsAt(m.startsAt); setEditField(m.field); }}>{t('adminMatches.edit')}</button>
                           <button className="btn btn--sm btn--danger"
-                            onClick={() => void run(PanelSection.Matches, () => adminApi.deleteMatch(id), 'adminMatches.errorDeleteMatch')}>{t('adminMatches.delete')}</button>
+                            onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(PanelSection.Matches, () => adminApi.deleteMatch(id), 'adminMatches.errorDeleteMatch'); }}>{t('adminMatches.delete')}</button>
                         </>
                       )}
                     </td>

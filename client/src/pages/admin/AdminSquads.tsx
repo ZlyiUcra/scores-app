@@ -174,7 +174,7 @@ export function AdminSquads() {
                               <>
                                 <button className="btn btn--sm" onClick={() => startEdit(p)}>{t('adminSquads.edit')}</button>
                                 <button className="btn btn--sm btn--danger" disabled={busy}
-                                  onClick={() => void run(() => adminApi.deletePlayer(p.id), 'adminSquads.errorDelete')}>{t('adminSquads.delete')}</button>
+                                  onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(() => adminApi.deletePlayer(p.id), 'adminSquads.errorDelete'); }}>{t('adminSquads.delete')}</button>
                               </>
                             )}
                           </td>

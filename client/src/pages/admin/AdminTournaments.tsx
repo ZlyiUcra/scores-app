@@ -178,7 +178,7 @@ export function AdminTournaments() {
                         <>
                           <button className="btn btn--sm" onClick={() => startEdit(x)}>{t('adminTournaments.edit')}</button>
                           <button className="btn btn--sm btn--danger" disabled={busy} title={t('adminTournaments.deleteTitle')}
-                            onClick={() => void run(() => adminApi.deleteTournament(x.id), 'adminTournaments.errorDelete')}>{t('adminTournaments.delete')}</button>
+                            onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; void run(() => adminApi.deleteTournament(x.id), 'adminTournaments.errorDelete'); }}>{t('adminTournaments.delete')}</button>
                         </>
                       )}
                     </td>

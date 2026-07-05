@@ -95,7 +95,7 @@ export function AdminUsers() {
                       {u.role === 'admin' ? t('adminUsers.demote') : t('adminUsers.promote')}
                     </button>
                     <button className="btn btn--sm btn--danger" disabled={busy || isSelf}
-                      onClick={() => act(u.id, () => adminApi.deleteUser(u.id))}>
+                      onClick={() => { if (!window.confirm(t('common.deleteConfirm'))) return; act(u.id, () => adminApi.deleteUser(u.id)); }}>
                       {t('adminUsers.delete')}
                     </button>
                   </td>
