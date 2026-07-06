@@ -12,6 +12,7 @@ import { bracketRouter } from './routes/bracket.js';
 import { rosterRouter } from './routes/roster.js';
 import { adminRouter } from './routes/admin/index.js';
 import { AppError } from './errors.js';
+import { securityHeaders } from './securityHeaders.js';
 import { initSocket } from './socket.js';
 
 const app = express();
@@ -22,6 +23,7 @@ app.set('trust proxy', 1);
 
 app.use(express.json({ limit: '16kb' }));
 app.use(cookieParser());
+app.use(securityHeaders);
 
 // In production, restrict CORS to the known client origin with credentials.
 // In development the Vite proxy makes everything same-origin, so no CORS needed.
