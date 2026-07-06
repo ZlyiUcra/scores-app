@@ -1,5 +1,19 @@
 import { z } from 'zod';
 import { AppError, AppErrorCode } from './errors.js';
+import type {
+  LoginRequest,
+  RegisterRequest,
+  CreateTournamentRequest,
+  UpdateTournamentRequest,
+  CreateTeamRequest,
+  CreateGroupRequest,
+  AssignTeamRequest,
+  CreatePlayerRequest,
+  UpdatePlayerRequest,
+  CreateMatchRequest,
+  UpdateBracketRequest,
+  UpdateUserRequest,
+} from '../../shared/types.js';
 
 // Zod schemas live on the server - the trust boundary. Every mutation body is
 // validated here; unknown keys are stripped, scores are bounded integers.
@@ -303,3 +317,31 @@ export type CreateGroupInput = z.infer<typeof createGroupSchema>;
 export type AssignTeamInput = z.infer<typeof assignTeamSchema>;
 export type CreatePlayerInput = z.infer<typeof createPlayerSchema>;
 export type UpdatePlayerInput = z.infer<typeof updatePlayerSchema>;
+
+// ---- Drift guards ----
+//
+// The zod schemas above are the runtime trust boundary; the `XxxRequest`
+// interfaces in shared/types.ts are the compile-time wire contract the client
+// also imports. They duplicate each other's shape, so this block pins them
+// together: each schema's inferred shape must EXACTLY match its shared type
+// (bidirectional - catches a field forgotten on either side, not just a type
+// mismatch). `Eq` is `true` only on an exact match; `_assert<Eq<...>>(true)`
+// then fails to compile on drift (the `T extends true` constraint rejects the
+// `false`). NOTE: updateTeam/updateMatch/goal/listUsers have no shared request
+// type yet, so they are not bound here.
+type Eq<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+function _assert<T extends true>(value: T): T {
+  return value;
+}
+_assert<Eq<z.infer<typeof loginSchema>, LoginRequest>>(true);
+_assert<Eq<z.infer<typeof registerSchema>, RegisterRequest>>(true);
+_assert<Eq<z.infer<typeof createTournamentSchema>, CreateTournamentRequest>>(true);
+_assert<Eq<z.infer<typeof updateTournamentSchema>, UpdateTournamentRequest>>(true);
+_assert<Eq<z.infer<typeof createTeamSchema>, CreateTeamRequest>>(true);
+_assert<Eq<z.infer<typeof createGroupSchema>, CreateGroupRequest>>(true);
+_assert<Eq<z.infer<typeof assignTeamSchema>, AssignTeamRequest>>(true);
+_assert<Eq<z.infer<typeof createPlayerSchema>, CreatePlayerRequest>>(true);
+_assert<Eq<z.infer<typeof updatePlayerSchema>, UpdatePlayerRequest>>(true);
+_assert<Eq<z.infer<typeof createMatchSchema>, CreateMatchRequest>>(true);
+_assert<Eq<z.infer<typeof updateBracketSchema>, UpdateBracketRequest>>(true);
+_assert<Eq<z.infer<typeof updateUserSchema>, UpdateUserRequest>>(true);
