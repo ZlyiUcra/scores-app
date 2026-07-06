@@ -1,0 +1,1 @@
+export { AdminSquads } from './AdminSquads';
