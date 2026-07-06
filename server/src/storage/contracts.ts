@@ -1,5 +1,6 @@
 import type {
   AuthUser,
+  AuditLogEntry,
   BracketSlotId,
   Group,
   Match,
@@ -291,6 +292,8 @@ export interface AuditRepository {
    * (STORE_WRITE_FAILED) and the caller swallows it so audit never breaks the
    * audited action. */
   append(entry: AuditEntry): Promise<void>;
+  /** Newest-first rows bounded by `limit`, for the admin viewer. */
+  list(limit: number): Promise<AuditLogEntry[]>;
 }
 
 /** Everything a storage driver provides. One instance per process. */

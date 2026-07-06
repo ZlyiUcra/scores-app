@@ -19,6 +19,7 @@ import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminTournaments } from './pages/admin/AdminTournaments';
 import { AdminMatches } from './pages/admin/AdminMatches';
 import { AdminSquads } from './pages/admin/AdminSquads';
+import { AdminAudit } from './pages/admin/AdminAudit';
 
 function LangSwitcher() {
   const { lang, setLang } = useI18n();
@@ -186,6 +187,7 @@ export function App() {
             <Route path="tournaments" element={<AdminTournaments />} />
             <Route path="matches" element={<AdminMatches />} />
             <Route path="squads" element={<AdminSquads />} />
+            <Route path="audit" element={<AdminAudit />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

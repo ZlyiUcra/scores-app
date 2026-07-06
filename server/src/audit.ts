@@ -1,4 +1,4 @@
-import type { AuthUser } from '../../shared/types.js';
+import type { AuditLogEntry, AuthUser } from '../../shared/types.js';
 import { auditRepository } from './storage/index.js';
 
 /** Who performed the action - id (joins to users) plus the readable username. */
@@ -40,4 +40,9 @@ export function audit(actor: Actor, action: string, target: string): void {
   void auditRepository
     .append({ ts, actorId: actor.id, username: actor.username, action, target })
     .catch((err: unknown) => console.error('[audit] persist failed:', err));
+}
+
+/** Newest-first audit rows for the admin viewer (bounded by `limit`). */
+export function listAudit(limit = 200): Promise<AuditLogEntry[]> {
+  return auditRepository.list(limit);
 }

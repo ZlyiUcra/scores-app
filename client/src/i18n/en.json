@@ -62,8 +62,18 @@
     "tournaments": "Tournaments",
     "matches": "Games",
     "squads": "Squads",
+    "audit": "Audit",
     "tournament": "Tournament:",
     "finishedNote": "This tournament is finished - set it back to active to make changes."
+  },
+  "adminAudit": {
+    "title": "Audit trail",
+    "colTime": "Time",
+    "colUser": "User",
+    "colAction": "Action",
+    "colTarget": "Target",
+    "empty": "No audit records yet.",
+    "errorLoad": "Audit trail not loaded."
   },
   "adminTournaments": {
     "newTitle": "New tournament",

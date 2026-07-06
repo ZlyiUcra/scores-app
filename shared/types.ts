@@ -312,6 +312,16 @@ export interface ApiError {
   error: { code: string; message: string };
 }
 
+/** One row of the admin audit trail (who did what, and to what). */
+export interface AuditLogEntry {
+  id: number;
+  ts: string;
+  actorId: string;
+  username: string;
+  action: string;
+  target: string;
+}
+
 // ---- Socket event names & payload map ----
 
 export const SOCKET_EVENTS = {

@@ -1,5 +1,6 @@
 import { AppError, AppErrorCode } from '../../errors.js';
 import type { AuditEntry, AuditRepository } from '../contracts.js';
+import type { AuditLogEntry } from '../../../../shared/types.js';
 import type { SqliteContext } from './db.js';
 
 /**
@@ -29,5 +30,28 @@ export class SqliteAuditRepository implements AuditRepository {
         500,
       );
     }
+  }
+
+  async list(limit: number): Promise<AuditLogEntry[]> {
+    const rows = this.ctx.db
+      .prepare(
+        'SELECT id, ts, actorId, username, action, target FROM audit_log ORDER BY id DESC LIMIT ?',
+      )
+      .all(limit) as Array<{
+      id: number;
+      ts: string;
+      actorId: string;
+      username: string;
+      action: string;
+      target: string;
+    }>;
+    return rows.map((r) => ({
+      id: r.id,
+      ts: r.ts,
+      actorId: r.actorId,
+      username: r.username,
+      action: r.action,
+      target: r.target,
+    }));
   }
 }

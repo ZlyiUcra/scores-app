@@ -62,8 +62,18 @@
     "tournaments": "Турніри",
     "matches": "Ігри",
     "squads": "Склади",
+    "audit": "Журнал",
     "tournament": "Турнір:",
     "finishedNote": "Турнір завершено - щоб щось змінити, поверніть статус на «триває»."
+  },
+  "adminAudit": {
+    "title": "Журнал дій",
+    "colTime": "Час",
+    "colUser": "Користувач",
+    "colAction": "Дія",
+    "colTarget": "Об'єкт",
+    "empty": "Записів у журналі ще немає.",
+    "errorLoad": "Журнал дій не завантажено."
   },
   "adminTournaments": {
     "newTitle": "Новий турнір",

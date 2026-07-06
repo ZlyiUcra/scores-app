@@ -62,8 +62,18 @@
     "tournaments": "Torneios",
     "matches": "Jogos",
     "squads": "Plantéis",
+    "audit": "Auditoria",
     "tournament": "Torneio:",
     "finishedNote": "Este torneio terminou - volte a pô-lo «a decorrer» para fazer alterações."
+  },
+  "adminAudit": {
+    "title": "Registo de auditoria",
+    "colTime": "Hora",
+    "colUser": "Utilizador",
+    "colAction": "Ação",
+    "colTarget": "Alvo",
+    "empty": "Ainda não há registos de auditoria.",
+    "errorLoad": "Registo de auditoria não carregado."
   },
   "adminTournaments": {
     "newTitle": "Novo torneio",

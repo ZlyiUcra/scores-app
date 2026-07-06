@@ -1,6 +1,7 @@
 import type {
   AdminUserView,
   AssignTeamRequest,
+  AuditLogEntry,
   BracketSlotId,
   BracketView,
   CreateGroupRequest,
@@ -117,6 +118,9 @@ export const adminApi = {
     request<{ bracket: BracketView }>(`/bracket/reset?tournamentId=${encodeURIComponent(tournamentId)}`, {
       method: 'POST',
     }),
+
+  // Audit trail (newest first, server-bounded).
+  listAudit: () => request<{ entries: AuditLogEntry[] }>('/admin/audit'),
 };
 
 export type { AdminUserView, Role };
