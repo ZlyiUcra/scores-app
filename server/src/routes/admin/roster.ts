@@ -45,7 +45,7 @@ adminRosterRouter.post('/groups', adminMutationLimiter, async (req, res, next) =
     const group = await createGroup(tournamentId, parsed.name);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
     broadcastBracket(tournamentId, await listBracket(tournamentId));
-    audit(req.user!.id, 'group.create', group.id);
+    audit(req.user!, 'group.create', group.id);
     res.status(201).json({ group });
   } catch (err) {
     next(err);
@@ -58,7 +58,7 @@ adminRosterRouter.patch('/groups/:id', adminMutationLimiter, async (req, res, ne
     const parsed = parseOrThrow(createGroupSchema, req.body, 'Invalid body.');
     const { group, tournamentId } = await updateGroup(req.params.id, parsed.name);
     broadcastRoster(tournamentId, await getRoster(tournamentId)); // group name shows in standings + match rows
-    audit(req.user!.id, 'group.update', req.params.id);
+    audit(req.user!, 'group.update', req.params.id);
     res.json({ group });
   } catch (err) {
     next(err);
@@ -70,7 +70,7 @@ adminRosterRouter.delete('/groups/:id', adminMutationLimiter, async (req, res, n
     const tournamentId = await removeGroup(req.params.id); // 409 if it still has teams / bracket started
     broadcastRoster(tournamentId, await getRoster(tournamentId));
     broadcastBracket(tournamentId, await listBracket(tournamentId));
-    audit(req.user!.id, 'group.delete', req.params.id);
+    audit(req.user!, 'group.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -82,7 +82,7 @@ adminRosterRouter.post('/groups/:id/fixtures', adminMutationLimiter, async (req,
   try {
     const { matches: created, tournamentId } = await generateGroupFixtures(req.params.id);
     broadcastMatchSnapshot(tournamentId, await listMatches(tournamentId)); // batch create -> one snapshot
-    audit(req.user!.id, `group.fixtures(created=${created.length})`, req.params.id);
+    audit(req.user!, `group.fixtures(created=${created.length})`, req.params.id);
     res.json({ matches: created });
   } catch (err) {
     next(err);
@@ -105,7 +105,7 @@ adminRosterRouter.post('/teams', adminMutationLimiter, async (req, res, next) =>
     const tournamentId = await requestTournamentId(req);
     const team = await createTeam(tournamentId, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
-    audit(req.user!.id, 'team.create', team.id);
+    audit(req.user!, 'team.create', team.id);
     res.status(201).json({ team });
   } catch (err) {
     next(err);
@@ -120,7 +120,7 @@ adminRosterRouter.patch('/teams/:id', adminMutationLimiter, async (req, res, nex
     broadcastRoster(tournamentId, await getRoster(tournamentId)); // standings names
     broadcastMatchSnapshot(tournamentId, await listMatches(tournamentId)); // names embedded in match DTOs
     broadcastBracket(tournamentId, await listBracket(tournamentId)); // names embedded in resolved bracket
-    audit(req.user!.id, `team.update(${JSON.stringify(parsed)})`, req.params.id);
+    audit(req.user!, `team.update(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ team });
   } catch (err) {
     next(err);
@@ -134,7 +134,7 @@ adminRosterRouter.patch('/teams/:id/group', adminMutationLimiter, async (req, re
     const { team, tournamentId } = await assignTeam(req.params.id, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
     broadcastBracket(tournamentId, await listBracket(tournamentId)); // membership changes bracket seeding/size
-    audit(req.user!.id, `team.assign(${JSON.stringify(parsed)})`, req.params.id);
+    audit(req.user!, `team.assign(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ team });
   } catch (err) {
     next(err);
@@ -146,7 +146,7 @@ adminRosterRouter.delete('/teams/:id', adminMutationLimiter, async (req, res, ne
     const tournamentId = await removeTeam(req.params.id); // 409 if referenced by a match / bracket started
     broadcastRoster(tournamentId, await getRoster(tournamentId));
     broadcastBracket(tournamentId, await listBracket(tournamentId));
-    audit(req.user!.id, 'team.delete', req.params.id);
+    audit(req.user!, 'team.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);

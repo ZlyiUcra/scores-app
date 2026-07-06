@@ -29,7 +29,7 @@ adminUsersRouter.patch('/users/:id', adminMutationLimiter, async (req, res, next
     const view = await updateUser(req.params.id, actor, parsed);
     // Revocation: if we just deactivated them, cut their live sockets now.
     if (parsed.active === false) disconnectUser(req.params.id);
-    audit(actor, `user.update(${JSON.stringify(parsed)})`, req.params.id);
+    audit(req.user!, `user.update(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ user: view });
   } catch (err) {
     next(err);
@@ -41,7 +41,7 @@ adminUsersRouter.delete('/users/:id', adminMutationLimiter, async (req, res, nex
     const actor = req.user!.id;
     await deleteUser(req.params.id, actor);
     disconnectUser(req.params.id); // revoke live sockets of the deleted user
-    audit(actor, 'user.delete', req.params.id);
+    audit(req.user!, 'user.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);

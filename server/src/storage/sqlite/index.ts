@@ -7,6 +7,7 @@ import { SqlitePlayerRepository } from "./players.js";
 import { SqliteMatchRepository } from "./matches.js";
 import { SqliteUserRepository } from "./users.js";
 import { SqliteBracketRepository } from "./bracket.js";
+import { SqliteAuditRepository } from "./audit.js";
 
 /**
  * Build the SQLite storage: open/migrate the database, then construct the
@@ -27,5 +28,6 @@ export async function createSqliteStorage(options: {
     matches: new SqliteMatchRepository(ctx, teams),
     users: new SqliteUserRepository(ctx),
     bracket: new SqliteBracketRepository(ctx),
+    audit: new SqliteAuditRepository(ctx),
   };
 }

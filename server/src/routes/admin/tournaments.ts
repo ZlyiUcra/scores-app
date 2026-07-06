@@ -14,7 +14,7 @@ adminTournamentsRouter.post('/tournaments', adminMutationLimiter, async (req, re
   try {
     const parsed = parseOrThrow(createTournamentSchema, req.body, 'Invalid body.');
     const tournament = await createTournament(parsed);
-    audit(req.user!.id, 'tournament.create', tournament.id);
+    audit(req.user!, 'tournament.create', tournament.id);
     res.status(201).json({ tournament });
   } catch (err) {
     next(err);
@@ -25,7 +25,7 @@ adminTournamentsRouter.patch('/tournaments/:id', adminMutationLimiter, async (re
   try {
     const parsed = parseOrThrow(updateTournamentSchema, req.body, 'Invalid body.');
     const tournament = await updateTournament(req.params.id, parsed);
-    audit(req.user!.id, `tournament.update(${JSON.stringify(parsed)})`, req.params.id);
+    audit(req.user!, `tournament.update(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ tournament });
   } catch (err) {
     next(err);
@@ -35,7 +35,7 @@ adminTournamentsRouter.patch('/tournaments/:id', adminMutationLimiter, async (re
 adminTournamentsRouter.delete('/tournaments/:id', adminMutationLimiter, async (req, res, next) => {
   try {
     await removeTournament(req.params.id); // 409 unless empty and not the last one
-    audit(req.user!.id, 'tournament.delete', req.params.id);
+    audit(req.user!, 'tournament.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);

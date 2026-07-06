@@ -268,6 +268,28 @@ export interface BracketRepository {
   hasAny(tournamentId: string): Promise<boolean>;
 }
 
+/** One immutable audit record: who did what, and to what. Append-only - the
+ * store keeps the RAW value (a newline in `target` is just data in its own
+ * column, never a forged second row), so the structured store is
+ * injection-proof by construction; line-based consumers sanitize themselves. */
+export interface AuditEntry {
+  ts: string;
+  actorId: string;
+  /** Denormalized so the record survives the actor being deleted (forensics). */
+  username: string;
+  action: string;
+  target: string;
+}
+
+/** Append-only audit trail. No reads in the app yet (query the table directly);
+ * a viewer UI is a separate front. */
+export interface AuditRepository {
+  /** Append one record. Best-effort at the caller: a persist failure rejects
+   * (STORE_WRITE_FAILED) and the caller swallows it so audit never breaks the
+   * audited action. */
+  append(entry: AuditEntry): Promise<void>;
+}
+
 /** Everything a storage driver provides. One instance per process. */
 export interface Storage {
   tournaments: TournamentRepository;
@@ -277,4 +299,5 @@ export interface Storage {
   matches: MatchRepository;
   users: UserRepository;
   bracket: BracketRepository;
+  audit: AuditRepository;
 }

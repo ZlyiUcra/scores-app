@@ -42,7 +42,7 @@ bracketRouter.patch('/:slot', requireAdmin, bracketMutationLimiter, async (req, 
     // Rewiring who plays is the highest-impact bracket write - leave a trace.
     if (parsed.homeOverrideId !== undefined || parsed.awayOverrideId !== undefined) {
       const pins = { home: parsed.homeOverrideId, away: parsed.awayOverrideId };
-      audit(req.user!.id, `bracket.override(${JSON.stringify(pins)})`, req.params.slot);
+      audit(req.user!, `bracket.override(${JSON.stringify(pins)})`, req.params.slot);
     }
     broadcastBracket(tournamentId, bracket);
     res.json({ bracket });

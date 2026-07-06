@@ -18,7 +18,7 @@ adminPlayersRouter.post('/teams/:id/players', adminMutationLimiter, async (req, 
     const parsed = parseOrThrow(createPlayerSchema, req.body, 'Invalid body.');
     const { player, tournamentId } = await createPlayer(req.params.id, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId)); // squads ride the roster snapshot
-    audit(req.user!.id, 'player.create', player.id);
+    audit(req.user!, 'player.create', player.id);
     res.status(201).json({ player });
   } catch (err) {
     next(err);
@@ -31,7 +31,7 @@ adminPlayersRouter.patch('/players/:id', adminMutationLimiter, async (req, res, 
     const parsed = parseOrThrow(updatePlayerSchema, req.body, 'Invalid body.');
     const { player, tournamentId } = await updatePlayer(req.params.id, parsed);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
-    audit(req.user!.id, `player.update(${JSON.stringify(parsed)})`, req.params.id);
+    audit(req.user!, `player.update(${JSON.stringify(parsed)})`, req.params.id);
     res.json({ player });
   } catch (err) {
     next(err);
@@ -42,7 +42,7 @@ adminPlayersRouter.delete('/players/:id', adminMutationLimiter, async (req, res,
   try {
     const tournamentId = await removePlayer(req.params.id);
     broadcastRoster(tournamentId, await getRoster(tournamentId));
-    audit(req.user!.id, 'player.delete', req.params.id);
+    audit(req.user!, 'player.delete', req.params.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);

@@ -26,3 +26,4 @@ export const playerRepository = storage.players;
 export const matchRepository = storage.matches;
 export const userRepository = storage.users;
 export const bracketRepository = storage.bracket;
+export const auditRepository = storage.audit;

@@ -111,6 +111,16 @@ export function openDatabase(dataDir: string): SqliteContext {
     -- Jersey number is unique within a team, but only when present (NULLs allowed).
     CREATE UNIQUE INDEX IF NOT EXISTS players_team_number
       ON players(teamId, number) WHERE number IS NOT NULL;
+    -- Append-only audit trail (admin actions). Parameterized inserts keep it
+    -- injection-proof by construction; AUTOINCREMENT id = stable insertion order.
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ts TEXT NOT NULL,
+      actorId TEXT NOT NULL,
+      username TEXT NOT NULL,
+      action TEXT NOT NULL,
+      target TEXT NOT NULL
+    );
   `);
 
   // Schema evolution: bracket rows gained per-side admin override columns after
