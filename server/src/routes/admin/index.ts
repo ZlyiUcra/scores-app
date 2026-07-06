@@ -6,6 +6,7 @@ import { adminRosterRouter } from './roster.js';
 import { adminPlayersRouter } from './players.js';
 import { adminMatchesRouter } from './matches.js';
 import { adminAuditRouter } from './audit.js';
+import { adminExportRouter } from './export.js';
 
 /** Everything under /api/admin, composed from the per-domain sub-routers. */
 export const adminRouter = Router();
@@ -22,3 +23,4 @@ adminRouter.use(adminRosterRouter);
 adminRouter.use(adminPlayersRouter);
 adminRouter.use(adminMatchesRouter);
 adminRouter.use(adminAuditRouter);
+adminRouter.use(adminExportRouter);

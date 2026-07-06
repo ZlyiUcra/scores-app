@@ -209,6 +209,10 @@ export interface MatchRepository {
   get(id: string): Promise<Match | undefined>;
   /** Raw stored form for mutation logic. */
   getStored(id: string): Promise<StoredMatch | undefined>;
+  /** A tournament's raw stored matches in ONE pass (export/backup). Unlike
+   * list(), returns the STORED shape (team ids, not embedded teams), so a
+   * snapshot stays compact and round-trippable. */
+  listStored(tournamentId: string): Promise<StoredMatch[]>;
   /** Insert-or-replace by id (rev bumping is the service's responsibility).
    * Returns the RESOLVED match so callers never re-derive the wire DTO. */
   save(match: StoredMatch): Promise<Match>;

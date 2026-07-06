@@ -95,7 +95,10 @@
     "deleteTitle": "Only an empty tournament (no groups, teams or games) can be deleted.",
     "errorCreate": "Tournament not created.",
     "errorUpdate": "Tournament not updated.",
-    "errorDelete": "Tournament not deleted."
+    "errorDelete": "Tournament not deleted.",
+    "export": "Export",
+    "exportTitle": "Download a full JSON backup of this tournament.",
+    "errorExport": "Tournament not exported."
   },
   "adminUsers": {
     "title": "Users",

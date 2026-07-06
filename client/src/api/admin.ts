@@ -21,7 +21,7 @@ import type {
   UpdateTournamentRequest,
   UpdateUserRequest,
 } from '../../../shared/types';
-import { request } from './client';
+import { ApiError, request } from './client';
 
 /** `?tournamentId=` suffix for the endpoints that create into / list from a
  * specific tournament (id-addressed mutations derive it server-side). */
@@ -121,6 +121,21 @@ export const adminApi = {
 
   // Audit trail (newest first, server-bounded).
   listAudit: () => request<{ entries: AuditLogEntry[] }>('/admin/audit'),
+
+  // Full-tournament JSON snapshot (manual backup). NOT request()-based: the
+  // response is a file download (blob), not a JSON envelope. The httpOnly
+  // session cookie rides along via credentials. Returns the blob plus the
+  // filename to save it under.
+  exportTournament: async (tournamentId: string): Promise<{ blob: Blob; filename: string }> => {
+    const res = await fetch(`/api/admin/tournaments/${encodeURIComponent(tournamentId)}/export`, {
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
+      throw new ApiError(res.status, body?.error?.code ?? 'ERROR', body?.error?.message ?? 'Export failed.');
+    }
+    return { blob: await res.blob(), filename: `tournament-${tournamentId}.json` };
+  },
 };
 
 export type { AdminUserView, Role };

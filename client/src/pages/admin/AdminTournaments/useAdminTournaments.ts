@@ -78,6 +78,29 @@ export function useAdminTournaments() {
     await run(() => adminApi.deleteTournament(id), 'adminTournaments.errorDelete');
   }
 
+  // Download a full JSON snapshot of the tournament (manual backup). Standalone
+  // (not run(): no list re-fetch, it is a read), and the blob is turned into a
+  // client-side download via a transient object URL + anchor click.
+  async function exportTournament(id: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const { blob, filename } = await adminApi.exportTournament(id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('adminTournaments.errorExport'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // A delete is gated by a confirm modal: the row button only stages the id,
   // and the component renders <ConfirmDialog {...deleteConfirm} /> while one is
   // pending. The actual mutation runs on confirm.
@@ -105,5 +128,6 @@ export function useAdminTournaments() {
     },
     requestDelete,
     deleteConfirm,
+    exportTournament,
   };
 }

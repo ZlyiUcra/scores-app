@@ -88,6 +88,14 @@ export class SqliteMatchRepository implements MatchRepository {
     return this.matches.get(id);
   }
 
+  async listStored(tournamentId: string): Promise<StoredMatch[]> {
+    const out: StoredMatch[] = [];
+    for (const m of this.matches.values()) {
+      if (m.tournamentId === tournamentId) out.push(m);
+    }
+    return out;
+  }
+
   async save(match: StoredMatch): Promise<Match> {
     const prev = this.matches.get(match.id);
     this.matches.set(match.id, match);

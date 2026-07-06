@@ -95,7 +95,10 @@
     "deleteTitle": "Só um torneio vazio (sem grupos, equipas ou jogos) pode ser eliminado.",
     "errorCreate": "Torneio não criado.",
     "errorUpdate": "Torneio não atualizado.",
-    "errorDelete": "Torneio não eliminado."
+    "errorDelete": "Torneio não eliminado.",
+    "export": "Exportar",
+    "exportTitle": "Descarregar uma cópia JSON completa deste torneio.",
+    "errorExport": "Torneio não exportado."
   },
   "adminUsers": {
     "title": "Utilizadores",

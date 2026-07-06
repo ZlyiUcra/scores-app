@@ -19,7 +19,8 @@ const STATUSES: TournamentStatus[] = ['upcoming', 'active', 'finished'];
 export function AdminTournaments() {
   const { t } = useI18n();
   const dateLabels = useDateLabels();
-  const { tournaments, busy, error, create, edit, requestDelete, deleteConfirm } = useAdminTournaments();
+  const { tournaments, busy, error, create, edit, requestDelete, deleteConfirm, exportTournament } =
+    useAdminTournaments();
 
   return (
     <div className="admin-panel">
@@ -114,6 +115,8 @@ export function AdminTournaments() {
                       ) : (
                         <>
                           <button className="btn btn--sm" onClick={() => edit.begin(x)}>{t('adminTournaments.edit')}</button>
+                          <button className="btn btn--sm" disabled={busy} title={t('adminTournaments.exportTitle')}
+                            onClick={() => void exportTournament(x.id)}>{t('adminTournaments.export')}</button>
                           <button className="btn btn--sm btn--danger" disabled={busy} title={t('adminTournaments.deleteTitle')}
                             onClick={() => requestDelete(x.id)}>{t('adminTournaments.delete')}</button>
                         </>
