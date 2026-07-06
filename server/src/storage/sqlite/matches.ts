@@ -102,6 +102,25 @@ export class SqliteMatchRepository implements MatchRepository {
     return this.resolve(match);
   }
 
+  async saveMany(input: StoredMatch[]): Promise<Match[]> {
+    if (input.length === 0) return [];
+    // Stage every match in the Map, then ONE persist - N fixtures must not cost
+    // N full-table rewrites. All-or-nothing: roll the Map back on failure.
+    const prevs = input.map((m) => [m.id, this.matches.get(m.id) ?? null] as const);
+    for (const m of input) this.matches.set(m.id, m);
+    try {
+      this.persist();
+    } catch (err) {
+      console.error('[matches] persist failed during saveMany:', err);
+      for (const [id, prev] of prevs) {
+        if (prev) this.matches.set(id, prev);
+        else this.matches.delete(id);
+      }
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the matches. Try again.', 500);
+    }
+    return input.map((m) => this.resolve(m));
+  }
+
   async remove(id: string): Promise<void> {
     const prev = this.matches.get(id);
     if (!prev) throw new AppError(AppErrorCode.NotFound, `Match ${id} not found.`, 404);

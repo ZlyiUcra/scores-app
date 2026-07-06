@@ -211,13 +211,30 @@ export function generateGroupFixtures(groupId: string): Promise<{ matches: Match
     base.setHours(base.getHours() + 1);
 
     const pairs = roundRobinPairs(members.map((tm) => tm.id));
-    const created: Match[] = [];
+    // Build every new fixture first, then ONE batched persist (saveMany) instead
+    // of N full-table rewrites. Pairs come straight from this group's members, so
+    // home/away are already known-good same-group teams; the editable/bracket
+    // guards above cover the whole batch.
+    const toCreate: StoredMatch[] = [];
     for (let i = 0; i < pairs.length; i++) {
       const [homeId, awayId] = pairs[i];
       if (covered.has(pairKey(homeId, awayId))) continue;
-      const startsAt = new Date(base.getTime() + created.length * 30 * 60 * 1000).toISOString();
-      created.push((await createMatchInner({ homeId, awayId, startsAt, field: '' })).match);
+      const startsAt = new Date(base.getTime() + toCreate.length * 30 * 60 * 1000).toISOString();
+      toCreate.push({
+        id: crypto.randomUUID(),
+        tournamentId: group.tournamentId,
+        group: groupId,
+        homeId,
+        awayId,
+        homeScore: 0,
+        awayScore: 0,
+        status: 'scheduled',
+        startsAt,
+        field: '',
+        rev: 1,
+      });
     }
+    const created = await matchRepository.saveMany(toCreate);
     return { matches: created, tournamentId: group.tournamentId };
   });
 }

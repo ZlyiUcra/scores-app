@@ -211,6 +211,9 @@ export interface MatchRepository {
   /** Insert-or-replace by id (rev bumping is the service's responsibility).
    * Returns the RESOLVED match so callers never re-derive the wire DTO. */
   save(match: StoredMatch): Promise<Match>;
+  /** Insert several matches in ONE persist (batch fixture generation) instead of
+   * N full-table rewrites. All-or-nothing: on failure nothing is kept. */
+  saveMany(matches: StoredMatch[]): Promise<Match[]>;
   /** Delete a match; throws NOT_FOUND for an unknown id. */
   remove(id: string): Promise<void>;
   /** How many stored matches reference a given team (referential-integrity guard). */
