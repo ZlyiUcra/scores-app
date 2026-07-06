@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react';
-import type { Tournament, TournamentStatus } from '../../../../shared/types';
-import { adminApi } from '../../api/admin';
-import { api, ApiError } from '../../api/client';
-import { useTournamentStore } from '../../stores/tournamentStore';
-import { useI18n } from '../../i18n';
-import type { DateRange } from '../../components/DateRangeField';
-import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import type { Tournament, TournamentStatus } from '../../../../../shared/types';
+import { adminApi } from '../../../api/admin';
+import { api, ApiError } from '../../../api/client';
+import { useTournamentStore } from '../../../stores/tournamentStore';
+import { useI18n } from '../../../i18n';
+import type { DateRange } from '../../../components/DateRangeField';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 
 /**
  * All behavior and state for the AdminTournaments panel, kept out of the

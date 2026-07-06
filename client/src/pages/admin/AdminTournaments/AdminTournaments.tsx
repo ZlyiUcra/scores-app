@@ -1,9 +1,9 @@
-import type { TournamentStatus } from '../../../../shared/types';
-import { formatDay } from '../../lib/format';
-import { DateRangeField } from '../../components/DateRangeField';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { useDateLabels } from '../../lib/dateLabels';
-import { useI18n } from '../../i18n';
+import type { TournamentStatus } from '../../../../../shared/types';
+import { formatDay } from '../../../lib/format';
+import { DateRangeField } from '../../../components/DateRangeField';
+import { ConfirmDialog } from '../../../components/ConfirmDialog';
+import { useDateLabels } from '../../../lib/dateLabels';
+import { useI18n } from '../../../i18n';
 import { useAdminTournaments } from './useAdminTournaments';
 
 const STATUSES: TournamentStatus[] = ['upcoming', 'active', 'finished'];
@@ -89,8 +89,8 @@ export function AdminTournaments() {
                       ) : (
                         <span>
                           {x.startsAt || x.endsAt
-                            ? `${x.startsAt ? formatDay(x.startsAt) : '…'} - ${x.endsAt ? formatDay(x.endsAt) : '…'}`
-                            : '—'}
+                            ? `${x.startsAt ? formatDay(x.startsAt) : '...'} - ${x.endsAt ? formatDay(x.endsAt) : '...'}`
+                            : '-'}
                         </span>
                       )}
                     </td>

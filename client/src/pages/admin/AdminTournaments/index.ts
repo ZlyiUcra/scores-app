@@ -1,0 +1,1 @@
+export { AdminTournaments } from './AdminTournaments';
