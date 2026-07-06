@@ -7,6 +7,7 @@ import {
   clearAuthCookie,
   createUser,
   readUserFromCookies,
+  revokeSession,
   setAuthCookie,
   signToken,
   verifyCredentials,
@@ -83,7 +84,8 @@ authRouter.post('/register', sameOriginOnly, registerLimiter, async (req, res, n
   }
 });
 
-authRouter.post('/logout', (_req, res) => {
+authRouter.post('/logout', (req, res) => {
+  revokeSession(req.cookies); // revoke the token server-side (per-token jti)
   clearAuthCookie(res);
   res.json({ ok: true });
 });
