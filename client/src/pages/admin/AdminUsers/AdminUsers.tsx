@@ -1,54 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
-import type { AdminUserView, Paginated } from '../../../../shared/types';
-import { adminApi } from '../../api/admin';
-import { ApiError } from '../../api/client';
-import { formatDay } from '../../lib/format';
-import { useAuth } from '../../auth/AuthContext';
-import { useI18n } from '../../i18n';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { formatDay } from '../../../lib/format';
+import { useAuth } from '../../../auth/AuthContext';
+import { useI18n } from '../../../i18n';
+import { ConfirmDialog } from '../../../components/ConfirmDialog';
+import { useAdminUsers } from './useAdminUsers';
 
-const PAGE_SIZE = 10;
-
-/** Admin user management: paginated search, role promotion/demotion, enable/
- * disable and delete. This data is not socket-fed, so every action refetches
- * the page it acted on. */
+/** Admin user management UI - all state and actions live in useAdminUsers. */
 export function AdminUsers() {
   const { user: me } = useAuth();
   const { t } = useI18n();
-  const [q, setQ] = useState('');
-  const [page, setPage] = useState(1);
-  const [data, setData] = useState<Paginated<AdminUserView> | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const { request, dialog } = useConfirmDialog();
-
-  const load = useCallback(async () => {
-    try {
-      setData(await adminApi.listUsers({ q: q.trim() || undefined, page, pageSize: PAGE_SIZE }));
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('adminUsers.errorLoad'));
-    }
-  }, [q, page]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  async function act(id: string, fn: () => Promise<unknown>) {
-    setBusyId(id);
-    setError(null);
-    try {
-      await fn();
-      await load();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('adminUsers.errorAction'));
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
+  const { data, error, busyId, q, page, totalPages, search, setPage, toggleActive, toggleRole, requestDelete, deleteConfirm } = useAdminUsers();
 
   return (
     <div className="admin-panel">
@@ -58,10 +18,7 @@ export function AdminUsers() {
           className="admin-panel__search"
           placeholder={t('adminUsers.search')}
           value={q}
-          onChange={(e) => {
-            setPage(1);
-            setQ(e.target.value);
-          }}
+          onChange={(e) => search(e.target.value)}
         />
       </div>
 
@@ -90,15 +47,15 @@ export function AdminUsers() {
                   <td className="muted">{formatDay(u.createdAt)}</td>
                   <td className="table__actions">
                     <button className="btn btn--sm" disabled={busy || isSelf}
-                      onClick={() => act(u.id, () => adminApi.updateUser(u.id, { active: !u.active }))}>
+                      onClick={() => toggleActive(u)}>
                       {u.active ? t('adminUsers.deactivate') : t('adminUsers.activate')}
                     </button>
                     <button className="btn btn--sm" disabled={busy || isSelf}
-                      onClick={() => act(u.id, () => adminApi.updateUser(u.id, { role: u.role === 'admin' ? 'user' : 'admin' }))}>
+                      onClick={() => toggleRole(u)}>
                       {u.role === 'admin' ? t('adminUsers.demote') : t('adminUsers.promote')}
                     </button>
                     <button className="btn btn--sm btn--danger" disabled={busy || isSelf}
-                      onClick={() => request({ message: t('common.deleteConfirm'), tone: 'danger', onConfirm: () => act(u.id, () => adminApi.deleteUser(u.id)) })}>
+                      onClick={() => requestDelete(u.id)}>
                       {t('adminUsers.delete')}
                     </button>
                   </td>
@@ -118,7 +75,7 @@ export function AdminUsers() {
         <button className="btn btn--sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>{t('adminUsers.next')}</button>
       </div>
 
-      {dialog && <ConfirmDialog {...dialog} />}
+      {deleteConfirm && <ConfirmDialog {...deleteConfirm} />}
     </div>
   );
 }
