@@ -22,7 +22,7 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
         <h3>Como navegar</h3>
         <p>
           O cabeçalho é igual em todas as páginas; o título à esquerda volta sempre ao
-          início. Num ecrã largo, as páginas do próprio torneio - Overview, Resultados,
+          início. Num ecrã largo, as páginas do próprio torneio - Visão geral, Resultados,
           Eliminatórias e Equipas - ficam juntas sob um único menu identificado com a
           página em que está, por isso abre-o para passar entre elas.
           Torneios{isAdmin ? ', Ajuda e Admin' : ' e Ajuda'} continuam como ligações
@@ -47,7 +47,7 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
       </section>
 
       <section className="card">
-        <h3>Overview</h3>
+        <h3>Visão geral</h3>
         <p>
           A página inicial mostra uma tabela por grupo. As tabelas são <em>ao vivo</em>:
           um jogo em curso conta com o resultado atual, por isso cada golo reordena a
