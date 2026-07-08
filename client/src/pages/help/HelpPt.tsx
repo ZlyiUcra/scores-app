@@ -14,8 +14,25 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
         <p>
           As contas têm dois perfis: os <strong>espectadores</strong> veem tudo em modo de
           leitura; os <strong>administradores</strong> também registam resultados. Criar
-          uma conta nova cria sempre um espectador. Os botões EN / UA / PT no cabeçalho
-          mudam o idioma da interface a qualquer momento.
+          uma conta nova cria sempre um espectador.
+        </p>
+      </section>
+
+      <section className="card">
+        <h3>Como navegar</h3>
+        <p>
+          O cabeçalho é igual em todas as páginas; o título à esquerda volta sempre ao
+          início. Num ecrã largo, as páginas do próprio torneio - Overview, Resultados,
+          Eliminatórias e Equipas - ficam juntas sob um único menu identificado com a
+          página em que está, por isso abre-o para passar entre elas.
+          Torneios{isAdmin ? ', Ajuda e Admin' : ' e Ajuda'} continuam como ligações
+          próprias.
+        </p>
+        <p>
+          O teu nome à direita abre o menu da conta, que contém a troca de idioma
+          (EN / UA / PT) e o botão para terminar sessão. Num ecrã estreito, todo o
+          cabeçalho recolhe atrás do botão de menu - abre um painel que mostra tudo de uma
+          vez, sem menus suspensos.
         </p>
       </section>
 

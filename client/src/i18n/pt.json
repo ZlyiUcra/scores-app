@@ -1,5 +1,5 @@
 {
-  "header": { "logout": "Terminar sessão", "menu": "Menu" },
+  "header": { "logout": "Terminar sessão", "menu": "Menu", "account": "Conta", "language": "Idioma" },
   "app": { "loading": "A carregar…", "loadError": "Não foi possível carregar os dados. Verifique a ligação.", "retry": "Tentar novamente" },
   "common": { "deleteConfirm": "Eliminar? Não pode ser desfeito.", "confirm": "Confirmar", "cancel": "Cancelar" },
   "role": { "admin": "administrador", "viewer": "espectador" },
@@ -172,7 +172,7 @@
     "name": "Torneio Joyn Consulting 2026",
     "location": "Urban Soccer, Monsanto, Lisboa"
   },
-  "nav": { "tournaments": "Torneios", "overview": "Overview", "results": "Resultados", "knockout": "Eliminatórias", "teams": "Equipas", "help": "Ajuda", "admin": "Admin" },
+  "nav": { "tournaments": "Torneios", "overview": "Overview", "results": "Resultados", "knockout": "Eliminatórias", "teams": "Equipas", "help": "Ajuda", "admin": "Admin", "tournamentMenu": "Torneio" },
   "tournaments": {
     "title": "Torneios",
     "empty": "Ainda não há torneios.",

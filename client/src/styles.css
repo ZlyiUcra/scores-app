@@ -406,6 +406,36 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .header__nav-link:hover { color: var(--text); }
 .header__nav-link--active { background: var(--surface-2); color: var(--text); }
 
+/* ---------- Header dropdowns (tournament pages + account) ---------- */
+/* The trigger reuses .header__nav-link for its look; these rules only reset the
+ * button chrome and add the caret. The panel is portalled to <body>, hence the
+ * fixed positioning fed by useAnchoredPopover. */
+.hdrop { position: relative; display: inline-flex; }
+.hdrop__trigger {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+}
+.hdrop__caret { font-size: 0.7em; color: var(--muted); flex: none; }
+.hdrop__pop {
+  position: fixed; z-index: 50; min-width: 180px; max-height: 70vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.15rem;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 10px; padding: 0.35rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.hdrop__item {
+  text-decoration: none; color: var(--muted); padding: 0.45rem 0.6rem;
+  border-radius: 6px; font-weight: 700; font-size: 0.9rem; white-space: nowrap;
+}
+.hdrop__item:hover { color: var(--text); background: var(--surface-2); }
+.hdrop__item--active { color: var(--text); background: var(--surface-2); }
+.hdrop__pop--account { min-width: 200px; gap: 0.6rem; }
+.hdrop__section { display: flex; flex-direction: column; gap: 0.35rem; }
+.hdrop__label {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted);
+}
+.hdrop__logout { width: 100%; }
+
 /* ---------- Section headings ---------- */
 .section-title { font-size: 1.05rem; margin: 1.25rem 0 0.75rem; }
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 1.25rem 0 0.75rem; }

@@ -1,5 +1,5 @@
 {
-  "header": { "logout": "Вийти", "menu": "Меню" },
+  "header": { "logout": "Вийти", "menu": "Меню", "account": "Акаунт", "language": "Мова" },
   "app": { "loading": "Завантаження…", "loadError": "Не вдалося завантажити дані. Перевірте з'єднання.", "retry": "Повторити" },
   "common": { "deleteConfirm": "Видалити? Скасувати не вдасться.", "confirm": "Підтвердити", "cancel": "Скасувати" },
   "role": { "admin": "адмін", "viewer": "глядач" },
@@ -172,7 +172,7 @@
     "name": "Турнір Joyn Consulting 2026",
     "location": "Urban Soccer, Monsanto, Лісабон"
   },
-  "nav": { "tournaments": "Турніри", "overview": "Огляд", "results": "Результати", "knockout": "Плей-оф", "teams": "Команди", "help": "Довідка", "admin": "Адмін" },
+  "nav": { "tournaments": "Турніри", "overview": "Огляд", "results": "Результати", "knockout": "Плей-оф", "teams": "Команди", "help": "Довідка", "admin": "Адмін", "tournamentMenu": "Турнір" },
   "tournaments": {
     "title": "Турніри",
     "empty": "Турнірів поки немає.",

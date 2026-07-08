@@ -14,8 +14,24 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
         <p>
           Accounts have two roles: <strong>viewers</strong> see everything read-only;{' '}
           <strong>admins</strong> also record results. Registering a new account always
-          creates a viewer. The EN / UA / PT buttons in the header switch the interface
-          language at any time.
+          creates a viewer.
+        </p>
+      </section>
+
+      <section className="card">
+        <h3>Getting around</h3>
+        <p>
+          The header is the same on every page; its title on the left always returns to
+          the start. On a wide screen the tournament's own pages - Overview, Results,
+          Knockouts and Teams - sit together under a single menu labelled with the page
+          you are on, so you open it to move between them.
+          Tournaments{isAdmin ? ', Help and Admin' : ' and Help'} stay as their own links.
+        </p>
+        <p>
+          Your name on the right opens the account menu, which holds the language switch
+          (EN / UA / PT) and the log-out button. On a narrow screen the whole header
+          collapses behind the menu button - it opens a panel that lists everything at
+          once, with no dropdowns.
         </p>
       </section>
 
