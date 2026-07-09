@@ -17,7 +17,7 @@ mobile-first UI. The interface is localized (EN / PT / UK) via a language switch
 | Client | Vite + React + TypeScript, Zustand, react-router, socket.io-client |
 | Server | Node + Express + TypeScript, Socket.IO, bcryptjs + JWT, Zod |
 | Shared | `shared/types.ts` — single source of types for client and server |
-| Data | JSON files behind repository interfaces (easy to swap for SQLite) |
+| Data | SQLite (`node:sqlite`) behind storage contracts (driver-swappable) |
 
 ### Architecture decisions (from the 5-persona review board)
 
@@ -121,7 +121,7 @@ and a minimal audit log of every mutation.
 
 ### Intentionally deferred (follow-up)
 
-Refresh tokens/rotation, SQLite, per-match rooms, HTTPS/HSTS/CSP hardening,
+Refresh tokens/rotation, per-match rooms, HTTPS/HSTS/CSP hardening,
 Docker/CI, deep tests. Registration: email verification, account lockout,
 breached-password check (HIBP/zxcvbn), enumeration-proof responses. Admin: team
 rename, match soft-delete, file/DB audit log, cursor pagination and secondary
@@ -144,7 +144,7 @@ localizada (EN / PT / UK) através de um seletor de idioma.
 | Cliente | Vite + React + TypeScript, Zustand, react-router, socket.io-client |
 | Servidor | Node + Express + TypeScript, Socket.IO, bcryptjs + JWT, Zod |
 | Partilhado | `shared/types.ts` — fonte única de tipos para cliente e servidor |
-| Dados | Ficheiros JSON atrás de interfaces de repositório (fácil trocar por SQLite) |
+| Dados | SQLite (`node:sqlite`) atrás de contratos de armazenamento (driver substituível) |
 
 ### Decisões de arquitetura (do conselho de revisão de 5 perfis)
 
@@ -254,7 +254,7 @@ Apenas para administradores (guarda no cliente + `requireAdmin` em todo o router
 
 ### Adiado intencionalmente (seguimento)
 
-Refresh tokens/rotação, SQLite, salas por jogo, endurecimento HTTPS/HSTS/CSP,
+Refresh tokens/rotação, salas por jogo, endurecimento HTTPS/HSTS/CSP,
 Docker/CI, testes profundos. Registo: verificação por email, bloqueio de conta,
 verificação de palavra-passe comprometida (HIBP/zxcvbn), respostas à prova de
 enumeração. Administração: renomear equipas, soft-delete de jogos, registo de
@@ -278,7 +278,7 @@ por env, envelope versionado).
 | Клієнт | Vite + React + TypeScript, Zustand, react-router, socket.io-client |
 | Сервер | Node + Express + TypeScript, Socket.IO, bcryptjs + JWT, Zod |
 | Спільне | `shared/types.ts` — єдине джерело типів для клієнта й сервера |
-| Дані | JSON-файли за інтерфейсами репозиторіїв (легко замінити на SQLite) |
+| Дані | SQLite (`node:sqlite`) за контрактами сховища (драйвер замінний) |
 
 ### Архітектурні рішення (з рев'ю ради з 5 персон)
 
@@ -375,7 +375,7 @@ audit-лог кожної мутації.
 
 ### Що свідомо відкладено (follow-up)
 
-Refresh-токени/ротація, SQLite, per-match rooms, HTTPS/HSTS/CSP хардненг,
+Refresh-токени/ротація, per-match rooms, HTTPS/HSTS/CSP хардненг,
 Docker/CI, глибокі тести. Для реєстрації: email-верифікація, account lockout,
 breached-password check (HIBP/zxcvbn), enumeration-proof відповіді. Для адмінки:
 рейм команд, soft-delete матчів, файловий/DB audit-лог, cursor-пагінація та
