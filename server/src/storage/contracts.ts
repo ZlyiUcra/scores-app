@@ -137,6 +137,9 @@ export interface GroupRepository {
   countByTournament(tournamentId: string): Promise<number>;
   /** Create a group with a fresh uuid; name arrives pre-validated. */
   create(tournamentId: string, name: string): Promise<Group>;
+  /** Insert several groups in ONE persist (import), order preserved. All-or-
+   * nothing: on failure nothing is kept. */
+  createMany(tournamentId: string, names: string[]): Promise<Group[]>;
   /** Rename a group (cosmetic - id-based references stay valid). */
   update(id: string, name: string): Promise<Group>;
   /** Delete a group. Emptiness (no member teams) is the SERVICE's guard. */
@@ -164,6 +167,13 @@ export interface TeamRepository {
   countByTournament(tournamentId: string): Promise<number>;
   /** Create an UNASSIGNED team (groupId/groupAddedAt start null). */
   create(tournamentId: string, input: { name: string; shortName: string }): Promise<Team>;
+  /** Insert several teams in ONE persist (import), each carrying its group
+   * placement + seeding key verbatim - no per-team follow-up assign() call.
+   * All-or-nothing: on failure nothing is kept. */
+  createMany(
+    tournamentId: string,
+    rows: { name: string; shortName: string; groupId: string | null; groupAddedAt: string | null }[],
+  ): Promise<Team[]>;
   /** Rename a team (name and/or code). Membership is untouched. */
   update(id: string, patch: { name?: string; shortName?: string }): Promise<Team>;
   /** Set/clear a team's group. `groupAddedAt` is server-set here (null clears). */
@@ -191,6 +201,11 @@ export interface PlayerRepository {
   numberInUse(teamId: string, number: number, exceptId?: string): Promise<boolean>;
   /** Insert a player with a fresh uuid. */
   create(input: { teamId: string; name: string; number: number | null; position: string | null }): Promise<Player>;
+  /** Insert several players in ONE persist (import). All-or-nothing: on
+   * failure nothing is kept. */
+  createMany(
+    rows: { teamId: string; name: string; number: number | null; position: string | null }[],
+  ): Promise<Player[]>;
   /** Patch name/number/position; team membership is immutable (delete + re-add). */
   update(id: string, patch: { name?: string; number?: number | null; position?: string | null }): Promise<Player>;
   /** Delete one player; throws NOT_FOUND for an unknown id. */

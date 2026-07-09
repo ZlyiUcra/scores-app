@@ -101,6 +101,32 @@ export class SqliteTeamRepository implements TeamRepository {
     return toTeamDto(team);
   }
 
+  async createMany(
+    tournamentId: string,
+    rows: { name: string; shortName: string; groupId: string | null; groupAddedAt: string | null }[],
+  ): Promise<Team[]> {
+    if (rows.length === 0) return [];
+    // Stage every team in the Map, then ONE persist - import must not cost one
+    // full-table rewrite per team. All-or-nothing: roll the Map back on failure.
+    const created: StoredTeam[] = rows.map((r) => ({
+      id: crypto.randomUUID(),
+      tournamentId,
+      name: r.name.trim(),
+      shortName: r.shortName.trim().toUpperCase(),
+      groupId: r.groupId,
+      groupAddedAt: r.groupAddedAt,
+    }));
+    for (const t of created) this.byId.set(t.id, t);
+    try {
+      this.persist();
+    } catch (err) {
+      console.error('[teams] persist failed during createMany:', err);
+      for (const t of created) this.byId.delete(t.id);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the teams. Try again.', 500);
+    }
+    return created.map(toTeamDto);
+  }
+
   async update(id: string, patch: { name?: string; shortName?: string }): Promise<Team> {
     const team = this.byId.get(id);
     if (!team) throw new AppError(AppErrorCode.NotFound, `Team ${id} not found.`, 404);

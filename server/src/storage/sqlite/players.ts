@@ -72,6 +72,30 @@ export class SqlitePlayerRepository implements PlayerRepository {
     return player;
   }
 
+  async createMany(
+    rows: { teamId: string; name: string; number: number | null; position: string | null }[],
+  ): Promise<Player[]> {
+    if (rows.length === 0) return [];
+    // Stage every player in the Map, then ONE persist - import must not cost
+    // one full-table rewrite per player. All-or-nothing: roll back on failure.
+    const created: Player[] = rows.map((r) => ({
+      id: crypto.randomUUID(),
+      teamId: r.teamId,
+      name: r.name.trim(),
+      number: r.number,
+      position: r.position,
+    }));
+    for (const p of created) this.byId.set(p.id, p);
+    try {
+      this.persist();
+    } catch (err) {
+      console.error('[players] persist failed during createMany:', err);
+      for (const p of created) this.byId.delete(p.id);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the players. Try again.', 500);
+    }
+    return created;
+  }
+
   async update(id: string, patch: { name?: string; number?: number | null; position?: string | null }): Promise<Player> {
     const player = this.byId.get(id);
     if (!player) throw new AppError(AppErrorCode.NotFound, `Player ${id} not found.`, 404);

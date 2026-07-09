@@ -75,6 +75,27 @@ export class SqliteGroupRepository implements GroupRepository {
     return toDto(group);
   }
 
+  async createMany(tournamentId: string, names: string[]): Promise<Group[]> {
+    if (names.length === 0) return [];
+    // Stage every group in the Map, then ONE persist - import must not cost one
+    // full-table rewrite per group. All-or-nothing: roll the Map back on failure.
+    const created: StoredGroup[] = names.map((name) => ({
+      id: crypto.randomUUID(),
+      tournamentId,
+      name: name.trim(),
+      createdAt: new Date().toISOString(),
+    }));
+    for (const g of created) this.byId.set(g.id, g);
+    try {
+      this.persist();
+    } catch (err) {
+      console.error('[groups] persist failed during createMany:', err);
+      for (const g of created) this.byId.delete(g.id);
+      throw new AppError(AppErrorCode.StoreWriteFailed, 'Could not save the groups. Try again.', 500);
+    }
+    return created.map(toDto);
+  }
+
   async update(id: string, name: string): Promise<Group> {
     const group = this.byId.get(id);
     if (!group) throw new AppError(AppErrorCode.NotFound, `Group ${id} not found.`, 404);
