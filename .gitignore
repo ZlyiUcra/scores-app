@@ -4,6 +4,7 @@ dist/
 *.log
 .DS_Store
 CLAUDE.md
+.claude/
 
 # Local SQLite database (seeded/created at runtime)
 *.db
