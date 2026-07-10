@@ -118,7 +118,7 @@ announcement, unpatched CVE, or peer requirement).
 
 ## Phase 6: Polish & Final Validation
 
-- [ ] T017 Run the complete quickstart.md checklist end-to-end once more and confirm every spec
+- [x] T017 Run the complete quickstart.md checklist end-to-end once more and confirm every spec
       success criterion: SC-001 (both audits 0), SC-002 (endpoint gone), SC-003 (smoke green in
       both modes), SC-004 (429 window unchanged), SC-005 (bundle delta recorded), SC-006 (no
       behavior change), SC-007 (backlog triggers recorded); report the final summary to the user
