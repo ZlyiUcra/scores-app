@@ -230,7 +230,17 @@ export function Header() {
               <TournamentMenu base={base} />
             ))}
           <NavLink to="/help" className={link} onClick={closeMenu}>{t('nav.help')}</NavLink>
-          {isAdmin && <NavLink to="/admin" className={link} onClick={closeMenu}>{t('nav.admin')}</NavLink>}
+          {isAdmin && (
+            <NavLink
+              // Carry the tournament on screen into the admin selection (?t=)
+              // so Admin opens on what the admin is looking at, not the default.
+              to={scoped ? `/admin?t=${encodeURIComponent(scoped.params.tournamentId ?? '')}` : '/admin'}
+              className={link}
+              onClick={closeMenu}
+            >
+              {t('nav.admin')}
+            </NavLink>
+          )}
         </nav>
         <div className="header__right">
           {compact ? (

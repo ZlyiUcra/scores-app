@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { useTournamentStore, selectDefaultId, selectError, selectLoaded, selectTournaments } from './stores/tournamentStore';
 import { LoadError } from './components/LoadError';
@@ -51,6 +51,13 @@ function LegacyRedirect({ page }: { page: 'results' | 'ko' | 'teams' | 'match' }
   return <Navigate to={`/t/${defaultId}/${tail}`} replace />;
 }
 
+/** /admin index -> the default tab, keeping the query string — a plain string
+ * Navigate would drop `?t=` and lose the tournament selection carried in. */
+function AdminIndexRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/admin/matches${search}`} replace />;
+}
+
 /** Root: gates everything behind login, wires the live data feed and lays out
  * the header + routes. */
 export function App() {
@@ -91,7 +98,7 @@ export function App() {
           <Route path="/teams" element={<LegacyRedirect page="teams" />} />
           <Route path="/match/:id" element={<LegacyRedirect page="match" />} />
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/matches" replace />} />
+            <Route index element={<AdminIndexRedirect />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="tournaments" element={<AdminTournaments />} />
             <Route path="matches" element={<AdminMatches />} />
