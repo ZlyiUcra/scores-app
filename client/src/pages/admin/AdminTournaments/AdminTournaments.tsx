@@ -1,3 +1,4 @@
+import { useRef, type ChangeEvent } from 'react';
 import type { TournamentStatus } from '../../../../../shared/types';
 import { formatDay } from '../../../lib/format';
 import { DateRangeField } from '../../../components/DateRangeField';
@@ -19,8 +20,19 @@ const STATUSES: TournamentStatus[] = ['upcoming', 'active', 'finished'];
 export function AdminTournaments() {
   const { t } = useI18n();
   const dateLabels = useDateLabels();
-  const { tournaments, busy, error, create, edit, requestDelete, deleteConfirm, exportTournament } =
+  const { tournaments, busy, error, create, edit, requestDelete, deleteConfirm, exportTournament, importTournament } =
     useAdminTournaments();
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  function pickImportFile() {
+    importInputRef.current?.click();
+  }
+
+  function onImportFileChosen(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-picking the same file
+    if (file) void importTournament(file);
+  }
 
   return (
     <div className="admin-panel">
@@ -54,7 +66,20 @@ export function AdminTournaments() {
       </section>
 
       <section className="card">
-        <h3>{t('adminTournaments.listTitle')} ({tournaments.length})</h3>
+        <div className="admin-panel__head">
+          <h3>{t('adminTournaments.listTitle')} ({tournaments.length})</h3>
+          <div>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json"
+              style={{ display: 'none' }}
+              onChange={onImportFileChosen}
+            />
+            <button className="btn btn--sm" disabled={busy} title={t('adminTournaments.importTitle')}
+              onClick={pickImportFile}>{t('adminTournaments.import')}</button>
+          </div>
+        </div>
         <div className="table-wrap">
           <table className="table">
             <thead>

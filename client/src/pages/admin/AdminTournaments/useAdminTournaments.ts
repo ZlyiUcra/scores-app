@@ -101,6 +101,31 @@ export function useAdminTournaments() {
     }
   }
 
+  // Restore a tournament from a picked export file. A cheap client-side JSON
+  // sanity check gives a friendlier message before the round trip; the server
+  // is the authority and fully re-validates regardless. Always creates a new
+  // tournament, so the list needs a re-fetch on success (mirrors `run()`).
+  async function importTournament(file: File) {
+    setBusy(true);
+    setError(null);
+    try {
+      const text = await file.text();
+      try {
+        JSON.parse(text);
+      } catch {
+        setError(t('adminTournaments.errorImportNotJson'));
+        return;
+      }
+      await adminApi.importTournament(text);
+      const { tournaments: list, defaultId } = await api.listTournaments();
+      useTournamentStore.getState().setTournaments(list, defaultId);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('adminTournaments.errorImport'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // A delete is gated by a confirm modal: the row button only stages the id,
   // and the component renders <ConfirmDialog {...deleteConfirm} /> while one is
   // pending. The actual mutation runs on confirm.
@@ -129,5 +154,6 @@ export function useAdminTournaments() {
     requestDelete,
     deleteConfirm,
     exportTournament,
+    importTournament,
   };
 }

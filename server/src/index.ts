@@ -21,6 +21,12 @@ const app = express();
 // X-Forwarded-For; rate limiting needs it to bucket per user, not per proxy.
 app.set('trust proxy', 1);
 
+// A whole tournament export (groups/teams/players/matches/bracket) can run
+// tens to a couple hundred KB, well past the global 16 KB cap below - so this
+// one route gets its own, larger parser, mounted ahead of the global one.
+// body-parser skips re-parsing once `req._body` is already set, so the global
+// parser becomes a no-op for this exact path and is otherwise untouched.
+app.use('/api/admin/tournaments/import', express.json({ limit: '1mb' }));
 app.use(express.json({ limit: '16kb' }));
 app.use(cookieParser());
 app.use(securityHeaders);
@@ -69,6 +75,16 @@ if (config.isProd && clientDist) {
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {
     res.status(err.status).json({ error: { code: err.code, message: err.message } });
+    return;
+  }
+  // body-parser (raw-body/http-errors) throws BEFORE any route runs for a
+  // malformed or oversized JSON body - a client mistake with a real status
+  // (400 parse failure, 413 too-large), not an AppError. `expose: true` is
+  // http-errors' own marker that the message is safe to show a client.
+  const status = (err as { status?: unknown } | null)?.status;
+  const expose = (err as { expose?: unknown } | null)?.expose;
+  if (err instanceof Error && typeof status === 'number' && expose === true) {
+    res.status(status).json({ error: { code: status === 413 ? 'PAYLOAD_TOO_LARGE' : 'BAD_REQUEST', message: err.message } });
     return;
   }
   console.error('[error]', err);

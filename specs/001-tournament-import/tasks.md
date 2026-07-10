@@ -24,7 +24,7 @@ Web app: `server/src/`, `client/src/`, `shared/` (see plan.md Project Structure)
 
 **Purpose**: A real fixture to validate against - no scaffolding or dependencies are needed.
 
-- [ ] T001 Produce a sample export fixture: with the dev servers running, download
+- [x] T001 Produce a sample export fixture: with the dev servers running, download
       `GET /api/admin/tournaments/:id/export` for a tournament that has groups, teams, players, played
       matches and bracket results; save it outside the repo (scratchpad) for use in every validation task.
 
@@ -34,17 +34,17 @@ Web app: `server/src/`, `client/src/`, `shared/` (see plan.md Project Structure)
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 Add `createMany` signatures for group, team and player repositories to
+- [x] T002 Add `createMany` signatures for group, team and player repositories to
       `server/src/storage/contracts.ts`, mirroring the existing `matches.saveMany` doc contract (single
       table, one persist, all-or-nothing staging rollback); exact signatures per
       `contracts/import-api.md`.
-- [ ] T003 [P] Implement `createMany` in `server/src/storage/sqlite/groups.ts` (stage in Map cache, ONE
+- [x] T003 [P] Implement `createMany` in `server/src/storage/sqlite/groups.ts` (stage in Map cache, ONE
       persist, rollback staged entries on failure - copy the `saveMany` pattern from
       `server/src/storage/sqlite/matches.ts`).
-- [ ] T004 [P] Implement `createMany` in `server/src/storage/sqlite/teams.ts`; rows carry
+- [x] T004 [P] Implement `createMany` in `server/src/storage/sqlite/teams.ts`; rows carry
       `groupId`/`groupAddedAt` so import needs no per-team `assign()` follow-up.
-- [ ] T005 [P] Implement `createMany` in `server/src/storage/sqlite/players.ts`.
-- [ ] T006 [P] Add `tournamentExportSchema` to `server/src/validation.ts`: `.strict()` at every level,
+- [x] T005 [P] Implement `createMany` in `server/src/storage/sqlite/players.ts`.
+- [x] T006 [P] Add `tournamentExportSchema` to `server/src/validation.ts`: `.strict()` at every level,
       REUSE the existing field validators (tournament/team/player names, `scoreField`, status enums,
       `.datetime()`), `schemaVersion` as `z.literal(exportSchemaVersion)` imported from
       `server/src/services/export.ts`, `rev` as `int().min(1)`, bracket record keys as strings (semantic
@@ -64,37 +64,37 @@ rejected before anything is written.
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Create `server/src/services/import.ts`, part 1 - the pre-write graph pass over a
+- [x] T007 [US1] Create `server/src/services/import.ts`, part 1 - the pre-write graph pass over a
       schema-valid `TournamentExport`: in-file uniqueness of all ids; every reference resolves in-file
       (`team.groupId`, `player.teamId`, `match.homeId/awayId/group`, bracket override ids);
       `homeId !== awayId`; jersey-number uniqueness per team; group size cap; bracket keys against
       `bracketSlotIds()` for the size derived from the file's own groups/teams (reuse
       `shared/tournament.ts`, no second slot enumerator). Violations throw the standard VALIDATION error
       with a specific message.
-- [ ] T008 [US1] `server/src/services/import.ts`, part 2 - materialization: under ONE `withMutationLock`
+- [x] T008 [US1] `server/src/services/import.ts`, part 2 - materialization: under ONE `withMutationLock`
       section (parse/zod/graph all happen before the lock), create the tournament (status as-is from the
       file), then `groups.createMany`, `teams.createMany` (with `groupAddedAt` verbatim),
       `players.createMany`, `matches.saveMany`, `bracket.save` per slot - all through the storage
       contracts, remapping every reference through one `Map<oldId, newId>`; write the audit entry (actor,
       resulting tournament id/name, entity counts); on a mid-import write failure, leave the partial
       tournament and rethrow with its id in the message (no cleanup).
-- [ ] T009 [US1] Create `server/src/routes/admin/import.ts` (`POST /tournaments/import`): route-scoped
+- [x] T009 [US1] Create `server/src/routes/admin/import.ts` (`POST /tournaments/import`): route-scoped
       `express.json({ limit: '1mb' })`, dedicated 5/min rate limiter modeled on `exportLimiter` in
       `server/src/routes/admin/export.ts`, standard error envelope, 201 with `{ tournament }`; mount the
       router in `server/src/routes/admin/index.ts`.
-- [ ] T010 [P] [US1] Add `importTournament(fileText)` to `client/src/api/admin.ts` per
+- [x] T010 [P] [US1] Add `importTournament(fileText)` to `client/src/api/admin.ts` per
       `contracts/import-api.md` (send the file text as the JSON body unchanged).
-- [ ] T011 [US1] Add the import mutation to
+- [x] T011 [US1] Add the import mutation to
       `client/src/pages/admin/AdminTournaments/useAdminTournaments.ts`: read the picked file as text,
       cheap client-side JSON sanity check for a friendlier message, call the API, refresh the tournament
       list on success, surface the server error message on failure.
-- [ ] T012 [US1] Add the Import action (file input + button next to Export) to
+- [x] T012 [US1] Add the Import action (file input + button next to Export) to
       `client/src/pages/admin/AdminTournaments/AdminTournaments.tsx`, following the page's existing
       button/error patterns.
-- [ ] T013 [US1] Add the new i18n keys (button label, title, progress/error messages) to ALL THREE
+- [x] T013 [US1] Add the new i18n keys (button label, title, progress/error messages) to ALL THREE
       catalogs in the same change: `client/src/i18n/en.json`, `client/src/i18n/ua.json`,
       `client/src/i18n/pt.json`.
-- [ ] T014 [US1] Validate: `npm run typecheck` in both packages, then quickstart.md Scenario 1 (round
+- [x] T014 [US1] Validate: `npm run typecheck` in both packages, then quickstart.md Scenario 1 (round
       trip vs the T001 fixture), Scenario 3 rejection paths a-g (each returns the specified status and
       writes nothing), Scenario 4 (same file twice -> two independent tournaments).
 
@@ -109,7 +109,7 @@ tournament or the default landing view.
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Verify archive behaviour end to end with a live tournament running: import the T001
+- [x] T015 [US2] Verify archive behaviour end to end with a live tournament running: import the T001
       fixture edited to `"status": "finished"`; confirm it is browsable in full, rejects edits like any
       finished tournament, and the viewers' default landing tournament is unchanged. Fix any gap found
       within import scope (`server/src/services/import.ts`).
@@ -125,7 +125,7 @@ default-takeover behaves as designed.
 
 ### Implementation for User Story 3
 
-- [ ] T016 [US3] Complete the status matrix: import the fixture edited to `"status": "upcoming"` (arrives
+- [x] T016 [US3] Complete the status matrix: import the fixture edited to `"status": "upcoming"` (arrives
       prepared, default unchanged) and to `"status": "active"` (becomes the default landing tournament in
       a fresh tab - the documented recovery behaviour). Fix any gap found within import scope
       (`server/src/services/import.ts`).

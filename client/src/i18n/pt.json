@@ -98,7 +98,11 @@
     "errorDelete": "Torneio não eliminado.",
     "export": "Exportar",
     "exportTitle": "Descarregar uma cópia JSON completa deste torneio.",
-    "errorExport": "Torneio não exportado."
+    "errorExport": "Torneio não exportado.",
+    "import": "Importar",
+    "importTitle": "Restaurar um torneio a partir de um ficheiro de cópia JSON. Cria sempre um novo torneio.",
+    "errorImport": "Torneio não importado.",
+    "errorImportNotJson": "Esse ficheiro não é JSON válido."
   },
   "adminUsers": {
     "title": "Utilizadores",

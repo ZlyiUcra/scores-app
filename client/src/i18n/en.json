@@ -98,7 +98,11 @@
     "errorDelete": "Tournament not deleted.",
     "export": "Export",
     "exportTitle": "Download a full JSON backup of this tournament.",
-    "errorExport": "Tournament not exported."
+    "errorExport": "Tournament not exported.",
+    "import": "Import",
+    "importTitle": "Restore a tournament from a JSON backup file. Always creates a new tournament.",
+    "errorImport": "Tournament not imported.",
+    "errorImportNotJson": "That file is not valid JSON."
   },
   "adminUsers": {
     "title": "Users",

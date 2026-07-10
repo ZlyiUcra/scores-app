@@ -136,6 +136,12 @@ export const adminApi = {
     }
     return { blob: await res.blob(), filename: `tournament-${tournamentId}.json` };
   },
+
+  // Restore a tournament from a picked export file - `fileText` is sent
+  // unchanged as the request body (it is already the exact JSON an export
+  // downloaded; the server re-validates fully regardless).
+  importTournament: (fileText: string) =>
+    request<{ tournament: Tournament }>('/admin/tournaments/import', { method: 'POST', body: fileText }),
 };
 
 export type { AdminUserView, Role };

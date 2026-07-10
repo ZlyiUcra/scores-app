@@ -14,6 +14,7 @@ import type {
   UpdateBracketRequest,
   UpdateUserRequest,
 } from '../../shared/types.js';
+import { exportSchemaVersion, type TournamentExport } from './services/export.js';
 
 // Zod schemas live on the server - the trust boundary. Every mutation body is
 // validated here; unknown keys are stripped, scores are bounded integers.
@@ -175,17 +176,15 @@ export const updateTeamSchema = z
   .strict()
   .refine((v) => v.name !== undefined || v.shortName !== undefined, { message: 'Nothing to update.' });
 
+const groupName = z
+  .string()
+  .trim()
+  .min(2, 'Group name must be at least 2 characters.')
+  .max(40, 'Group name must be at most 40 characters.')
+  .regex(/^[\p{L}\p{N} .'\-]+$/u, 'Group name contains invalid characters.');
+
 /** Create/rename-group body: just a bounded, charset-limited name. */
-export const createGroupSchema = z
-  .object({
-    name: z
-      .string()
-      .trim()
-      .min(2, 'Group name must be at least 2 characters.')
-      .max(40, 'Group name must be at most 40 characters.')
-      .regex(/^[\p{L}\p{N} .'\-]+$/u, 'Group name contains invalid characters.'),
-  })
-  .strict();
+export const createGroupSchema = z.object({ name: groupName }).strict();
 
 // Add/move a team to a group, or remove it (groupId: null). NOTE: no
 // `groupAddedAt` - the seeding key is stamped server-side, never client-supplied.
@@ -285,6 +284,92 @@ export const listUsersQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
 
+// ---- Admin: tournament import ----
+
+// Shared per-slot result shape (bracket record values below). Mirrors
+// updateBracketSchema's fields but every field is REQUIRED (a full stored
+// slot, not a partial patch).
+const bracketResultSchema = z
+  .object({
+    homeScore: scoreField,
+    awayScore: scoreField,
+    homePens: z.number().int().min(0).max(99).nullable(),
+    awayPens: z.number().int().min(0).max(99).nullable(),
+    status: z.enum(['scheduled', 'live', 'finished']),
+    field: fieldLabel,
+    startsAt: z.string().datetime().nullable(),
+    homeOverrideId: z.string().min(1).max(64).nullable(),
+    awayOverrideId: z.string().min(1).max(64).nullable(),
+    rev: z.number().int().min(1),
+  })
+  .strict();
+
+/**
+ * A whole `TournamentExport` file as untrusted input (import). `.strict()` at
+ * every level - an unknown key anywhere (including a top-level "bonus"
+ * collection) rejects the whole file, unlike mutation bodies where unknown
+ * keys are stripped. Structural/charset checks only: cross-item rules
+ * (in-file id references resolve, `homeId !== awayId`, jersey-number
+ * uniqueness, bracket size/slot-key validity) are the graph pass in
+ * services/import.ts, which needs the whole parsed file at once.
+ */
+export const tournamentExportSchema = z
+  .object({
+    schemaVersion: z.literal(exportSchemaVersion),
+    exportedAt: z.string().datetime({ message: 'exportedAt must be an ISO datetime.' }),
+    tournament: z
+      .object({
+        id: z.string().min(1).max(64),
+        name: tournamentName,
+        startsAt: tournamentDate,
+        endsAt: tournamentDate,
+        status: tournamentStatus,
+      })
+      .strict(),
+    groups: z.array(z.object({ id: z.string().min(1).max(64), name: groupName }).strict()),
+    teams: z.array(
+      z
+        .object({
+          id: z.string().min(1).max(64),
+          name: teamName,
+          shortName: teamShortName,
+          groupId: z.string().min(1).max(64).nullable(),
+          groupAddedAt: z.string().datetime().nullable(),
+        })
+        .strict(),
+    ),
+    players: z.array(
+      z
+        .object({
+          id: z.string().min(1).max(64),
+          teamId: z.string().min(1).max(64),
+          name: playerName,
+          number: jerseyNumber,
+          position: playerPosition,
+        })
+        .strict(),
+    ),
+    matches: z.array(
+      z
+        .object({
+          id: z.string().min(1).max(64),
+          tournamentId: z.string().min(1).max(64),
+          group: z.string().min(1).max(64),
+          homeId: z.string().min(1).max(64),
+          awayId: z.string().min(1).max(64),
+          homeScore: scoreField,
+          awayScore: scoreField,
+          status: z.enum(['scheduled', 'live', 'finished']),
+          startsAt: z.string().datetime({ message: 'startsAt must be an ISO datetime.' }),
+          field: fieldLabel,
+          rev: z.number().int().min(1),
+        })
+        .strict(),
+    ),
+    bracket: z.record(z.string(), bracketResultSchema.optional()),
+  })
+  .strict();
+
 /**
  * Parse `input` against `schema`, returning the typed data, or throw a uniform
  * BAD_REQUEST (400) carrying the first issue's message (or `fallback` when zod
@@ -317,6 +402,7 @@ export type CreateGroupInput = z.infer<typeof createGroupSchema>;
 export type AssignTeamInput = z.infer<typeof assignTeamSchema>;
 export type CreatePlayerInput = z.infer<typeof createPlayerSchema>;
 export type UpdatePlayerInput = z.infer<typeof updatePlayerSchema>;
+export type TournamentExportInput = z.infer<typeof tournamentExportSchema>;
 
 // ---- Drift guards ----
 //
@@ -345,3 +431,4 @@ _assert<Eq<z.infer<typeof updatePlayerSchema>, UpdatePlayerRequest>>(true);
 _assert<Eq<z.infer<typeof createMatchSchema>, CreateMatchRequest>>(true);
 _assert<Eq<z.infer<typeof updateBracketSchema>, UpdateBracketRequest>>(true);
 _assert<Eq<z.infer<typeof updateUserSchema>, UpdateUserRequest>>(true);
+_assert<Eq<z.infer<typeof tournamentExportSchema>, TournamentExport>>(true);
