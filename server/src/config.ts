@@ -24,12 +24,16 @@ function resolveJwtSecret(): string {
 
 function resolveAdminPassword(): string {
   const fromEnv = process.env.ADMIN_PASSWORD?.trim();
-  if (fromEnv) return fromEnv;
+  // >= 8 mirrors registerSchema's password rule - a trivially short admin
+  // password is one dictionary run away from full /api/admin.
+  if (fromEnv && fromEnv.length >= 8) return fromEnv;
 
   // Same rule as JWT_SECRET: a wiped/fresh production database reseeds the
   // admin account, so the well-known dev password must never reach prod.
   if (isProd) {
-    throw new Error('ADMIN_PASSWORD must be set in production. Refusing to start.');
+    throw new Error(
+      'ADMIN_PASSWORD must be set (>= 8 chars) in production. Refusing to start.',
+    );
   }
   return 'admin123';
 }
