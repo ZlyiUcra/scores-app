@@ -154,8 +154,26 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
                 <strong>Admin - Tournaments</strong>: create tournaments ahead of time
                 (name, planned dates, status). The "finished" status turns a tournament
                 into an archive - every change inside it is rejected until you set it
-                back to active. Only an empty tournament can be deleted, and never the
-                last one.
+                back to active. Only an empty tournament (no groups, teams or games) can
+                be deleted, and never the last one; deleting it also clears any leftover
+                knockout data automatically, so no separate reset is needed first.
+              </li>
+              <li>
+                <strong>Export</strong> downloads a complete JSON backup of one
+                tournament - groups, teams, squads, games and the bracket. Keep it as an
+                off-site copy or use it to move a tournament to another server.
+              </li>
+              <li>
+                <strong>Import</strong> restores a tournament from such a backup file:
+                pick the file next to the tournament list. It always creates a brand-new
+                tournament with a fresh identity - importing the same file twice makes
+                two separate tournaments, and the original the file came from is never
+                touched. If its name matches one already in the list, "(2)", "(3)" and
+                so on is appended so the two are easy to tell apart. The file's own
+                status decides how it lands: "finished" arrives as a read-only archive,
+                "upcoming" arrives ready to prepare, "active" becomes the tournament
+                visitors land on by default. A malformed or invalid file is rejected
+                before anything is created.
               </li>
               <li>
                 The tournament selector above the admin pages picks which tournament

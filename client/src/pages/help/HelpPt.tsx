@@ -158,7 +158,28 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
                 <strong>Admin - Torneios</strong>: crie torneios com antecedência (nome,
                 datas previstas, estado). O estado «terminado» transforma o torneio num
                 arquivo - qualquer alteração dentro dele é rejeitada até voltar a pô-lo «a
-                decorrer». Só um torneio vazio pode ser eliminado, e nunca o último.
+                decorrer». Só um torneio vazio (sem grupos, equipas ou jogos) pode ser
+                eliminado, e nunca o último; eliminar um torneio também limpa
+                automaticamente qualquer resto de eliminatórias, sem precisar de as repor
+                à parte.
+              </li>
+              <li>
+                <strong>Exportar</strong> descarrega uma cópia JSON completa de um
+                torneio - grupos, equipas, plantéis, jogos e o bracket. Guarde-a como
+                cópia fora do site ou use-a para mover um torneio para outro servidor.
+              </li>
+              <li>
+                <strong>Importar</strong> restaura um torneio a partir desse ficheiro de
+                cópia: escolha o ficheiro junto à lista de torneios. Cria sempre um
+                torneio totalmente novo com identidade própria - importar o mesmo
+                ficheiro duas vezes dá dois torneios separados, e o original de onde veio
+                o ficheiro nunca é alterado. Se o nome coincidir com um já existente na
+                lista, é acrescentado «(2)», «(3)» e assim por diante para os distinguir
+                facilmente. O estado gravado no ficheiro decide como chega: «terminado»
+                chega como arquivo em modo de leitura, «previsto» chega pronto a
+                preparar, «a decorrer» torna-se o torneio que os visitantes veem por
+                omissão. Um ficheiro danificado ou inválido é rejeitado antes de se criar
+                seja o que for.
               </li>
               <li>
                 O seletor de torneio no topo das páginas de administração define que
