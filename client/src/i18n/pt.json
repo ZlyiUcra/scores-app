@@ -64,7 +64,8 @@
     "squads": "Plantéis",
     "audit": "Auditoria",
     "tournament": "Torneio:",
-    "finishedNote": "Este torneio terminou - volte a pô-lo «a decorrer» para fazer alterações."
+    "finishedNote": "Este torneio terminou - volte a pô-lo «a decorrer» para fazer alterações.",
+    "noTournaments": "Ainda não há torneios - crie um no separador «Torneios»."
   },
   "adminAudit": {
     "title": "Registo de auditoria",

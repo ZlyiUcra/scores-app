@@ -64,7 +64,8 @@
     "squads": "Squads",
     "audit": "Audit",
     "tournament": "Tournament:",
-    "finishedNote": "This tournament is finished - set it back to active to make changes."
+    "finishedNote": "This tournament is finished - set it back to active to make changes.",
+    "noTournaments": "No tournaments yet - create one on the Tournaments tab."
   },
   "adminAudit": {
     "title": "Audit trail",

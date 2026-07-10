@@ -182,9 +182,12 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
                 seja o que for.
               </li>
               <li>
-                O seletor de torneio no topo das páginas de administração define que
-                torneio os Jogos e os Plantéis editam - assim um torneio previsto pode ser
-                totalmente preparado antes de começar.
+                O seletor de torneio aparece por cima de Jogos e Plantéis - as únicas
+                páginas de administração que trabalham sobre um torneio - e define que
+                torneio elas editam, para que um torneio previsto possa ser totalmente
+                preparado antes de começar. A seleção vive no endereço da página:
+                recarregar não a perde, e a ligação pode ser partilhada para abrir a
+                administração já nesse torneio.
               </li>
               <li>
                 <strong>Admin - Jogos</strong>: crie grupos e equipas; uma equipa pode

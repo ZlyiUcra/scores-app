@@ -176,9 +176,11 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
                 before anything is created.
               </li>
               <li>
-                The tournament selector above the admin pages picks which tournament
-                Games and Squads edit - so an upcoming tournament can be fully prepared
-                before it starts.
+                The tournament selector appears above Games and Squads - the only
+                admin pages that work on one tournament - and picks which tournament
+                they edit, so an upcoming tournament can be fully prepared before it
+                starts. The selection lives in the page address: reloading keeps it,
+                and the link can be shared to open the admin area on that tournament.
               </li>
               <li>
                 <strong>Admin - Games</strong>: create groups and teams; a team can be
