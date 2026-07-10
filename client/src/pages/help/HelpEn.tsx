@@ -201,6 +201,12 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
                 <strong>Admin - Users</strong>: promote/demote, disable or delete
                 accounts. Disabling cuts the user's live connection immediately.
               </li>
+              <li>
+                <strong>Admin - Audit</strong>: a read-only trail of admin changes -
+                who did what, to what and when, newest first (the most recent
+                entries). An import leaves a single summary entry there recording
+                what arrived.
+              </li>
               <li>Error messages always appear inside the section they belong to.</li>
             </ul>
           </section>

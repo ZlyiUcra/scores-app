@@ -107,6 +107,20 @@ Admin-only (client guard + `requireAdmin` on the whole `/api/admin` router). The
   / `match:removed`. Matches store `homeId/awayId`; the server resolves teams into
   the wire DTO (client display is unchanged).
 
+**Tournament management (`/admin/tournaments`)**
+- Create/edit tournaments (name, planned dates, status); `finished` archives a
+  tournament - the server rejects every write inside it.
+- **Export**: downloads one tournament (groups, teams, players, games, bracket) as
+  a versioned JSON backup file.
+- **Import**: restores such a file as a **new** tournament - every id is minted
+  fresh, nothing existing is overwritten; the file is validated like any mutation
+  body (route-scoped 1 MB cap, rate-limited) and leaves one summary row in the
+  audit log.
+
+**Audit log (`/admin/audit`)**
+- Read-only viewer over the persisted audit trail (time, user, action, target),
+  newest first, capped at the latest 200 entries.
+
 **Admin-mutation security:** strict Zod allowlist on PATCH (against `role`
 mass-assignment), charset validation of team names (against stored XSS), rate-limit,
 and a minimal audit log of every mutation.
@@ -239,6 +253,20 @@ Apenas para administradores (guarda no cliente + `requireAdmin` em todo o router
   `match:created` / `match:removed`. Os jogos guardam `homeId/awayId`; o servidor
   resolve as equipas no DTO (a apresentação no cliente não muda).
 
+**Gestão de torneios (`/admin/tournaments`)**
+- Criar/editar torneios (nome, datas planeadas, estado); `finished` arquiva o
+  torneio - o servidor rejeita qualquer escrita dentro dele.
+- **Exportação**: descarrega um torneio (grupos, equipas, jogadores, jogos,
+  eliminatória) como ficheiro JSON de cópia de segurança com versão de esquema.
+- **Importação**: restaura esse ficheiro como um torneio **novo** - todos os ids
+  são gerados de novo, nada do existente é substituído; o ficheiro é validado como
+  qualquer corpo de mutação (limite de 1 MB na rota, rate-limit) e deixa uma linha
+  de resumo no registo de auditoria.
+
+**Registo de auditoria (`/admin/audit`)**
+- Visualizador só de leitura do registo de auditoria persistido (hora, utilizador,
+  ação, alvo), do mais recente para o mais antigo, limitado às últimas 200 entradas.
+
 **Segurança das mutações de administração:** allowlist estrita do Zod no PATCH
 (contra mass-assignment de `role`), validação de caracteres dos nomes das equipas
 (contra XSS armazenado), rate-limit e um registo de auditoria mínimo de cada mutação.
@@ -358,6 +386,19 @@ Endpoint: `POST /api/auth/register` → авто-логін тим самим ш
 - Нові/видалені матчі з'являються/зникають **у всіх клієнтів наживо** через
   `match:created` / `match:removed`. Матч зберігає `homeId/awayId`, сервер резолвить
   команди у wire-DTO (клієнт відображення не змінюється).
+
+**Керування турнірами (`/admin/tournaments`)**
+- Створення/редагування турнірів (назва, планові дати, статус); `finished` архівує
+  турнір - сервер відхиляє будь-який запис усередині нього.
+- **Експорт**: завантажує один турнір (групи, команди, гравці, ігри, сітка) як
+  версіонований JSON-файл резервної копії.
+- **Імпорт**: відновлює такий файл як **новий** турнір - усі id генеруються заново,
+  нічого з наявного не перезаписується; файл валідується як будь-яке тіло мутації
+  (ліміт 1 MB на роуті, rate-limit) і лишає один підсумковий рядок в audit-лозі.
+
+**Audit-лог (`/admin/audit`)**
+- Read-only перегляд збереженого audit-трейлу (час, користувач, дія, ціль), новіші
+  зверху, обмежено останніми 200 записами.
 
 **Безпека адмін-мутацій:** strict Zod-allowlist на PATCH (проти mass-assignment
 `role`), charset-валідація назв команд (проти stored-XSS), rate-limit і мінімальний

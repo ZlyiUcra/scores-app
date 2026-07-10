@@ -209,6 +209,12 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
                 eliminar contas. Desativar corta de imediato a ligação ao vivo do
                 utilizador.
               </li>
+              <li>
+                <strong>Admin - Auditoria</strong>: um registo só de leitura das
+                alterações de administração - quem alterou o quê e quando, do mais
+                recente para o mais antigo (as entradas mais recentes). Uma
+                importação deixa aí uma única entrada de resumo com o que chegou.
+              </li>
               <li>As mensagens de erro aparecem sempre na secção a que dizem respeito.</li>
             </ul>
           </section>
