@@ -1,6 +1,6 @@
 import type { Group, Roster, Team } from '../../../shared/types.js';
 import { TOURNAMENT_FORMAT } from '../../../shared/tournament.js';
-import { groupRepository, matchRepository, playerRepository, teamRepository } from '../storage/index.js';
+import { bracketRepository, groupRepository, matchRepository, playerRepository, teamRepository } from '../storage/index.js';
 import type { AssignTeamInput } from '../validation.js';
 import { AppError, AppErrorCode, requireFound } from '../errors.js';
 import { assertBracketNotStarted } from './bracketGuard.js';
@@ -71,14 +71,19 @@ export function updateGroup(id: string, name: string): Promise<{ group: Group; t
   });
 }
 
-/** Admin: remove an empty group. Returns the owning tournament. */
+/** Admin: remove an empty group. Returns the owning tournament. Like
+ * `removeTeam`/`removeMatch`, this does NOT block on a started knockout - it
+ * clears the whole bracket first (same as "Reset knockout") and proceeds, so
+ * the delete-everything path never needs a manual reset in between. */
 export function removeGroup(id: string): Promise<string> {
   return withMutationLock(async () => {
     const stored = requireFound(await groupRepository.getStored(id), `Group ${id} not found.`);
     await assertTournamentEditable(stored.tournamentId);
-    await assertBracketNotStarted(stored.tournamentId);
     if ((await teamRepository.countInGroup(id)) > 0) {
       throw new AppError(AppErrorCode.GroupInUse, 'Remove the group\'s teams before deleting it.', 409);
+    }
+    if (await bracketRepository.hasStarted(stored.tournamentId)) {
+      await bracketRepository.reset(stored.tournamentId);
     }
     await groupRepository.remove(id);
     return stored.tournamentId;
@@ -128,16 +133,26 @@ export function assignTeam(teamId: string, input: AssignTeamInput): Promise<{ te
 
 /** Admin: remove a team, only if no match references it. NOTE: the countByTeam
  * check below is an INDEPENDENT integrity guard (match history must not point
- * at a deleted team) - it is NOT redundant with assertBracketNotStarted.
+ * at a deleted team) - it does not depend on bracket state.
+ * Unlike every other bracket-adjacent mutation, this one does NOT block on a
+ * started knockout - it clears the WHOLE bracket instead (same as "Reset
+ * knockout") and proceeds. A team about to disappear can be pinned by an
+ * override or resolved into a played slot; there is no safe, narrower
+ * "remove just this team's trace" operation (winners/qualifiers recompute
+ * from whichever teams remain), so the only consistent option is a full
+ * reset - by the time every team is gone, the bracket is already clean and
+ * the tournament is ready to delete.
  * The team's players are removed with it. Returns the owning tournament. */
 export function removeTeam(id: string): Promise<string> {
   return withMutationLock(async () => {
     const stored = requireFound(await teamRepository.getStored(id), `Team ${id} not found.`);
     await assertTournamentEditable(stored.tournamentId);
-    await assertBracketNotStarted(stored.tournamentId);
     const used = await matchRepository.countByTeam(id);
     if (used > 0) {
       throw new AppError(AppErrorCode.TeamInUse, `Team is referenced by ${used} match(es) and cannot be removed.`, 409);
+    }
+    if (await bracketRepository.hasStarted(stored.tournamentId)) {
+      await bracketRepository.reset(stored.tournamentId);
     }
     await teamRepository.remove(id);
     await playerRepository.removeByTeam(id); // cascade the squad

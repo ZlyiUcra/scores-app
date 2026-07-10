@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import type { Match, MatchUpdate } from '../../../shared/types.js';
 import type { StoredMatch } from '../storage/contracts.js';
-import { groupRepository, matchRepository, teamRepository } from '../storage/index.js';
+import { bracketRepository, groupRepository, matchRepository, teamRepository } from '../storage/index.js';
 import type { CreateMatchInput, GoalInput, UpdateMatchInput } from '../validation.js';
 import { AppError, AppErrorCode, requireFound } from '../errors.js';
 import { assertBracketNotStarted } from './bracketGuard.js';
@@ -139,12 +139,18 @@ export function createMatch(input: CreateMatchInput): Promise<{ match: Match; to
   return withMutationLock(() => createMatchInner(input));
 }
 
-/** Admin: remove a match. Returns the owning tournament. */
+/** Admin: remove a match. Returns the owning tournament. Like `removeTeam`,
+ * this does NOT block on a started knockout - it clears the whole bracket
+ * first (same as "Reset knockout") and proceeds, so the delete-everything
+ * path (matches -> teams -> groups -> tournament) never needs a manual reset
+ * in between. Creating/editing matches is unaffected and stays guarded. */
 export function removeMatch(id: string): Promise<string> {
   return withMutationLock(async () => {
     const current = await getStored(id);
     await assertTournamentEditable(current.tournamentId);
-    await assertBracketNotStarted(current.tournamentId);
+    if (await bracketRepository.hasStarted(current.tournamentId)) {
+      await bracketRepository.reset(current.tournamentId);
+    }
     await matchRepository.remove(id);
     return current.tournamentId;
   });
