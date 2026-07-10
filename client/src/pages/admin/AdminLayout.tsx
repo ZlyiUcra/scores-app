@@ -127,7 +127,7 @@ export function AdminLayout() {
   return (
     <div className="admin-area">
       <div className="admin-area__bar">
-        <Link to="/" className="back">{t('adminLayout.back')}</Link>
+        <Link to={tournament ? `/t/${tournament.id}` : '/'} className="back">{t('adminLayout.back')}</Link>
         <nav className="subnav">
           <NavLink to={tabTo('/admin/users')} className={({ isActive }) => `subnav__link ${isActive ? 'subnav__link--active' : ''}`}>
             {t('adminLayout.users')}
