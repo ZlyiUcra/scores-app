@@ -287,8 +287,6 @@ export interface BracketRepository {
    * OR any pinned participant. Both couple bracket state to the group setup,
    * so both must lock group/team mutations until an explicit reset. */
   hasStarted(tournamentId: string): Promise<boolean>;
-  /** Whether any slot row exists at all (tournament-removal guard). */
-  hasAny(tournamentId: string): Promise<boolean>;
 }
 
 /** One immutable audit record: who did what, and to what. Append-only - the

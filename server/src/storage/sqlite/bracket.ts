@@ -132,9 +132,4 @@ export class SqliteBracketRepository implements BracketRepository {
     }
     return false;
   }
-
-  async hasAny(tournamentId: string): Promise<boolean> {
-    const slots = this.byTournament.get(tournamentId);
-    return slots !== undefined && slots.size > 0;
-  }
 }

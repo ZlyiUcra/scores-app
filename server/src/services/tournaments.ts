@@ -60,9 +60,13 @@ export function updateTournament(id: string, patch: UpdateTournamentInput): Prom
   return withMutationLock(() => tournamentRepository.update(id, patch));
 }
 
-/** Admin: remove a tournament - only an EMPTY one (no groups, teams, matches
- * or knockout rows; mirrors the empty-group delete guard) and never the last
- * one, so the default-tournament resolution always has something to return. */
+/** Admin: remove a tournament - only an EMPTY one (no groups, teams or
+ * matches; mirrors the empty-group delete guard) and never the last one, so
+ * the default-tournament resolution always has something to return. Any
+ * knockout rows left over (e.g. a slot's schedule was once edited) are
+ * orphaned once groups/teams/matches are gone, so they are cleared as part of
+ * the tournament's own removal instead of being a separate blocking
+ * precondition. */
 export function removeTournament(id: string): Promise<void> {
   return withMutationLock(async () => {
     await getTournament(id); // NOT_FOUND for unknown ids before any guard fires
@@ -72,8 +76,7 @@ export function removeTournament(id: string): Promise<void> {
     const used =
       (await groupRepository.countByTournament(id)) > 0 ||
       (await teamRepository.countByTournament(id)) > 0 ||
-      (await matchRepository.countByTournament(id)) > 0 ||
-      (await bracketRepository.hasAny(id));
+      (await matchRepository.countByTournament(id)) > 0;
     if (used) {
       throw new AppError(
         AppErrorCode.TournamentInUse,
@@ -81,6 +84,7 @@ export function removeTournament(id: string): Promise<void> {
         409,
       );
     }
+    await bracketRepository.reset(id);
     await tournamentRepository.remove(id);
   });
 }
