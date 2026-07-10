@@ -1,32 +1,33 @@
 <!--
 Sync Impact Report
 ==================
-Version change: unversioned template -> 1.0.0
-Bump rationale: initial ratification. Every placeholder token replaced with concrete text.
+Version change: 1.0.0 -> 1.0.1
+Bump rationale: PATCH. Clarification of a single constant in Technology and Scale Constraints:
+the runtime floor "Node >= 22.5" becomes "Node >= 22.12". Driver: the frontend toolchain target
+approved by consilium 2026-07-10 (vite 7 line) supports only node ^20.19 || >=22.12, and the
+root package.json engines field is raised to >=22.12 by feature 002-dep-upgrade. No principle
+added, removed or redefined.
 
-Principles defined (all new):
-- I. Data Preservation (NON-NEGOTIABLE)
-- II. Explicit Scope, Smallest Diff
-- III. One Source of Truth Behind Seams
-- IV. Trust Boundary Discipline
-- V. Strict Types, ASCII Sources, Complete i18n
+Modified principles: none.
 
-Sections added:
-- Technology and Scale Constraints (was [SECTION_2_NAME])
-- Development Workflow and Quality Gates (was [SECTION_3_NAME])
-- Governance (was [GOVERNANCE_RULES])
+Sections modified:
+- Technology and Scale Constraints: runtime floor constant only.
 
-Sections removed: none.
+Sections added: none. Sections removed: none.
 
 Template consistency check:
-- .specify/templates/plan-template.md - aligned, no change needed. Its "Constitution Check"
-  is a runtime slot ("[Gates determined based on constitution file]") filled per feature.
-- .specify/templates/spec-template.md - aligned, no change needed. This constitution adds no
-  mandatory spec section and forbids no existing one.
-- .specify/templates/tasks-template.md - aligned, no change needed. Tests are already marked
-  OPTIONAL, which matches the project's deliberate parked-tests stance.
+- .specify/templates/plan-template.md - aligned, no change needed (Constitution Check is a
+  runtime slot filled per feature).
+- .specify/templates/spec-template.md - aligned, no change needed.
+- .specify/templates/tasks-template.md - aligned, no change needed.
 - .specify/templates/checklist-template.md - aligned, no change needed.
 - .specify/templates/commands/ - not present in this install; nothing to reconcile.
+- specs/002-dep-upgrade/spec.md - updated: the Assumptions governance flag about the runtime
+  floor conflict now records that the amendment has been made.
+- specs/001-tournament-import/* - historical artifacts of a shipped feature; mention "Node >=
+  22.5" as it was true at the time. Deliberately left untouched.
+- root package.json engines - NOT changed by this amendment; it is raised to >=22.12 inside
+  feature 002-dep-upgrade (frontend toolchain commit), which this amendment authorizes.
 
 Deviation from the /speckit-constitution instructions: the report status markers are written in
 ASCII words instead of the requested emoji, because CLAUDE.md forbids emoji and mandates ASCII.
@@ -35,6 +36,7 @@ Follow-up TODOs:
 - TODO(README_DATA_ROW): README.md still describes the data layer as "JSON files behind
   repository interfaces (easy to swap for SQLite)". The active driver is node:sqlite behind
   storage/contracts.ts. Out of scope for this amendment; flagged for a separate docs fix.
+  (Carried over from 1.0.0.)
 -->
 
 # Live Scores Constitution
@@ -117,7 +119,7 @@ checker was bought to find.
 
 ## Technology and Scale Constraints
 
-- Runtime is Node >= 22.5. Client is Vite, React, TypeScript, Zustand, react-router, and
+- Runtime is Node >= 22.12. Client is Vite, React, TypeScript, Zustand, react-router, and
   socket.io-client. Server is Express, Socket.IO, JWT, bcryptjs, and Zod.
 - The storage driver is `node:sqlite` (`DatabaseSync`), still flagged experimental on this Node
   line. The contracts seam is the accepted mitigation and a Postgres driver is the escape hatch.
@@ -163,4 +165,4 @@ contradict it; where the two diverge, this document wins and `CLAUDE.md` is corr
 - Compliance is reviewed at change-review time. Complexity MUST be justified; unjustified
   complexity is a blocking finding.
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-09 | **Last Amended**: 2026-07-09
+**Version**: 1.0.1 | **Ratified**: 2026-07-09 | **Last Amended**: 2026-07-10
