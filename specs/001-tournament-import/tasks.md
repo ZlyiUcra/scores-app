@@ -134,7 +134,7 @@ default-takeover behaves as designed.
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-- [ ] T017 Full pass of quickstart.md Scenario 5: audit viewer shows an entry per import (FR-010); no
+- [x] T017 Full pass of quickstart.md Scenario 5: audit viewer shows an entry per import (FR-010); no
       visible viewer freeze during import (SC-005); EN/UA/PT all show translated labels and error
       messages; final `npm run typecheck` in both packages.
 
