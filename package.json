@@ -12,7 +12,7 @@
     "build": "npm run install:all && npm --prefix server run build && npm --prefix client run build",
     "start": "npm --prefix server run start"
   },
-  "engines": { "node": ">=22.5" },
+  "engines": { "node": ">=22.12" },
   "devDependencies": {
     "concurrently": "^9.0.1"
   }
