@@ -121,12 +121,11 @@ and a minimal audit log of every mutation.
 
 ### Intentionally deferred (follow-up)
 
-Refresh tokens/rotation, per-match rooms, HTTPS/HSTS/CSP hardening,
-Docker/CI, deep tests. Registration: email verification, account lockout,
-breached-password check (HIBP/zxcvbn), enumeration-proof responses. Admin: team
-rename, match soft-delete, file/DB audit log, cursor pagination and secondary
-indexes (a scan is fine up to ~10k). Hooks are left in the code (repository
-interfaces, env config, versioned envelope).
+Refresh tokens/rotation, per-match rooms, Docker/CI, deep tests.
+Registration: email verification, account lockout, breached-password check
+(HIBP/zxcvbn), enumeration-proof responses. Admin: match soft-delete, cursor
+pagination and secondary indexes (a scan is fine up to ~10k). Hooks are left
+in the code (repository interfaces, env config, versioned envelope).
 
 ---
 
@@ -254,13 +253,12 @@ Apenas para administradores (guarda no cliente + `requireAdmin` em todo o router
 
 ### Adiado intencionalmente (seguimento)
 
-Refresh tokens/rotação, salas por jogo, endurecimento HTTPS/HSTS/CSP,
-Docker/CI, testes profundos. Registo: verificação por email, bloqueio de conta,
-verificação de palavra-passe comprometida (HIBP/zxcvbn), respostas à prova de
-enumeração. Administração: renomear equipas, soft-delete de jogos, registo de
-auditoria em ficheiro/BD, paginação por cursor e índices secundários (um scan chega
-até ~10 mil). Os ganchos ficam no código (interfaces de repositório, configuração
-por env, envelope versionado).
+Refresh tokens/rotação, salas por jogo, Docker/CI, testes profundos. Registo:
+verificação por email, bloqueio de conta, verificação de palavra-passe
+comprometida (HIBP/zxcvbn), respostas à prova de enumeração. Administração:
+soft-delete de jogos, paginação por cursor e índices secundários (um scan
+chega até ~10 mil). Os ganchos ficam no código (interfaces de repositório,
+configuração por env, envelope versionado).
 
 ---
 
@@ -375,9 +373,8 @@ audit-лог кожної мутації.
 
 ### Що свідомо відкладено (follow-up)
 
-Refresh-токени/ротація, per-match rooms, HTTPS/HSTS/CSP хардненг,
-Docker/CI, глибокі тести. Для реєстрації: email-верифікація, account lockout,
-breached-password check (HIBP/zxcvbn), enumeration-proof відповіді. Для адмінки:
-рейм команд, soft-delete матчів, файловий/DB audit-лог, cursor-пагінація та
-вторинні індекси (scan достатній до ~10k). Гачки в коді залишені (інтерфейси
-репозиторіїв, env-конфіг, versioned envelope).
+Refresh-токени/ротація, per-match rooms, Docker/CI, глибокі тести. Для
+реєстрації: email-верифікація, account lockout, breached-password check
+(HIBP/zxcvbn), enumeration-proof відповіді. Для адмінки: soft-delete матчів,
+cursor-пагінація та вторинні індекси (scan достатній до ~10k). Гачки в коді
+залишені (інтерфейси репозиторіїв, env-конфіг, versioned envelope).
