@@ -11,15 +11,21 @@ remained in the spec; this file records the decisions and the evidence behind th
 - **Rationale**: `npm audit --json` vulnerable ranges are GHSA-4w7w-66w2-5vf9 `<=6.4.1`,
   GHSA-fx2h-pf6j-xcff `<=6.4.2`, GHSA-v6wh-96g9-6wx3 `<=6.4.2`, esbuild GHSA-67mh-4wv8-2f99
   `<=0.24.2`. No range reaches 7.x. `npm view vite@7.3.6 dependencies` shows esbuild
-  `^0.27.0 || ^0.28.0` (fix was 0.25.0) and NO launch-editor at all - the one confirmed active
-  vector (NTLMv2 leak via `/__open-in-editor`, blind cross-site GET with a UNC path, middleware has
-  no Origin check - verified in the bundled vite 5.4.21 code) disappears with the dependency.
-  Audit's suggestion of 8.1.4 is merely "latest", not the minimal fix. Staying on 7.x keeps the
-  rollup bundler - no Rolldown/Oxc/Lightning-CSS variables in a security-motivated step.
+  `^0.27.0 || ^0.28.0` (fix was 0.25.0). `npm ls launch-editor` is empty post-upgrade, but that is
+  because vite now bundles `launch-editor` inside its own `dist/node` output instead of listing it
+  as a resolvable dependency - it is NOT gone. Live re-test on 2026-07-10 (T017) against the
+  running vite 7.3.6 dev server: the `/__open-in-editor` route still responds (500, not 404), but
+  sending the actual attack payload (a UNC path) hits an explicit guard added upstream in the
+  bundled `launch-editor@2.14.1` (`client/node_modules/vite/dist/node/chunks/config.js:14880`)
+  that rejects Windows UNC paths BEFORE the `fs.existsSync` call that used to trigger the SMB/NTLM
+  handshake. So the confirmed vector is closed by that guard, not by the dependency disappearing -
+  SC-002 in spec.md was reworded to match. Audit's suggestion of 8.1.4 is merely "latest", not the
+  minimal fix. Staying on 7.x keeps the rollup bundler - no Rolldown/Oxc/Lightning-CSS variables in
+  a security-motivated step.
 - **Alternatives considered**: vite 8.1.4 (rejected now: three majors + bundler swap in one step,
   largest regression surface for zero additional security value; deferred - see R6); staying on
-  5.4.21 (rejected: 5.x is EOL, no more backports, and the launch-editor vector is live during
-  every dev session on Windows).
+  5.4.21 (rejected: 5.x is EOL, no more backports, and the launch-editor UNC-path vector is live
+  during every dev session on Windows).
 
 ## R2. Plugin pairing: @vitejs/plugin-react ^5 (NOT 6)
 

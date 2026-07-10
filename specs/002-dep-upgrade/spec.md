@@ -154,8 +154,10 @@ that would trigger picking it up.
 
 - **SC-001**: A security audit of both the client and server workspaces reports zero known
   advisories.
-- **SC-002**: The confirmed active credential-leak vector is gone: the vulnerable development-server
-  service endpoint no longer exists in the running dev server.
+- **SC-002**: The confirmed active credential-leak vector is gone: sending the UNC-path payload to
+  the development-server's open-in-editor endpoint no longer reaches the filesystem/network call
+  that leaked the NTLMv2 hash (the endpoint route itself still exists - the fix is a guard in the
+  bundled `launch-editor` code, verified with the live attack payload, not removal of the route).
 - **SC-003**: Every item on the fixed smoke checklist passes in both development mode and
   production-served mode.
 - **SC-004**: The login rate limit rejects the excess attempt within the same window as before the
