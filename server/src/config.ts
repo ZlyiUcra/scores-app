@@ -34,6 +34,23 @@ function resolveAdminPassword(): string {
   return 'admin123';
 }
 
+function resolveViewerPassword(): string {
+  const fromEnv = process.env.VIEWER_PASSWORD?.trim();
+  // >= 8 mirrors registerSchema's password rule; bcrypt truncates at 72 bytes
+  // anyway, so a trivially short value is the real risk here.
+  if (fromEnv && fromEnv.length >= 8) return fromEnv;
+
+  // Same rule as ADMIN_PASSWORD, and for a sharper reason: there is no
+  // password-change endpoint at all, so the seed is the ONLY point where the
+  // viewer password can ever be set - a role promotion keeps it forever.
+  if (isProd) {
+    throw new Error(
+      'VIEWER_PASSWORD must be set (>= 8 chars) in production. Refusing to start.',
+    );
+  }
+  return 'viewer123';
+}
+
 function resolveMaxUsers(): number {
   const fromEnv = process.env.MAX_USERS?.trim();
   if (!fromEnv) return 500;
@@ -71,4 +88,9 @@ export const config = {
   /** Password of the seeded admin (first boot / empty users table only).
    * Required in production; dev falls back to the well-known default. */
   adminPassword: resolveAdminPassword(),
+  /** Password of the seeded viewer. Consumed on first boot / empty users
+   * table only - NOT a rotation mechanism: changing the env on a live
+   * database is a no-op. Required in production; dev falls back to the
+   * well-known default. */
+  viewerPassword: resolveViewerPassword(),
 };

@@ -58,6 +58,10 @@ Or in two terminals: `npm run dev:server` and `npm run dev:client`.
 | Admin | `admin` | `admin123` |
 | Viewer | `viewer` | `viewer123` |
 
+Both passwords are dev defaults: in production the server refuses to start unless
+`ADMIN_PASSWORD` and `VIEWER_PASSWORD` are set, and they apply to the first boot on an
+empty database only.
+
 New viewers self-register via the **Register** tab on the login page.
 
 ### User registration
@@ -198,6 +202,10 @@ Ou em dois terminais: `npm run dev:server` e `npm run dev:client`.
 |---|---|---|
 | Administrador | `admin` | `admin123` |
 | Espectador | `viewer` | `viewer123` |
+
+Ambas as palavras-passe são predefinições de desenvolvimento: em produção o servidor
+recusa arrancar sem as variáveis `ADMIN_PASSWORD` e `VIEWER_PASSWORD`, e estas aplicam-se
+apenas ao primeiro arranque com a base de dados vazia.
 
 Novos espectadores registam-se no separador **Registo** na página de início de sessão.
 
@@ -341,6 +349,10 @@ npm run dev
 |---|---|---|
 | Адмін | `admin` | `admin123` |
 | Глядач | `viewer` | `viewer123` |
+
+Обидва паролі — дефолти для розробки: у продакшені сервер відмовляється стартувати без
+змінних `ADMIN_PASSWORD` і `VIEWER_PASSWORD`, і діють вони лише на перший запуск із
+порожньою базою.
 
 Нові глядачі створюють акаунти самі — вкладка **«Реєстрація»** на сторінці входу.
 

@@ -8,8 +8,8 @@ run all of it before calling the feature done. Commands are PowerShell (Windows 
 
 - Node >= 22.12 (`node --version`; dev machine has 22.14.0).
 - Dependencies installed per workspace (`npm install` in `server/` and `client/`).
-- For prod-served mode: `JWT_SECRET` and `ADMIN_PASSWORD` env vars set (server throws on boot
-  without them in production).
+- For prod-served mode: `JWT_SECRET`, `ADMIN_PASSWORD` and `VIEWER_PASSWORD` env vars set (server
+  throws on boot without them in production).
 
 ## Baseline (recorded 2026-07-10, before any change)
 
@@ -81,7 +81,7 @@ run all of it before calling the feature done. Commands are PowerShell (Windows 
 
    ```powershell
    npm run build                        # repo root: builds server + client
-   $env:NODE_ENV='production'; $env:JWT_SECRET='...'; $env:ADMIN_PASSWORD='...'
+   $env:NODE_ENV='production'; $env:JWT_SECRET='...'; $env:ADMIN_PASSWORD='...'; $env:VIEWER_PASSWORD='...'
    npm run start
    ```
 

@@ -130,13 +130,14 @@ async function seedDemoRoster(storage: Storage, tournamentId: string): Promise<v
 /** Seeded operators - only on a completely empty account table (a legacy
  * users.json import, when present, runs first inside the driver and makes
  * this a no-op). Reserved usernames (validation.ts) keep strangers from
- * squatting these names. On a public deploy the well-known dev password MUST
- * be overridden via ADMIN_PASSWORD. */
+ * squatting these names. On a public deploy the well-known dev passwords
+ * MUST be overridden via ADMIN_PASSWORD and VIEWER_PASSWORD; both apply to
+ * this seed only and never rotate an existing account. */
 async function seedUsers(storage: Storage): Promise<void> {
   if ((await storage.users.count()) > 0) return;
   const seeds = [
     { username: 'admin', password: config.adminPassword, role: 'admin' as const },
-    { username: 'viewer', password: 'viewer123', role: 'user' as const },
+    { username: 'viewer', password: config.viewerPassword, role: 'user' as const },
   ];
   for (const s of seeds) {
     await storage.users.create({
