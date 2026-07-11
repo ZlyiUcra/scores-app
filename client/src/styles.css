@@ -537,6 +537,14 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
   flex: 1 1 0; display: flex; align-items: center; position: relative;
   padding: 0.4rem 0.9rem;
 }
+/* Final column holding the final + third-place stacked: centre the pair
+   together (rather than spreading them across the column) so they read as one
+   below the other, right under the incoming semifinal line. */
+.bracket-round__matches--stack { justify-content: center; gap: 0.5rem; }
+.bracket-round__matches--stack .bracket-match { flex: 0 0 auto; }
+/* The third-place card is not fed by the tree in the linear layout - drop the
+   stray incoming spur it would otherwise inherit as a last-column match. */
+.bracket .bracket-round:not(:first-child) .bracket-match--extra::before { display: none; }
 
 /* Linear connectors. Outgoing elbow from every feeding round: half-height
    vertical bar + a spur into the card. Odd cards draw the lower half, even cards
@@ -581,21 +589,27 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .bcell--center::before {
   content: ''; position: absolute; left: 0; width: 0.9rem; top: 50%; border-top: 2px solid var(--line);
 }
-/* Pairing bracket into the two children (outer side) on a parent cell: a
-   vertical bar spanning ~child-centre to child-centre, plus a centre spur to the
-   card (the background line). The children's own spurs meet the bar's ends. */
-.bcell--left.bcell--parent::before {
-  content: ''; position: absolute; left: 0; width: 0.9rem; top: 25%; height: 50%;
-  border-left: 2px solid var(--line);
+/* Pairing bar (a vertical bar spanning ~centre to ~centre, plus a centre spur
+   to the single card). Two mirror-image uses share the geometry:
+   - a PARENT converging its two children on its outer side ("]" into one);
+   - a semifinal DIVERGING to the centre pair (final up, third place down) on
+     its inner side ("[" out of one). border-top: 0 cancels the simple outgoing
+     spur a diverging semifinal would otherwise inherit. */
+.bcell--left.bcell--parent::before,
+.bcell--right.bcell--diverge::before {
+  content: ''; position: absolute; left: 0; width: 0.9rem; top: calc(25% - 1px); height: calc(50% + 2px);
+  border-left: 2px solid var(--line); border-top: 0;
   background: linear-gradient(var(--line), var(--line)) no-repeat left 50% / 100% 2px;
 }
-.bcell--right.bcell--parent::after {
-  content: ''; position: absolute; right: 0; width: 0.9rem; top: 25%; height: 50%;
-  border-right: 2px solid var(--line);
+.bcell--right.bcell--parent::after,
+.bcell--left.bcell--diverge::after {
+  content: ''; position: absolute; right: 0; width: 0.9rem; top: calc(25% - 1px); height: calc(50% + 2px);
+  border-right: 2px solid var(--line); border-top: 0;
   background: linear-gradient(var(--line), var(--line)) no-repeat left 50% / 100% 2px;
 }
 
-/* Third-place: a separate centred block below the main bracket. */
+/* Third-place: the separate centred block, used by the LINEAR layout (and the
+   mirror only when the bracket is too small to stack it under the final). */
 .bracket-third { max-width: 340px; margin: 1.25rem auto 0; }
 .bracket-third .bcard { margin-top: 0.35rem; }
 
@@ -607,13 +621,28 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
   border-radius: 10px; overflow: hidden;
 }
 .bcard--live { border-color: var(--danger); }
+/* Trophy games: the final and the third-place match get a warm gold accent so
+   they read as the important, distinct games among the rounds that feed them.
+   Similar treatment for both; the final is a touch stronger. */
+.bcard--final, .bcard--third { border-color: rgba(217, 164, 65, 0.55); background: rgba(217, 164, 65, 0.05); }
+.bcard--final { border-color: rgba(217, 164, 65, 0.85); }
+.bcard--final .bcard__head, .bcard--third .bcard__head { background: rgba(217, 164, 65, 0.16); }
 .bcard__head {
   display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem;
   background: var(--bg); font-size: 0.66rem; color: var(--muted);
+  /* One line always. A wrapping schedule used to make a card taller than its
+     sibling, throwing the bracket elbow connectors out of alignment (the elbow
+     assumes a feeding pair shares a height). Keeping the head to a single line
+     keeps paired cards equal so the corners meet cleanly. */
+  flex-wrap: nowrap;
 }
-.bcard__slot { font-weight: 800; letter-spacing: 0.03em; color: var(--text); }
-.bcard__field { opacity: 0.8; }
-.bcard__status { margin-left: auto; text-transform: uppercase; }
+.bcard__slot { font-weight: 800; letter-spacing: 0.03em; color: var(--text); flex: none; }
+.bcard__field { opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.bcard__status { margin-left: auto; text-transform: uppercase; flex: none; }
+/* 'Scheduled' is the default, repeated on every un-played card - drop the label
+   (a scheduled card is already obvious: seed names, no score) to free the head
+   width for the kick-off on one line. Live/finished stay - they carry signal. */
+.bcard--scheduled .bcard__status { display: none; }
 .bcard--live .bcard__status { color: var(--danger); }
 .bcard__side {
   display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;

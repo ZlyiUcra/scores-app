@@ -51,10 +51,13 @@ function Side({ m, side }: { m: BracketMatch; side: 'home' | 'away' }) {
 function BracketCard({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
   const { basePath } = useTournament();
+  // Final and third-place are the trophy games - a distinct card accent marks
+  // them out from the rounds that feed them.
+  const trophyClass = m.round === 'final' ? ' bcard--final' : m.round === 'third' ? ' bcard--third' : '';
   // The whole card links to the game page (admins get the edit controls
   // there), same as a row in the results list.
   return (
-    <Link to={`${basePath}/ko/${m.slot}`} className={`bcard-link bcard bcard--${m.status}`}>
+    <Link to={`${basePath}/ko/${m.slot}`} className={`bcard-link bcard bcard--${m.status}${trophyClass}`}>
       <div className="bcard__head">
         <span className="bcard__slot">{slotShort(m.slot, t)}</span>
         {m.startsAt && <span className="bcard__field">{formatKickoff(m.startsAt)}</span>}
@@ -68,15 +71,23 @@ function BracketCard({ m }: { m: BracketMatch }) {
   );
 }
 
-/** One round rendered as a titled column of match cards. */
-function RoundColumn({ round, matches }: { round: Round; matches: BracketMatch[] }) {
+/** One round rendered as a titled column of match cards. `extra` (the
+ * third-place game) rides in the final column, stacked right under the final so
+ * the linear layout stacks the two centre games the same way the mirror does. */
+function RoundColumn({ round, matches, extra }: { round: Round; matches: BracketMatch[]; extra?: BracketMatch[] }) {
   const { t } = useI18n();
+  const split = (extra?.length ?? 0) > 0;
   return (
     <div className="bracket-round">
       <h4 className="bracket-round__title">{t(`bracket.${round}`)}</h4>
-      <div className="bracket-round__matches">
+      <div className={`bracket-round__matches${split ? ' bracket-round__matches--stack' : ''}`}>
         {matches.map((m) => (
           <div className="bracket-match" key={m.slot}>
+            <BracketCard m={m} />
+          </div>
+        ))}
+        {extra?.map((m) => (
+          <div className="bracket-match bracket-match--extra" key={m.slot}>
             <BracketCard m={m} />
           </div>
         ))}
@@ -130,7 +141,7 @@ export function Bracket({ view }: { view: BracketView }) {
     </div>
   );
 
-  // Mirror geometry. Columns are [outer..inner-left, final, inner-right..outer];
+  // Mirror geometry. Columns are [outer..inner-left, centre, inner-right..outer];
   // each round's matches split in half by slot index (first half -> left
   // subtree, second -> right). A round `i` steps in from the outer edge, so its
   // cards span 2^i grid rows and centre between the two that feed them. A card
@@ -139,7 +150,16 @@ export function Bracket({ view }: { view: BracketView }) {
   const wings = WING_ROUNDS.filter((r) => roundMatches(r).length > 0);
   const totalCols = wings.length * 2 + 1;
   const centerCol = wings.length + 1;
-  const rows = wings.length > 0 ? roundMatches(wings[0]).length / 2 : 1;
+  // When a third-place game exists it stacks under the final in the centre
+  // column, and the semifinals FAN OUT to the pair (final up, third down) -
+  // the mirror image of how two cards converge into one. That needs an even
+  // row count so each of the pair takes an exact half; a 4-team bracket (base
+  // rows = 1) is bumped to 2, and the wings' spans scale to match.
+  const baseRows = wings.length > 0 ? roundMatches(wings[0]).length / 2 : 1;
+  const stacked = third.length > 0 && finalMatches.length > 0;
+  const rows = stacked ? Math.max(2, baseRows) : baseRows;
+  const scale = baseRows > 0 ? rows / baseRows : 1;
+  const innermost = wings.length - 1;
 
   type Placed = {
     m: BracketMatch;
@@ -148,22 +168,35 @@ export function Bracket({ view }: { view: BracketView }) {
     span: number;
     side: 'left' | 'right' | 'center';
     parent: boolean;
+    /** A semifinal that fans out to the centre pair (final + third place). */
+    diverge: boolean;
   };
   const placed: Placed[] = [];
   wings.forEach((r, i) => {
     const ms = roundMatches(r);
     const half = ms.length / 2;
-    const span = 1 << i;
+    const span = (1 << i) * scale;
+    const diverge = stacked && i === innermost;
     ms.slice(0, half).forEach((m, j) =>
-      placed.push({ m, col: i + 1, row: j * span + 1, span, side: 'left', parent: i > 0 }),
+      placed.push({ m, col: i + 1, row: j * span + 1, span, side: 'left', parent: i > 0, diverge }),
     );
     ms.slice(half).forEach((m, j) =>
-      placed.push({ m, col: totalCols - i, row: j * span + 1, span, side: 'right', parent: i > 0 }),
+      placed.push({ m, col: totalCols - i, row: j * span + 1, span, side: 'right', parent: i > 0, diverge }),
     );
   });
-  finalMatches.forEach((m) =>
-    placed.push({ m, col: centerCol, row: 1, span: rows, side: 'center', parent: false }),
-  );
+  if (stacked) {
+    const half = rows / 2;
+    finalMatches.forEach((m) =>
+      placed.push({ m, col: centerCol, row: 1, span: half, side: 'center', parent: false, diverge: false }),
+    );
+    third.forEach((m) =>
+      placed.push({ m, col: centerCol, row: half + 1, span: half, side: 'center', parent: false, diverge: false }),
+    );
+  } else {
+    finalMatches.forEach((m) =>
+      placed.push({ m, col: centerCol, row: 1, span: rows, side: 'center', parent: false, diverge: false }),
+    );
+  }
 
   // One round title per column (both wings show the round name, final centred).
   const titles: { round: Round; col: number }[] = [];
@@ -175,14 +208,21 @@ export function Bracket({ view }: { view: BracketView }) {
 
   return (
     <div className="bracket-wrap">
-      {/* Narrow screens: linear left-to-right bracket. */}
+      {/* Narrow screens: linear left-to-right bracket. The third-place game
+          stacks under the final in the final column (like the mirror); it only
+          falls back to the separate block below when there is no final. */}
       <div className="bracket-linear">
         <div className="bracket">
           {linearColumns.map((r) => (
-            <RoundColumn key={r} round={r} matches={roundMatches(r)} />
+            <RoundColumn
+              key={r}
+              round={r}
+              matches={roundMatches(r)}
+              extra={r === 'final' ? third : undefined}
+            />
           ))}
         </div>
-        {thirdBlock}
+        {finalMatches.length === 0 && thirdBlock}
       </div>
 
       {/* Wide screens: mirrored grid converging on the centred final, with the
@@ -207,14 +247,16 @@ export function Bracket({ view }: { view: BracketView }) {
           {placed.map((p) => (
             <div
               key={p.m.slot}
-              className={`bcell bcell--${p.side}${p.parent ? ' bcell--parent' : ''}`}
+              className={`bcell bcell--${p.side}${p.parent ? ' bcell--parent' : ''}${p.diverge ? ' bcell--diverge' : ''}`}
               style={{ gridColumn: p.col, gridRow: `${p.row + 1} / span ${p.span}` }}
             >
               <BracketCard m={p.m} />
             </div>
           ))}
         </div>
-        {thirdBlock}
+        {/* The third-place game rides in the grid when stacked under the final;
+            only fall back to the separate block when it is not. */}
+        {!stacked && thirdBlock}
       </div>
     </div>
   );
