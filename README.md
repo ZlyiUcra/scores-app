@@ -126,7 +126,7 @@ Admin-only (client guard + `requireAdmin` on the whole `/api/admin` router). The
 
 **Audit log (`/admin/audit`)**
 - Read-only viewer over the persisted audit trail (time, user, action, target),
-  newest first, capped at the latest 200 entries.
+  newest first, server-paginated with a page-size picker.
 
 **Admin-mutation security:** strict Zod allowlist on PATCH (against `role`
 mass-assignment), charset validation of team names (against stored XSS), rate-limit,
@@ -279,7 +279,8 @@ Apenas para administradores (guarda no cliente + `requireAdmin` em todo o router
 
 **Registo de auditoria (`/admin/audit`)**
 - Visualizador só de leitura do registo de auditoria persistido (hora, utilizador,
-  ação, alvo), do mais recente para o mais antigo, limitado às últimas 200 entradas.
+  ação, alvo), do mais recente para o mais antigo, com paginação no servidor e
+  seletor de tamanho de página.
 
 **Segurança das mutações de administração:** allowlist estrita do Zod no PATCH
 (contra mass-assignment de `role`), validação de caracteres dos nomes das equipas
@@ -418,7 +419,7 @@ Endpoint: `POST /api/auth/register` → авто-логін тим самим ш
 
 **Audit-лог (`/admin/audit`)**
 - Read-only перегляд збереженого audit-трейлу (час, користувач, дія, ціль), новіші
-  зверху, обмежено останніми 200 записами.
+  зверху, з серверною пагінацією та вибором розміру сторінки.
 
 **Безпека адмін-мутацій:** strict Zod-allowlist на PATCH (проти mass-assignment
 `role`), charset-валідація назв команд (проти stored-XSS), rate-limit і мінімальний

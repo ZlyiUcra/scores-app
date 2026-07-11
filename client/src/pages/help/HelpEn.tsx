@@ -211,8 +211,8 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
               </li>
               <li>
                 <strong>Admin - Audit</strong>: a read-only trail of admin changes -
-                who did what, to what and when, newest first (the most recent
-                entries). An import leaves a single summary entry there recording
+                who did what, to what and when, newest first, paged the same way
+                as Users. An import leaves a single summary entry there recording
                 what arrived.
               </li>
               <li>

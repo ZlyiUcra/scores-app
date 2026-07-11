@@ -222,7 +222,7 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
               <li>
                 <strong>Admin - Auditoria</strong>: um registo só de leitura das
                 alterações de administração - quem alterou o quê e quando, do mais
-                recente para o mais antigo (as entradas mais recentes). Uma
+                recente para o mais antigo, paginado como em Utilizadores. Uma
                 importação deixa aí uma única entrada de resumo com o que chegou.
               </li>
               <li>
