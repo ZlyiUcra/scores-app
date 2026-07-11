@@ -1,7 +1,12 @@
-import type { BracketParticipant, SeedRef } from '../../../shared/types';
+import type { BracketParticipant, Round, SeedRef } from '../../../shared/types';
 import { roundName } from '../../../shared/tournament';
 
 type Translate = (key: string, params?: Record<string, string | number>) => string;
+
+/** Rounds in bracket-tree order, third place slotted right before the final
+ * (they are typically played back to back on the day). Shared by every
+ * per-round listing (public Results knockout section, admin playoff table). */
+export const ROUND_ORDER: Round[] = ['r32', 'r16', 'qf', 'sf', 'third', 'final'];
 
 /** Friendly short name for a slot id: `R8M0` -> "QF1", `R2M0` -> "Final",
  * `THIRD` -> localized 3rd/4th. Used in card headers and winner/loser labels so

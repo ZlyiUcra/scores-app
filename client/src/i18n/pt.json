@@ -169,7 +169,8 @@
     "generateTitle": "Criar os jogos em falta (todos contra todos) deste grupo. As horas são provisórias.",
     "errorGenerate": "Não foi possível gerar os jogos.",
     "colSchedule": "Hora",
-    "errorUpdateMatch": "Jogo não atualizado."
+    "errorUpdateMatch": "Jogo não atualizado.",
+    "bracketMatchesTitle": "Jogos das eliminatórias"
   },
   "tournament": {
     "short": "Joyn 2026",

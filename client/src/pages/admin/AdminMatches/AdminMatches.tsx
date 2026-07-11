@@ -2,11 +2,13 @@
 // binding into this module (for `<>...</>`), and a bare `Fragment` import
 // collides with it at runtime even though TypeScript is fine with it.
 import { Fragment as ReactFragment } from 'react';
+import { Link } from 'react-router-dom';
 import { TOURNAMENT_FORMAT } from '../../../../../shared/tournament';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { DateField } from '../../../components/DateField';
 import { useDateLabels } from '../../../lib/dateLabels';
 import { formatTime } from '../../../lib/format';
+import { participantName, ROUND_ORDER } from '../../../lib/bracketLabels';
 import { useI18n } from '../../../i18n';
 import { useAdminMatches, PanelSection } from './useAdminMatches';
 
@@ -26,10 +28,12 @@ export function AdminMatches() {
   const {
     errors,
     busy,
+    tournamentId,
     groups,
     teams,
     order,
     byId,
+    bracket,
     groupNameById,
     countInGroup,
     sortedTeams,
@@ -309,6 +313,57 @@ export function AdminMatches() {
           </table>
         </div>
       </details>
+      {/* Read-only reference: bracket slots are structural (derived from the
+          team count), not independently created/deleted matches, so this
+          table has no delete - only Edit, which hands off to the slot's own
+          page (score, pens, overrides). Shown once the bracket has formed. */}
+      {bracket.matches.length > 0 && (
+        <details className="card">
+          <summary><h3>{t('adminMatches.bracketMatchesTitle')} ({bracket.matches.length})</h3></summary>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr><th>{t('adminMatches.colGame')}</th><th>{t('adminMatches.colSchedule')}</th><th>{t('adminMatches.colScore')}</th><th>{t('adminMatches.colStatus')}</th><th className="table__actions">{t('adminMatches.colActions')}</th></tr>
+              </thead>
+              <tbody>
+                {ROUND_ORDER.map((round) => {
+                  const matches = bracket.matches.filter((m) => m.round === round);
+                  if (matches.length === 0) return null;
+                  return (
+                    <ReactFragment key={round}>
+                      <tr className="table__band">
+                        <td colSpan={5}>
+                          {t(`bracket.${round}`)}
+                          <span className="table__band-count">{matches.length}</span>
+                        </td>
+                      </tr>
+                      {matches.map((m) => (
+                        <tr key={m.slot}>
+                          <td title={`${participantName(m.home, t)} - ${participantName(m.away, t)}`}>
+                            {participantName(m.home, t)} - {participantName(m.away, t)}
+                          </td>
+                          <td>{m.field ? `${m.field} - ` : ''}{m.startsAt ? formatTime(m.startsAt) : ''}</td>
+                          <td>
+                            {m.homeScore}:{m.awayScore}
+                            {m.homePens != null && m.awayPens != null && ` (${m.homePens}:${m.awayPens})`}
+                          </td>
+                          <td>
+                            <span className={`chip chip--${m.status}`}>{t(`status.${m.status}`)}</span>
+                          </td>
+                          <td className="table__actions">
+                            <Link className="btn btn--sm" to={`/t/${tournamentId}/ko/${m.slot}`}>{t('adminMatches.edit')}</Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </ReactFragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+
       {confirmDialog && <ConfirmDialog {...confirmDialog} />}
     </div>
   );

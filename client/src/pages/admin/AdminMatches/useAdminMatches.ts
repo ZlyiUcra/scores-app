@@ -4,6 +4,7 @@ import { adminApi } from '../../../api/admin';
 import { api, ApiError } from '../../../api/client';
 import { selectOrder, useMatchStore } from '../../../stores/matchStore';
 import { selectGroups, selectTeams, useRosterStore } from '../../../stores/rosterStore';
+import { selectBracket, useBracketStore } from '../../../stores/bracketStore';
 import { useI18n } from '../../../i18n';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { useAdminTournament } from '../AdminLayout';
@@ -34,6 +35,7 @@ export function useAdminMatches() {
   const byId = useMatchStore((s) => s.byId);
   const groups = useRosterStore(selectGroups);
   const teams = useRosterStore(selectTeams);
+  const bracket = useBracketStore(selectBracket);
 
   // Group create form.
   const [groupName, setGroupName] = useState('');
@@ -251,10 +253,12 @@ export function useAdminMatches() {
   return {
     errors,
     busy,
+    tournamentId: tournament.id,
     groups,
     teams,
     order,
     byId,
+    bracket,
     groupNameById,
     countInGroup,
     sortedTeams,

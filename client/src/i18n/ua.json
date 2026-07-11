@@ -169,7 +169,8 @@
     "generateTitle": "Створити ігри кожен-з-кожним, яких бракує в групі. Час початку - заглушка.",
     "errorGenerate": "Не вдалося згенерувати ігри.",
     "colSchedule": "Початок",
-    "errorUpdateMatch": "Матч не оновлено."
+    "errorUpdateMatch": "Матч не оновлено.",
+    "bracketMatchesTitle": "Матчі плей-офу"
   },
   "tournament": {
     "short": "Joyn 2026",

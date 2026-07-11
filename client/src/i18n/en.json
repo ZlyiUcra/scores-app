@@ -169,7 +169,8 @@
     "generateTitle": "Create the missing round-robin games for this group. Kick-off times are placeholders.",
     "errorGenerate": "Could not generate the games.",
     "colSchedule": "Kick-off",
-    "errorUpdateMatch": "Match not updated."
+    "errorUpdateMatch": "Match not updated.",
+    "bracketMatchesTitle": "Playoff games"
   },
   "tournament": {
     "short": "Joyn 2026",

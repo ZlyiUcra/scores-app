@@ -1,17 +1,13 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import type { BracketMatch, Round } from '../../../shared/types';
+import type { BracketMatch } from '../../../shared/types';
 import { useMatchStore, selectByGroup, selectConnected, selectMatch } from '../stores/matchStore';
 import { useRosterStore, selectGroups } from '../stores/rosterStore';
 import { useBracketStore, selectBracket } from '../stores/bracketStore';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 import { formatTime } from '../lib/format';
-import { participantName } from '../lib/bracketLabels';
-
-// Same order the bracket tree itself uses, third place slotted before the
-// final (they are typically played back to back on the day).
-const ROUND_ORDER: Round[] = ['r32', 'r16', 'qf', 'sf', 'third', 'final'];
+import { participantName, ROUND_ORDER } from '../lib/bracketLabels';
 
 /** Compact result row: time · field · status, then teams with score. Selects
  * its own match by id (memoized) so one update re-renders only this row. */
