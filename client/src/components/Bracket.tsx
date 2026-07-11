@@ -3,7 +3,7 @@ import type { BracketMatch, BracketView, Round } from '../../../shared/types';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 import { participantName, slotShort } from '../lib/bracketLabels';
-import { formatTime } from '../lib/format';
+import { formatKickoff } from '../lib/format';
 
 /** Which side won a finished knockout match ('home' | 'away' | null). */
 function winnerSide(m: BracketMatch): 'home' | 'away' | null {
@@ -57,7 +57,7 @@ function BracketCard({ m }: { m: BracketMatch }) {
     <Link to={`${basePath}/ko/${m.slot}`} className={`bcard-link bcard bcard--${m.status}`}>
       <div className="bcard__head">
         <span className="bcard__slot">{slotShort(m.slot, t)}</span>
-        {m.startsAt && <span className="bcard__field">{formatTime(m.startsAt)}</span>}
+        {m.startsAt && <span className="bcard__field">{formatKickoff(m.startsAt)}</span>}
         {m.field && <span className="bcard__field">{m.field}</span>}
         <span className="bcard__status">{t(`status.${m.status}`)}</span>
       </div>

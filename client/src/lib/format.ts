@@ -7,6 +7,14 @@ export function formatTime(iso: string): string {
   return `${p2(d.getHours())}h${p2(d.getMinutes())}`;
 }
 
+/** "03.07.2026 19h30" — date + hour together, for anywhere a match's
+ * scheduled start needs the date alongside the hour (a tournament can span
+ * more than one day). Empty when unset/invalid. */
+export function formatKickoff(iso: string): string {
+  const time = formatTime(iso);
+  return time ? `${formatDay(iso)} ${time}` : '';
+}
+
 // The app-wide DATE format is dd.mm.yyyy — both in displays and in the typed
 // date inputs (native pickers follow the OS locale, so we do not use them).
 

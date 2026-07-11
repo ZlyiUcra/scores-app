@@ -7,7 +7,7 @@ import { TOURNAMENT_FORMAT } from '../../../../../shared/tournament';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { DateField } from '../../../components/DateField';
 import { useDateLabels } from '../../../lib/dateLabels';
-import { formatTime } from '../../../lib/format';
+import { formatKickoff } from '../../../lib/format';
 import { participantName, ROUND_ORDER } from '../../../lib/bracketLabels';
 import { useI18n } from '../../../i18n';
 import { useAdminMatches, PanelSection } from './useAdminMatches';
@@ -283,7 +283,7 @@ export function AdminMatches() {
                             labels={dateLabels} placeholder={t('date.hintTime')} ariaLabel={t('adminMatches.start')} />
                         </div>
                       ) : (
-                        <span>{m.field ? `${m.field} - ` : ''}{formatTime(m.startsAt)}</span>
+                        <span>{m.field ? `${m.field} - ` : ''}{formatKickoff(m.startsAt)}</span>
                       )}
                     </td>
                     <td>{m.homeScore}:{m.awayScore}</td>
@@ -367,7 +367,7 @@ export function AdminMatches() {
                                 <DateField value={bracketEdit.startsAt} onChange={bracketEdit.setStartsAt} format={DATETIME_FORMAT}
                                   labels={dateLabels} placeholder={t('date.hintTime')} ariaLabel={t('adminMatches.start')} />
                               ) : (
-                                <span>{m.field ? `${m.field} - ` : ''}{m.startsAt ? formatTime(m.startsAt) : ''}</span>
+                                <span>{m.field ? `${m.field} - ` : ''}{m.startsAt ? formatKickoff(m.startsAt) : ''}</span>
                               )}
                             </td>
                             <td>

@@ -6,7 +6,7 @@ import { useRosterStore, selectGroups } from '../stores/rosterStore';
 import { useBracketStore, selectBracket } from '../stores/bracketStore';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
-import { formatTime } from '../lib/format';
+import { formatKickoff } from '../lib/format';
 import { participantName, ROUND_ORDER } from '../lib/bracketLabels';
 
 /** Compact result row: time · field · status, then teams with score. Selects
@@ -20,7 +20,7 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
   return (
     <Link to={`${basePath}/match/${m.id}`} className={`rrow rrow--${m.status}`}>
       <div className="rrow__meta">
-        <span>{formatTime(m.startsAt)}</span>
+        <span>{formatKickoff(m.startsAt)}</span>
         {m.field && <span>· {m.field}</span>}
         {/* Same colored status pill as the admin games table. */}
         <span className={`rrow__status chip chip--${m.status}`}>{t(`status.${m.status}`)}</span>
@@ -49,7 +49,7 @@ function BracketResultRow({ m }: { m: BracketMatch }) {
   return (
     <Link to={`${basePath}/ko/${m.slot}`} state={{ from: 'results' }} className={`rrow rrow--${m.status}`}>
       <div className="rrow__meta">
-        {m.startsAt && <span>{formatTime(m.startsAt)}</span>}
+        {m.startsAt && <span>{formatKickoff(m.startsAt)}</span>}
         {m.field && <span>· {m.field}</span>}
         <span className={`rrow__status chip chip--${m.status}`}>{t(`status.${m.status}`)}</span>
       </div>

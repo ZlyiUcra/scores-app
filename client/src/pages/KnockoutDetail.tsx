@@ -5,7 +5,7 @@ import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 import { StatusBadge } from '../components/StatusBadge';
 import { BracketSlotControls } from '../components/BracketSlotControls';
-import { formatTime } from '../lib/format';
+import { formatKickoff } from '../lib/format';
 import { participantName, slotShort } from '../lib/bracketLabels';
 
 /** One knockout game, mirroring MatchDetail: scoreboard for everyone, the
@@ -70,7 +70,7 @@ export function KnockoutDetail() {
 
       <div className="detail__meta">
         {t(`bracket.${m.round}`)} ({slotShort(m.slot, t)})
-        {m.startsAt ? ` · ${formatTime(m.startsAt)}` : ''}
+        {m.startsAt ? ` · ${formatKickoff(m.startsAt)}` : ''}
         {m.field ? ` · ${m.field}` : ''}
       </div>
 
