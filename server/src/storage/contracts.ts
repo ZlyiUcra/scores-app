@@ -107,14 +107,21 @@ export interface TournamentRepository {
   /** Create a tournament with a fresh uuid; fields arrive pre-validated. */
   create(input: {
     name: string;
+    location: string | null;
     startsAt: string | null;
     endsAt: string | null;
     status: TournamentStatus;
   }): Promise<Tournament>;
-  /** Patch name/dates/status. */
+  /** Patch name/location/dates/status. */
   update(
     id: string,
-    patch: { name?: string; startsAt?: string | null; endsAt?: string | null; status?: TournamentStatus },
+    patch: {
+      name?: string;
+      location?: string | null;
+      startsAt?: string | null;
+      endsAt?: string | null;
+      status?: TournamentStatus;
+    },
   ): Promise<Tournament>;
   /** Delete a tournament. Emptiness and the last-tournament guard are the
    * SERVICE's checks. */

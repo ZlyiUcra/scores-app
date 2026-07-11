@@ -16,10 +16,11 @@ export class SqliteTournamentRepository implements TournamentRepository {
 
   private load(): void {
     const rows = this.ctx.db
-      .prepare('SELECT id, name, startsAt, endsAt, status, createdAt FROM tournaments')
+      .prepare('SELECT id, name, location, startsAt, endsAt, status, createdAt FROM tournaments')
       .all() as Array<{
       id: string;
       name: string;
+      location: string | null;
       startsAt: string | null;
       endsAt: string | null;
       status: string;
@@ -37,9 +38,11 @@ export class SqliteTournamentRepository implements TournamentRepository {
     this.ctx.transaction(() => {
       this.ctx.db.exec('DELETE FROM tournaments');
       const ins = this.ctx.db.prepare(
-        'INSERT INTO tournaments (id, name, startsAt, endsAt, status, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO tournaments (id, name, location, startsAt, endsAt, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
       );
-      for (const t of this.byId.values()) ins.run(t.id, t.name, t.startsAt, t.endsAt, t.status, t.createdAt);
+      for (const t of this.byId.values()) {
+        ins.run(t.id, t.name, t.location, t.startsAt, t.endsAt, t.status, t.createdAt);
+      }
     });
   }
 
@@ -54,6 +57,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
 
   async create(input: {
     name: string;
+    location: string | null;
     startsAt: string | null;
     endsAt: string | null;
     status: TournamentStatus;
@@ -61,6 +65,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
     const tournament: StoredTournament = {
       id: crypto.randomUUID(),
       name: input.name.trim(),
+      location: input.location,
       startsAt: input.startsAt,
       endsAt: input.endsAt,
       status: input.status,
@@ -79,12 +84,19 @@ export class SqliteTournamentRepository implements TournamentRepository {
 
   async update(
     id: string,
-    patch: { name?: string; startsAt?: string | null; endsAt?: string | null; status?: TournamentStatus },
+    patch: {
+      name?: string;
+      location?: string | null;
+      startsAt?: string | null;
+      endsAt?: string | null;
+      status?: TournamentStatus;
+    },
   ): Promise<Tournament> {
     const tournament = this.byId.get(id);
     if (!tournament) throw new AppError(AppErrorCode.NotFound, `Tournament ${id} not found.`, 404);
     const prev = { ...tournament };
     if (patch.name !== undefined) tournament.name = patch.name.trim();
+    if (patch.location !== undefined) tournament.location = patch.location;
     if (patch.startsAt !== undefined) tournament.startsAt = patch.startsAt;
     if (patch.endsAt !== undefined) tournament.endsAt = patch.endsAt;
     if (patch.status !== undefined) tournament.status = patch.status;

@@ -45,6 +45,7 @@ export function openDatabase(dataDir: string): SqliteContext {
     CREATE TABLE IF NOT EXISTS tournaments (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
+      location TEXT,
       startsAt TEXT,
       endsAt TEXT,
       status TEXT NOT NULL,
@@ -129,6 +130,12 @@ export function openDatabase(dataDir: string): SqliteContext {
   const bracketInfo = db.prepare('PRAGMA table_info(bracket)').all() as Array<{ name: string }>;
   if (bracketInfo.length > 0 && !bracketInfo.some((c) => c.name === 'homeOverrideId')) {
     db.exec('ALTER TABLE bracket ADD COLUMN homeOverrideId TEXT; ALTER TABLE bracket ADD COLUMN awayOverrideId TEXT;');
+  }
+
+  // Schema evolution: tournaments gained an optional free-text venue field.
+  const tournamentsInfo = db.prepare('PRAGMA table_info(tournaments)').all() as Array<{ name: string }>;
+  if (tournamentsInfo.length > 0 && !tournamentsInfo.some((c) => c.name === 'location')) {
+    db.exec('ALTER TABLE tournaments ADD COLUMN location TEXT;');
   }
 
   // Schema evolution: the dead `minute` column (a live-clock idea that never got

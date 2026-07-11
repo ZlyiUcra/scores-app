@@ -3,12 +3,14 @@ import { useStandings } from '../hooks/useStandings';
 import { useQualificationTiers } from '../hooks/useQualificationTiers';
 import { StandingsTable } from '../components/StandingsTable';
 import { ThirdPlacesTable } from '../components/ThirdPlacesTable';
+import { useTournament } from '../tournament/TournamentScope';
 import { useI18n } from '../i18n';
 
 /** Front page: live group tables (green = qualifies wholesale, blue = the
  * contested place) and the contested-tier qualification table. */
 export function Overview() {
   const { t } = useI18n();
+  const { tournament } = useTournament();
   const tables = useStandings();
   // Primitive selectors: the header counts re-render only when a count actually
   // changes, not on every goal that leaves the finished-count the same.
@@ -27,7 +29,7 @@ export function Overview() {
     <div className="overview">
       <header className="tourney">
         <h1 className="tourney__name">{t('tournament.name')}</h1>
-        <p className="tourney__meta">{t('tournament.location')}</p>
+        {tournament.location && <p className="tourney__meta">{tournament.location}</p>}
         <p className="tourney__progress">{t('overview.played', { played, total })}</p>
       </header>
 

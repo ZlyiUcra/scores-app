@@ -154,6 +154,7 @@ export function importTournament(file: TournamentExportInput): Promise<ImportRes
   return withMutationLock(async () => {
     const tournament = await tournamentRepository.create({
       name: await uniqueTournamentName(file.tournament.name),
+      location: file.tournament.location,
       startsAt: file.tournament.startsAt,
       endsAt: file.tournament.endsAt,
       status: file.tournament.status,

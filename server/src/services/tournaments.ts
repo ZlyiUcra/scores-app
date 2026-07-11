@@ -48,6 +48,7 @@ export function createTournament(input: CreateTournamentInput): Promise<Tourname
   return withMutationLock(() =>
     tournamentRepository.create({
       name: input.name,
+      location: input.location ?? null,
       startsAt: input.startsAt ?? null,
       endsAt: input.endsAt ?? null,
       status: input.status ?? 'upcoming',

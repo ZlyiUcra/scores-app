@@ -113,6 +113,17 @@ const tournamentName = z
   .max(60, 'Tournament name must be at most 60 characters.')
   .regex(/^[\p{L}\p{N} .'\-]+$/u, 'Tournament name contains invalid characters.');
 
+/** Free-text venue (e.g. "Urban Soccer, Monsanto, Lisboa") - optional, so a
+ * comma is allowed on top of the name charset. Empty input normalizes to
+ * null (unset), same as the field never being provided. */
+const tournamentLocation = z
+  .string()
+  .trim()
+  .max(120, 'Location must be at most 120 characters.')
+  .regex(/^[\p{L}\p{N} .,'\-]*$/u, 'Location contains invalid characters.')
+  .nullable()
+  .transform((v) => (v ? v : null));
+
 /** Planned tournament dates are DATE-ONLY (YYYY-MM-DD) - they describe a
  * period of the year, not a kickoff instant, so no time/zone component. */
 const tournamentDate = z.string().date('Must be a date (YYYY-MM-DD).').nullable();
@@ -123,6 +134,7 @@ const tournamentStatus = z.enum(['upcoming', 'active', 'finished']);
 export const createTournamentSchema = z
   .object({
     name: tournamentName,
+    location: tournamentLocation.optional(),
     startsAt: tournamentDate.optional(),
     endsAt: tournamentDate.optional(),
     status: tournamentStatus.optional(),
@@ -139,6 +151,7 @@ export const createTournamentSchema = z
 export const updateTournamentSchema = z
   .object({
     name: tournamentName.optional(),
+    location: tournamentLocation.optional(),
     startsAt: tournamentDate.optional(),
     endsAt: tournamentDate.optional(),
     status: tournamentStatus.optional(),
@@ -335,6 +348,7 @@ export const tournamentExportSchema = z
       .object({
         id: z.string().min(1).max(64),
         name: tournamentName,
+        location: tournamentLocation,
         startsAt: tournamentDate,
         endsAt: tournamentDate,
         status: tournamentStatus,

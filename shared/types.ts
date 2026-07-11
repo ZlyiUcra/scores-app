@@ -26,6 +26,8 @@ export type TournamentStatus = 'upcoming' | 'active' | 'finished';
 export interface Tournament {
   id: string;
   name: string;
+  /** Free-text venue (e.g. "Urban Soccer, Monsanto, Lisboa"), or null. */
+  location: string | null;
   /** ISO date (YYYY-MM-DD) the tournament is planned to start, or null. */
   startsAt: string | null;
   /** ISO date the tournament is planned to end, or null. */
@@ -228,6 +230,7 @@ export interface RegisterRequest {
 // tournament is reopened for corrections).
 export interface CreateTournamentRequest {
   name: string;
+  location?: string | null;
   startsAt?: string | null;
   endsAt?: string | null;
   status?: TournamentStatus;
@@ -236,6 +239,7 @@ export interface CreateTournamentRequest {
 // Partial edit; the same field rules as creation.
 export interface UpdateTournamentRequest {
   name?: string;
+  location?: string | null;
   startsAt?: string | null;
   endsAt?: string | null;
   status?: TournamentStatus;

@@ -19,7 +19,7 @@ export function toSeedTeam(t: StoredTeam): SeedTeam {
 
 /** Public tournament DTO (drops createdAt - an internal ordering key). */
 export function toTournamentDto(t: StoredTournament): Tournament {
-  return { id: t.id, name: t.name, startsAt: t.startsAt, endsAt: t.endsAt, status: t.status };
+  return { id: t.id, name: t.name, location: t.location, startsAt: t.startsAt, endsAt: t.endsAt, status: t.status };
 }
 
 /** Public/session projection of an account - never leaks passwordHash. */

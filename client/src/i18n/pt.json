@@ -82,6 +82,8 @@
     "newTitle": "Novo torneio",
     "name": "Nome",
     "namePlaceholder": "ex. Taça de Verão 2026",
+    "location": "Local",
+    "locationPlaceholder": "ex. Parque Central, Lisboa",
     "start": "Data de início",
     "end": "Data de fim",
     "status": "Estado",
@@ -177,8 +179,7 @@
   },
   "tournament": {
     "short": "Joyn 2026",
-    "name": "Torneio Joyn Consulting 2026",
-    "location": "Urban Soccer, Monsanto, Lisboa"
+    "name": "Torneio Joyn Consulting 2026"
   },
   "nav": { "tournaments": "Torneios", "overview": "Visão geral", "results": "Resultados", "knockout": "Eliminatórias", "teams": "Equipas", "help": "Ajuda", "admin": "Admin", "tournamentMenu": "Torneio" },
   "tournaments": {

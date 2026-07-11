@@ -25,12 +25,14 @@ export function useAdminTournaments() {
 
   // Create form.
   const [name, setName] = useState('');
+  const [location, setLocation] = useState('');
   const [range, setRange] = useState<DateRange>({ start: null, end: null });
   const [status, setStatus] = useState<TournamentStatus>('upcoming');
 
   // Inline edit form (one row at a time).
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [editLocation, setEditLocation] = useState('');
   const [editRange, setEditRange] = useState<DateRange>({ start: null, end: null });
   const [editStatus, setEditStatus] = useState<TournamentStatus>('upcoming');
 
@@ -51,8 +53,15 @@ export function useAdminTournaments() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     await run(async () => {
-      await adminApi.createTournament({ name: name.trim(), startsAt: range.start, endsAt: range.end, status });
+      await adminApi.createTournament({
+        name: name.trim(),
+        location: location.trim() || null,
+        startsAt: range.start,
+        endsAt: range.end,
+        status,
+      });
       setName('');
+      setLocation('');
       setRange({ start: null, end: null });
       setStatus('upcoming');
     }, 'adminTournaments.errorCreate');
@@ -61,6 +70,7 @@ export function useAdminTournaments() {
   function begin(x: Tournament) {
     setEditId(x.id);
     setEditName(x.name);
+    setEditLocation(x.location ?? '');
     setEditRange({ start: x.startsAt ?? null, end: x.endsAt ?? null });
     setEditStatus(x.status);
   }
@@ -69,6 +79,7 @@ export function useAdminTournaments() {
     await run(async () => {
       await adminApi.updateTournament(id, {
         name: editName.trim(),
+        location: editLocation.trim() || null,
         startsAt: editRange.start,
         endsAt: editRange.end,
         status: editStatus,
@@ -131,7 +142,7 @@ export function useAdminTournaments() {
         (matchesByGroup[m.group] ??= []).push(m.id);
       }
       await downloadTournamentReport(
-        { tournamentName: x.name, tables, tiers, matchesByGroup, matchesById, bracketMatches: bracket.matches },
+        { tournamentName: x.name, location: x.location, tables, tiers, matchesByGroup, matchesById, bracketMatches: bracket.matches },
         t,
       );
     } catch (err) {
@@ -179,13 +190,15 @@ export function useAdminTournaments() {
     tournaments,
     busy,
     error,
-    create: { name, range, status, setName, setRange, setStatus, submit },
+    create: { name, location, range, status, setName, setLocation, setRange, setStatus, submit },
     edit: {
       activeId: editId,
       name: editName,
+      location: editLocation,
       range: editRange,
       status: editStatus,
       setName: setEditName,
+      setLocation: setEditLocation,
       setRange: setEditRange,
       setStatus: setEditStatus,
       begin,

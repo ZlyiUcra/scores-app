@@ -82,6 +82,8 @@
     "newTitle": "Новий турнір",
     "name": "Назва",
     "namePlaceholder": "напр. Літній кубок 2026",
+    "location": "Місце проведення",
+    "locationPlaceholder": "напр. Центральний парк, Київ",
     "start": "Дата початку",
     "end": "Дата кінця",
     "status": "Статус",
@@ -177,8 +179,7 @@
   },
   "tournament": {
     "short": "Joyn 2026",
-    "name": "Турнір Joyn Consulting 2026",
-    "location": "Urban Soccer, Monsanto, Лісабон"
+    "name": "Турнір Joyn Consulting 2026"
   },
   "nav": { "tournaments": "Турніри", "overview": "Огляд", "results": "Результати", "knockout": "Плей-оф", "teams": "Команди", "help": "Довідка", "admin": "Адмін", "tournamentMenu": "Турнір" },
   "tournaments": {

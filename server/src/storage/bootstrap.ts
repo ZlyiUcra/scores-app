@@ -20,7 +20,7 @@ import type { Storage, StoredMatch } from './contracts.js';
 export async function runBootstrap(storage: Storage): Promise<void> {
   let tournaments = await storage.tournaments.list();
   if (tournaments.length === 0) {
-    await storage.tournaments.create({ name: 'Tournament 1', startsAt: null, endsAt: null, status: 'active' });
+    await storage.tournaments.create({ name: 'Tournament 1', location: null, startsAt: null, endsAt: null, status: 'active' });
     tournaments = await storage.tournaments.list();
   }
   const tournamentId = tournaments[0].id;

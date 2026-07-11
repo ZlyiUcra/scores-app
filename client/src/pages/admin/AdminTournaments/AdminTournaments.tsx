@@ -48,6 +48,11 @@ export function AdminTournaments() {
               placeholder={t('adminTournaments.namePlaceholder')} required minLength={2} maxLength={60} />
           </label>
           <label className="field">
+            <span>{t('adminTournaments.location')}</span>
+            <input className="input" value={create.location} onChange={(e) => create.setLocation(e.target.value)}
+              placeholder={t('adminTournaments.locationPlaceholder')} maxLength={120} />
+          </label>
+          <label className="field">
             <span>{t('adminTournaments.colDates')}</span>
             <DateRangeField
               value={create.range}
@@ -98,10 +103,19 @@ export function AdminTournaments() {
                   <tr key={x.id}>
                     <td>
                       {editing ? (
-                        <input className="input" value={edit.name} maxLength={60}
-                          onChange={(e) => edit.setName(e.target.value)} aria-label={t('adminTournaments.name')} />
+                        <div className="stack">
+                          <input className="input" value={edit.name} maxLength={60}
+                            onChange={(e) => edit.setName(e.target.value)} aria-label={t('adminTournaments.name')} />
+                          <input className="input" value={edit.location} maxLength={120}
+                            onChange={(e) => edit.setLocation(e.target.value)}
+                            placeholder={t('adminTournaments.locationPlaceholder')}
+                            aria-label={t('adminTournaments.location')} />
+                        </div>
                       ) : (
-                        x.name
+                        <>
+                          {x.name}
+                          {x.location && <div className="muted">{x.location}</div>}
+                        </>
                       )}
                     </td>
                     <td>

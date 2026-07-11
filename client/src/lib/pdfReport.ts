@@ -10,6 +10,8 @@ type Translate = (key: string, params?: Record<string, string | number>) => stri
 
 export type ReportData = {
   tournamentName: string;
+  /** Free-text venue, printed under the title. Omitted when null/empty. */
+  location: string | null;
   tables: GroupTable[];
   tiers: QualificationTiers;
   matchesByGroup: Record<string, string[]>;
@@ -136,11 +138,12 @@ function playoffSection(matches: BracketMatch[], t: Translate): Content {
  * results by round). */
 export function buildReportDocDefinition(data: ReportData, t: Translate): TDocumentDefinitions {
   const third = thirdPlacesTable(data.tiers, t);
-  const content: Content[] = [
-    { text: data.tournamentName, style: 'title' },
+  const content: Content[] = [{ text: data.tournamentName, style: 'title' }];
+  if (data.location) content.push({ text: data.location, style: 'subtitle' });
+  content.push(
     { text: t('overview.groups'), style: 'sectionTitle' },
     ...data.tables.map((tb) => standingsTable(tb, data.tiers.autoRank, data.tiers.contestedRank, t)),
-  ];
+  );
   if (third) content.push(third);
   content.push(
     { text: t('matchList.title'), style: 'sectionTitle' },
@@ -155,7 +158,8 @@ export function buildReportDocDefinition(data: ReportData, t: Translate): TDocum
   return {
     content,
     styles: {
-      title: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
+      title: { fontSize: 18, bold: true, margin: [0, 0, 0, 2] },
+      subtitle: { fontSize: 11, color: '#555555', margin: [0, 0, 0, 8] },
       sectionTitle: { fontSize: 14, bold: true, margin: [0, 10, 0, 6] },
       groupTitle: { fontSize: 11, bold: true, margin: [0, 4, 0, 4] },
     },
