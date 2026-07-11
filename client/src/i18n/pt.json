@@ -178,8 +178,7 @@
     "bracketMatchesTitle": "Jogos das eliminatórias"
   },
   "tournament": {
-    "short": "Joyn 2026",
-    "name": "Torneio Joyn Consulting 2026"
+    "short": "Joyn 2026"
   },
   "nav": { "tournaments": "Torneios", "overview": "Visão geral", "results": "Resultados", "knockout": "Eliminatórias", "teams": "Equipas", "help": "Ajuda", "admin": "Admin", "tournamentMenu": "Torneio" },
   "tournaments": {

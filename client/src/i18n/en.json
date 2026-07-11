@@ -178,8 +178,7 @@
     "bracketMatchesTitle": "Playoff games"
   },
   "tournament": {
-    "short": "Joyn 2026",
-    "name": "Joyn Consulting Tournament 2026"
+    "short": "Joyn 2026"
   },
   "nav": { "tournaments": "Tournaments", "overview": "Overview", "results": "Results", "knockout": "Knockouts", "teams": "Teams", "help": "Help", "admin": "Admin", "tournamentMenu": "Tournament" },
   "tournaments": {
