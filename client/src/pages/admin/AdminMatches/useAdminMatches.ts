@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import type { Match, Team } from '../../../../../shared/types';
+import type { BracketMatch, Match, Team } from '../../../../../shared/types';
 import { adminApi } from '../../../api/admin';
 import { api, ApiError } from '../../../api/client';
 import { selectOrder, useMatchStore } from '../../../stores/matchStore';
@@ -17,6 +17,7 @@ export enum PanelSection {
   Teams = 'Teams',
   NewGame = 'NewGame',
   Matches = 'Matches',
+  Bracket = 'Bracket',
 }
 
 /**
@@ -55,6 +56,11 @@ export function useAdminMatches() {
   const [editMatchId, setEditMatchId] = useState<string | null>(null);
   const [editStartsAt, setEditStartsAt] = useState<string | null>(null);
   const [editField, setEditField] = useState('');
+  // Inline playoff-slot reschedule - kick-off time ONLY. Everything else about
+  // a slot (score, pens, team overrides) stays on its own /ko/:slot page; this
+  // table exists for visual reference plus the one narrow edit.
+  const [editSlot, setEditSlot] = useState<string | null>(null);
+  const [editSlotStartsAt, setEditSlotStartsAt] = useState<string | null>(null);
   // Manual game creation.
   const [homeId, setHomeId] = useState('');
   const [awayId, setAwayId] = useState('');
@@ -230,15 +236,30 @@ export function useAdminMatches() {
     }, 'adminMatches.errorUpdateMatch');
   }
 
+  // --- playoff-slot kick-off time (inline, this table only) ---
+  function beginBracketSlot(m: BracketMatch) {
+    setEditSlot(m.slot);
+    setEditSlotStartsAt(m.startsAt);
+  }
+  function saveBracketSlot(m: BracketMatch) {
+    void run(PanelSection.Bracket, async () => {
+      if (editSlotStartsAt !== m.startsAt) {
+        await adminApi.updateBracketSlot(tournament.id, m.slot, { startsAt: editSlotStartsAt, expectedRev: m.rev });
+      }
+      setEditSlot(null);
+    }, 'adminBracket.saveError');
+  }
+
   // Picking a home side drops an away pick that is no longer a legal opponent.
   function selectHome(next: string) {
     setHomeId(next);
     if (awayId && !openOpponentIds(next).includes(awayId)) setAwayId('');
   }
 
-  // A delete is gated by a confirm modal: the row button only stages the id,
-  // and the component renders <ConfirmDialog {...confirmDialog} /> while one is
-  // pending. One confirm is active at a time, shared by group/team/match.
+  // A delete (or the bracket-wide reset) is gated by a confirm modal: the
+  // triggering button only stages the action, and the component renders
+  // <ConfirmDialog {...confirmDialog} /> while one is pending. One confirm is
+  // active at a time, shared by group/team/match/bracket-reset.
   const { request, dialog: confirmDialog } = useConfirmDialog();
   function requestDeleteGroup(id: string) {
     request({ message: t('common.deleteConfirm'), tone: 'danger', onConfirm: () => { void run(PanelSection.Groups, () => adminApi.deleteGroup(id), 'adminMatches.errorDeleteGroup'); } });
@@ -249,16 +270,24 @@ export function useAdminMatches() {
   function requestDeleteMatch(id: string) {
     request({ message: t('common.deleteConfirm'), tone: 'danger', onConfirm: () => { void run(PanelSection.Matches, () => adminApi.deleteMatch(id), 'adminMatches.errorDeleteMatch'); } });
   }
+  // The ONE whole-bracket destructive action, mirrored here from the Knockout
+  // page as a single table-level entry point (no per-row delete - a slot is
+  // structural, not an independently removable match).
+  function requestResetBracket() {
+    request({ message: t('adminBracket.resetConfirm'), tone: 'danger', onConfirm: () => { void run(PanelSection.Bracket, () => adminApi.resetBracket(tournament.id), 'adminBracket.resetError'); } });
+  }
 
   return {
     errors,
     busy,
     tournamentId: tournament.id,
+    readOnly: tournament.status === 'finished',
     groups,
     teams,
     order,
     byId,
     bracket,
+    requestResetBracket,
     groupNameById,
     countInGroup,
     sortedTeams,
@@ -303,6 +332,14 @@ export function useAdminMatches() {
       cancel: () => setEditMatchId(null),
       save: saveMatch,
       remove: requestDeleteMatch,
+    },
+    bracketEdit: {
+      slot: editSlot,
+      startsAt: editSlotStartsAt,
+      setStartsAt: setEditSlotStartsAt,
+      begin: beginBracketSlot,
+      cancel: () => setEditSlot(null),
+      save: saveBracketSlot,
     },
     confirmDialog,
   };

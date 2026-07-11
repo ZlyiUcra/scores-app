@@ -29,11 +29,13 @@ export function AdminMatches() {
     errors,
     busy,
     tournamentId,
+    readOnly,
     groups,
     teams,
     order,
     byId,
     bracket,
+    requestResetBracket,
     groupNameById,
     countInGroup,
     sortedTeams,
@@ -48,6 +50,7 @@ export function AdminMatches() {
     teamEdit,
     matchCreate,
     matchEdit,
+    bracketEdit,
     confirmDialog,
   } = useAdminMatches();
 
@@ -313,13 +316,26 @@ export function AdminMatches() {
           </table>
         </div>
       </details>
-      {/* Read-only reference: bracket slots are structural (derived from the
-          team count), not independently created/deleted matches, so this
-          table has no delete - only Edit, which hands off to the slot's own
-          page (score, pens, overrides). Shown once the bracket has formed. */}
+      {/* Read-only reference plus one narrow edit: the game name links out to
+          the slot's own page (score, pens, overrides - a bracket slot is
+          structural, not an independently created/deleted match, so this
+          table has no per-row delete). The only editable field here is the
+          kick-off time, inline, same mechanics as the games table above.
+          Shown once the bracket has formed. */}
       {bracket.matches.length > 0 && (
         <details className="card">
-          <summary><h3>{t('adminMatches.bracketMatchesTitle')} ({bracket.matches.length})</h3></summary>
+          <summary>
+            <h3>{t('adminMatches.bracketMatchesTitle')} ({bracket.matches.length})</h3>
+            {!readOnly && (
+              <button
+                className="card__headerAction btn btn--sm btn--danger"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); requestResetBracket(); }}
+              >
+                {t('adminBracket.reset')}
+              </button>
+            )}
+          </summary>
+          {errors[PanelSection.Bracket] && <p className="admin__error">{errors[PanelSection.Bracket]}</p>}
           <div className="table-wrap">
             <table className="table">
               <thead>
@@ -337,24 +353,44 @@ export function AdminMatches() {
                           <span className="table__band-count">{matches.length}</span>
                         </td>
                       </tr>
-                      {matches.map((m) => (
-                        <tr key={m.slot}>
-                          <td title={`${participantName(m.home, t)} - ${participantName(m.away, t)}`}>
-                            {participantName(m.home, t)} - {participantName(m.away, t)}
-                          </td>
-                          <td>{m.field ? `${m.field} - ` : ''}{m.startsAt ? formatTime(m.startsAt) : ''}</td>
-                          <td>
-                            {m.homeScore}:{m.awayScore}
-                            {m.homePens != null && m.awayPens != null && ` (${m.homePens}:${m.awayPens})`}
-                          </td>
-                          <td>
-                            <span className={`chip chip--${m.status}`}>{t(`status.${m.status}`)}</span>
-                          </td>
-                          <td className="table__actions">
-                            <Link className="btn btn--sm" to={`/t/${tournamentId}/ko/${m.slot}`}>{t('adminMatches.edit')}</Link>
-                          </td>
-                        </tr>
-                      ))}
+                      {matches.map((m) => {
+                        const editing = bracketEdit.slot === m.slot;
+                        return (
+                          <tr key={m.slot}>
+                            <td title={`${participantName(m.home, t)} - ${participantName(m.away, t)}`}>
+                              <Link className="table-link" to={`/t/${tournamentId}/ko/${m.slot}`}>
+                                {participantName(m.home, t)} - {participantName(m.away, t)}
+                              </Link>
+                            </td>
+                            <td>
+                              {editing ? (
+                                <DateField value={bracketEdit.startsAt} onChange={bracketEdit.setStartsAt} format={DATETIME_FORMAT}
+                                  labels={dateLabels} placeholder={t('date.hintTime')} ariaLabel={t('adminMatches.start')} />
+                              ) : (
+                                <span>{m.field ? `${m.field} - ` : ''}{m.startsAt ? formatTime(m.startsAt) : ''}</span>
+                              )}
+                            </td>
+                            <td>
+                              {m.homeScore}:{m.awayScore}
+                              {m.homePens != null && m.awayPens != null && ` (${m.homePens}:${m.awayPens})`}
+                            </td>
+                            <td>
+                              <span className={`chip chip--${m.status}`}>{t(`status.${m.status}`)}</span>
+                            </td>
+                            <td className="table__actions">
+                              {editing ? (
+                                <>
+                                  <button className="btn btn--sm btn--primary" disabled={busy}
+                                    onClick={() => bracketEdit.save(m)}>{t('adminMatches.save')}</button>
+                                  <button className="btn btn--sm btn--ghost" onClick={bracketEdit.cancel}>{t('adminMatches.cancel')}</button>
+                                </>
+                              ) : (
+                                <button className="btn btn--sm" onClick={() => bracketEdit.begin(m)}>{t('adminMatches.edit')}</button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </ReactFragment>
                   );
                 })}
