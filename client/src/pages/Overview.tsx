@@ -1,9 +1,9 @@
-import { computeSize, computeQualificationOrder, TOURNAMENT_FORMAT } from '../../../shared/tournament';
 import { useMatchStore } from '../stores/matchStore';
-import { useRosterStore } from '../stores/rosterStore';
 import { useStandings } from '../hooks/useStandings';
+import { useQualificationTiers } from '../hooks/useQualificationTiers';
 import { StandingsTable } from '../components/StandingsTable';
 import { ThirdPlacesTable } from '../components/ThirdPlacesTable';
+import { ExportReportButton } from '../components/ExportReportButton';
 import { useI18n } from '../i18n';
 
 /** Front page: live group tables (green = qualifies wholesale, blue = the
@@ -19,35 +19,10 @@ export function Overview() {
     for (const id of s.order) if (s.byId[id]?.status === 'finished') n++;
     return n;
   });
-  const groups = useRosterStore((s) => s.groups);
-  const teams = useRosterStore((s) => s.teams);
 
-  // The bracket holds the largest power of two the team count can fill, and
-  // place tiers qualify wholesale (all 1sts, all 2nds, ...) until the one
-  // CONTESTED tier whose teams still fight for the leftover spots — the only
-  // tier worth a table. An exact fit has no contest and shows nothing.
-  const sizeInfo = computeSize(groups, teams);
-  let contested: ReturnType<typeof computeQualificationOrder> = [];
-  let contestedSpots = 0;
-  // Highest place that qualifies WHOLESALE — group rows up to it are green;
-  // the contested place is blue (see StandingsTable).
-  let autoRank = 0;
-  if (sizeInfo.formable) {
-    const order = computeQualificationOrder(tables);
-    let remaining = sizeInfo.size;
-    for (let rank = 1; rank <= TOURNAMENT_FORMAT.maxPerGroup && remaining > 0; rank++) {
-      const tier = order.filter((f) => f.row.rank === rank);
-      if (tier.length <= remaining) {
-        remaining -= tier.length; // the whole tier is in unconditionally
-        autoRank = rank;
-        continue;
-      }
-      contested = tier;
-      contestedSpots = remaining;
-      break;
-    }
-  }
-  const contestedRank = contested.length > 0 ? contested[0].row.rank : null;
+  // Rows up to autoRank are green; the contestedRank place is blue (see
+  // StandingsTable) — an exact bracket fit has no contest and shows nothing.
+  const { autoRank, contested, contestedSpots, contestedRank } = useQualificationTiers(tables);
 
   return (
     <div className="overview">
@@ -55,6 +30,7 @@ export function Overview() {
         <h1 className="tourney__name">{t('tournament.name')}</h1>
         <p className="tourney__meta">{t('tournament.location')}</p>
         <p className="tourney__progress">{t('overview.played', { played, total })}</p>
+        <ExportReportButton tables={tables} tiers={{ autoRank, contested, contestedSpots, contestedRank }} />
       </header>
 
       <section>

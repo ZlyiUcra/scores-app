@@ -224,7 +224,10 @@
   },
   "overview": {
     "played": "Jogos disputados {played} / {total}",
-    "groups": "Fase de grupos"
+    "groups": "Fase de grupos",
+    "exportPdf": "Descarregar relatório PDF",
+    "exportingPdf": "A gerar…",
+    "errorExportPdf": "Não foi possível gerar o relatório."
   },
   "thirds": {
     "title1": "Melhores vencedores de grupo",

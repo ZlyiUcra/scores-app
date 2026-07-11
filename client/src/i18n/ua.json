@@ -224,7 +224,10 @@
   },
   "overview": {
     "played": "Зіграно матчів {played} / {total}",
-    "groups": "Груповий етап"
+    "groups": "Груповий етап",
+    "exportPdf": "Завантажити PDF-звіт",
+    "exportingPdf": "Формування…",
+    "errorExportPdf": "Не вдалося сформувати звіт."
   },
   "thirds": {
     "title1": "Найкращі переможці груп",

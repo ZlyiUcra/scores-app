@@ -224,7 +224,10 @@
   },
   "overview": {
     "played": "Matches played {played} / {total}",
-    "groups": "Group stage"
+    "groups": "Group stage",
+    "exportPdf": "Download PDF report",
+    "exportingPdf": "Generating…",
+    "errorExportPdf": "Could not generate the report."
   },
   "thirds": {
     "title1": "Best group winners",

@@ -8,6 +8,7 @@ import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 import { formatKickoff } from '../lib/format';
 import { participantName, ROUND_ORDER } from '../lib/bracketLabels';
+import { isMatchPlayed, isBracketMatchPlayed, isBracketMatchDecided } from '../lib/matchStatus';
 
 /** Compact result row: time · field · status, then teams with score. Selects
  * its own match by id (memoized) so one update re-renders only this row. */
@@ -16,7 +17,7 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
   const { t } = useI18n();
   const { basePath } = useTournament();
   if (!m) return null;
-  const played = m.status !== 'scheduled';
+  const played = isMatchPlayed(m);
   return (
     <Link to={`${basePath}/match/${m.id}`} className={`rrow rrow--${m.status}`}>
       <div className="rrow__meta">
@@ -41,11 +42,8 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
 function BracketResultRow({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
   const { basePath } = useTournament();
-  // A frozen (reset) slot keeps its score, so "played" mirrors the bracket
-  // card's own showScore rule rather than just checking status.
-  const played =
-    m.status !== 'scheduled' || m.homeScore !== 0 || m.awayScore !== 0 || m.homePens != null || m.awayPens != null;
-  const decided = m.homePens != null && m.awayPens != null;
+  const played = isBracketMatchPlayed(m);
+  const decided = isBracketMatchDecided(m);
   return (
     <Link to={`${basePath}/ko/${m.slot}`} state={{ from: 'results' }} className={`rrow rrow--${m.status}`}>
       <div className="rrow__meta">
