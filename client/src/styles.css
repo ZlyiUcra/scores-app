@@ -277,7 +277,12 @@ body {
 .datefield__hint { font-size: 0.7rem; }
 .datefield__time { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.6rem; }
 .datefield__stepper { display: flex; align-items: center; gap: 0.1rem; }
-.datefield__timeval { font-variant-numeric: tabular-nums; min-width: 1.7rem; text-align: center; font-weight: 600; }
+/* Same color as a selected calendar day (.datefield__day--sel) - the
+   currently-stepped hour/minute reads as "selected" too. */
+.datefield__timeval {
+  font-variant-numeric: tabular-nums; min-width: 1.7rem; text-align: center; font-weight: 600;
+  background: var(--accent-2); color: #fff; border-radius: 6px; padding: 0.1rem 0.2rem;
+}
 .datefield__colon { font-weight: 700; }
 .datefield__ampm { margin-left: 0.25rem; min-width: 2.6rem; }
 .datefield__foot { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.6rem; }
