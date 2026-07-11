@@ -164,6 +164,12 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
                 off-site copy or use it to move a tournament to another server.
               </li>
               <li>
+                <strong>PDF report</strong> (the page icon next to Export) downloads a
+                printable snapshot of the tournament's results - group standings and
+                games, then the knockout results. It works for any tournament in the
+                list, whatever its status.
+              </li>
+              <li>
                 <strong>Import</strong> restores a tournament from such a backup file:
                 pick the file next to the tournament list. It always creates a brand-new
                 tournament with a fresh identity - importing the same file twice makes
@@ -208,6 +214,10 @@ export function HelpEn({ isAdmin }: { isAdmin: boolean }) {
                 who did what, to what and when, newest first (the most recent
                 entries). An import leaves a single summary entry there recording
                 what arrived.
+              </li>
+              <li>
+                The action buttons in the admin tables are icons - hover over one to
+                see what it does.
               </li>
               <li>Error messages always appear inside the section they belong to.</li>
             </ul>

@@ -116,6 +116,9 @@ Admin-only (client guard + `requireAdmin` on the whole `/api/admin` router). The
   tournament - the server rejects every write inside it.
 - **Export**: downloads one tournament (groups, teams, players, games, bracket) as
   a versioned JSON backup file.
+- **PDF report**: downloads a printable results snapshot of one tournament (group
+  standings and games, then knockout results); generated client-side with
+  lazy-loaded pdfmake.
 - **Import**: restores such a file as a **new** tournament - every id is minted
   fresh, nothing existing is overwritten; the file is validated like any mutation
   body (route-scoped 1 MB cap, rate-limited) and leaves one summary row in the
@@ -266,6 +269,9 @@ Apenas para administradores (guarda no cliente + `requireAdmin` em todo o router
   torneio - o servidor rejeita qualquer escrita dentro dele.
 - **Exportação**: descarrega um torneio (grupos, equipas, jogadores, jogos,
   eliminatória) como ficheiro JSON de cópia de segurança com versão de esquema.
+- **Relatório PDF**: descarrega um retrato imprimível dos resultados de um torneio
+  (classificações e jogos dos grupos, depois as eliminatórias); gerado no cliente
+  com pdfmake carregado sob procura.
 - **Importação**: restaura esse ficheiro como um torneio **novo** - todos os ids
   são gerados de novo, nada do existente é substituído; o ficheiro é validado como
   qualquer corpo de mutação (limite de 1 MB na rota, rate-limit) e deixa uma linha
@@ -404,6 +410,8 @@ Endpoint: `POST /api/auth/register` → авто-логін тим самим ш
   турнір - сервер відхиляє будь-який запис усередині нього.
 - **Експорт**: завантажує один турнір (групи, команди, гравці, ігри, сітка) як
   версіонований JSON-файл резервної копії.
+- **PDF-звіт**: завантажує друкований знімок результатів одного турніру (таблиці
+  груп та ігри, далі плей-оф); генерується на клієнті через lazy-loaded pdfmake.
 - **Імпорт**: відновлює такий файл як **новий** турнір - усі id генеруються заново,
   нічого з наявного не перезаписується; файл валідується як будь-яке тіло мутації
   (ліміт 1 MB на роуті, rate-limit) і лишає один підсумковий рядок в audit-лозі.

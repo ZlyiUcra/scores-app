@@ -169,6 +169,13 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
                 cópia fora do site ou use-a para mover um torneio para outro servidor.
               </li>
               <li>
+                <strong>Relatório PDF</strong> (o ícone de folha ao lado de Exportar)
+                descarrega um retrato imprimível dos resultados do torneio -
+                classificações e jogos dos grupos, depois os resultados das
+                eliminatórias. Funciona para qualquer torneio da lista, seja qual for o
+                estado.
+              </li>
+              <li>
                 <strong>Importar</strong> restaura um torneio a partir desse ficheiro de
                 cópia: escolha o ficheiro junto à lista de torneios. Cria sempre um
                 torneio totalmente novo com identidade própria - importar o mesmo
@@ -217,6 +224,10 @@ export function HelpPt({ isAdmin }: { isAdmin: boolean }) {
                 alterações de administração - quem alterou o quê e quando, do mais
                 recente para o mais antigo (as entradas mais recentes). Uma
                 importação deixa aí uma única entrada de resumo com o que chegou.
+              </li>
+              <li>
+                Os botões de ação nas tabelas de administração são ícones - passe o
+                rato por cima para ver o que cada um faz.
               </li>
               <li>As mensagens de erro aparecem sempre na secção a que dizem respeito.</li>
             </ul>
