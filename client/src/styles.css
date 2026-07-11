@@ -753,8 +753,16 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .tour-bar__name { font-weight: 700; }
 .tour-bar__note { font-size: 0.8rem; }
 
-.tour-list__section { margin-top: 1rem; }
-.tour-list__section h3 { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.4rem; }
+.accordion { margin-top: 1rem; }
+.accordion__heading { margin: 0; }
+.accordion__header {
+  display: flex; align-items: center; gap: 0.5rem; width: 100%;
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 0.9rem; color: var(--muted); text-align: left;
+}
+.accordion__icon { display: inline-block; }
+.accordion__icon--open { transform: rotate(90deg); }
+.accordion__body { margin-top: 0.4rem; }
 .tour-card {
   display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
   text-decoration: none; color: inherit;

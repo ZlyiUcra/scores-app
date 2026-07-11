@@ -188,7 +188,8 @@
     "upcoming": "запланований",
     "finished": "завершений",
     "readOnly": "Турнір завершено - лише перегляд.",
-    "section": { "active": "Зараз грається", "upcoming": "Заплановані", "finished": "Минулі турніри" }
+    "section": { "active": "Зараз грається", "upcoming": "Заплановані", "finished": "Минулі турніри" },
+    "sectionTitle": "{title} ({count})"
   },
   "adminSquads": {
     "title": "Склади",

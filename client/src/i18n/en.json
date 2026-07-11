@@ -188,7 +188,8 @@
     "upcoming": "upcoming",
     "finished": "finished",
     "readOnly": "This tournament is finished - view only.",
-    "section": { "active": "Now playing", "upcoming": "Upcoming", "finished": "Past tournaments" }
+    "section": { "active": "Now playing", "upcoming": "Upcoming", "finished": "Past tournaments" },
+    "sectionTitle": "{title} ({count})"
   },
   "adminSquads": {
     "title": "Squads",

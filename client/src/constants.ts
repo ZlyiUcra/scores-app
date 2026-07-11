@@ -21,3 +21,9 @@ export const pagerIcons = {
   next: '\u25B6\uFE0E',
   last: '\u23ED\uFE0E',
 };
+
+/** Right-pointing triangle used as the accordion toggle, rotated 90deg via
+ * CSS when the section is open. Escaped to keep the source ascii. */
+export const accordionIcons = {
+  toggle: '\u25B6\uFE0E',
+};

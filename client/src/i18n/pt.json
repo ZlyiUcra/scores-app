@@ -188,7 +188,8 @@
     "upcoming": "previsto",
     "finished": "terminado",
     "readOnly": "Este torneio terminou - apenas consulta.",
-    "section": { "active": "A decorrer", "upcoming": "Previstos", "finished": "Torneios anteriores" }
+    "section": { "active": "A decorrer", "upcoming": "Previstos", "finished": "Torneios anteriores" },
+    "sectionTitle": "{title} ({count})"
   },
   "adminSquads": {
     "title": "Plantéis",

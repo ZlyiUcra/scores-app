@@ -1,10 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Tournament, TournamentStatus } from '../../../shared/types';
 import { formatDay } from '../lib/format';
 import { useTournamentStore, selectTournaments, selectLoaded, selectError } from '../stores/tournamentStore';
 import { LoadError } from '../components/LoadError';
+import { Accordion } from '../components/Accordion';
+import { Pager } from '../components/Pager';
 import { useI18n } from '../i18n';
+
+const defaultPageSize = 20;
 
 function TournamentCard({ tour }: { tour: Tournament }) {
   const { t } = useI18n();
@@ -18,6 +22,40 @@ function TournamentCard({ tour }: { tour: Tournament }) {
       {dates && <span className="muted tour-card__dates">{dates}</span>}
       <span className={`chip chip--${tour.status}`}>{t(`tournaments.${tour.status}`)}</span>
     </Link>
+  );
+}
+
+/** One status section as an independently collapsible, paginated accordion.
+ * Owns its own page/pageSize state - opening/paging one section never
+ * affects the others. */
+function TournamentSection({ status, items, defaultOpen }: { status: TournamentStatus; items: Tournament[]; defaultOpen: boolean }) {
+  const { t } = useI18n();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(defaultPageSize);
+  const start = (page - 1) * pageSize;
+  const pageItems = items.slice(start, start + pageSize);
+
+  return (
+    <Accordion
+      defaultOpen={defaultOpen}
+      title={t('tournaments.sectionTitle', { title: t(`tournaments.section.${status}`), count: items.length })}
+    >
+      {pageItems.map((tour) => (
+        <TournamentCard key={tour.id} tour={tour} />
+      ))}
+      {items.length > pageSize && (
+        <Pager
+          page={page}
+          total={items.length}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
+      )}
+    </Accordion>
   );
 }
 
@@ -47,14 +85,7 @@ export function Tournaments() {
       {sections.map((status) => {
         const items = tournaments.filter((x) => x.status === status);
         if (items.length === 0) return null;
-        return (
-          <section key={status} className="tour-list__section">
-            <h3>{t(`tournaments.section.${status}`)}</h3>
-            {items.map((tour) => (
-              <TournamentCard key={tour.id} tour={tour} />
-            ))}
-          </section>
-        );
+        return <TournamentSection key={status} status={status} items={items} defaultOpen={status === 'active'} />;
       })}
     </div>
   );
