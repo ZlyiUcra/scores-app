@@ -53,7 +53,6 @@ export function Pager({ page, total, pageSize, onPageChange, onPageSizeChange }:
         {t('pager.next')}
       </button>
       <label className="pager__size">
-        {t('pager.perPage')}
         <select
           className="input"
           value={customMode ? 'custom' : String(pageSize)}
@@ -82,6 +81,7 @@ export function Pager({ page, total, pageSize, onPageChange, onPageSizeChange }:
             }}
           />
         )}
+        <span className="muted">{t('pager.perPage')}</span>
       </label>
     </div>
   );
