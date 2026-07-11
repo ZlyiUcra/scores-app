@@ -5,7 +5,7 @@ import { ApiError } from '../../../api/client';
 import { useI18n } from '../../../i18n';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 
-const PAGE_SIZE = 10;
+const defaultPageSize = 20;
 
 /**
  * All behavior and state for the AdminUsers panel, kept out of the component
@@ -17,17 +17,18 @@ export function useAdminUsers() {
   const { t } = useI18n();
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSizeState] = useState(defaultPageSize);
   const [data, setData] = useState<Paginated<AdminUserView> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      setData(await adminApi.listUsers({ q: q.trim() || undefined, page, pageSize: PAGE_SIZE }));
+      setData(await adminApi.listUsers({ q: q.trim() || undefined, page, pageSize }));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('adminUsers.errorLoad'));
     }
-  }, [q, page]);
+  }, [q, page, pageSize, t]);
 
   useEffect(() => {
     void load();
@@ -46,12 +47,16 @@ export function useAdminUsers() {
     }
   }
 
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
-
-  // Typing in the search box always returns to the first page.
+  // Typing in the search box, or changing the page size, always returns to
+  // the first page - otherwise a mid-list page can land past the new total.
   function search(value: string) {
     setPage(1);
     setQ(value);
+  }
+
+  function setPageSize(value: number) {
+    setPage(1);
+    setPageSizeState(value);
   }
 
   const toggleActive = (u: AdminUserView) =>
@@ -71,9 +76,10 @@ export function useAdminUsers() {
     busyId,
     q,
     page,
-    totalPages,
+    pageSize,
     search,
     setPage,
+    setPageSize,
     toggleActive,
     toggleRole,
     requestDelete,

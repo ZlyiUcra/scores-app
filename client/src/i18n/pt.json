@@ -2,6 +2,7 @@
   "header": { "logout": "Terminar sessão", "menu": "Menu", "account": "Conta", "language": "Idioma" },
   "app": { "loading": "A carregar…", "loadError": "Não foi possível carregar os dados. Verifique a ligação.", "retry": "Tentar novamente" },
   "common": { "deleteConfirm": "Eliminar? Não pode ser desfeito.", "confirm": "Confirmar", "cancel": "Cancelar" },
+  "pager": { "prev": "← Anterior", "next": "Seguinte →", "page": "Página {page} / {total}", "perPage": "Por página", "custom": "Personalizado…" },
   "role": { "admin": "administrador", "viewer": "espectador" },
   "login": {
     "subtitle": "Torneio de futebol local",
@@ -122,9 +123,6 @@
     "promote": "↑ administrador",
     "delete": "Eliminar",
     "empty": "Nada encontrado.",
-    "prev": "← Anterior",
-    "next": "Seguinte →",
-    "page": "Página {page} / {total}",
     "errorLoad": "Falha ao carregar.",
     "errorAction": "Ação não concluída."
   },

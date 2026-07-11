@@ -2,13 +2,14 @@ import { formatDay } from '../../../lib/format';
 import { useAuth } from '../../../auth/AuthContext';
 import { useI18n } from '../../../i18n';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
+import { Pager } from '../../../components/Pager';
 import { useAdminUsers } from './useAdminUsers';
 
 /** Admin user management UI - all state and actions live in useAdminUsers. */
 export function AdminUsers() {
   const { user: me } = useAuth();
   const { t } = useI18n();
-  const { data, error, busyId, q, page, totalPages, search, setPage, toggleActive, toggleRole, requestDelete, deleteConfirm } = useAdminUsers();
+  const { data, error, busyId, q, page, pageSize, search, setPage, setPageSize, toggleActive, toggleRole, requestDelete, deleteConfirm } = useAdminUsers();
 
   return (
     <div className="admin-panel">
@@ -69,11 +70,13 @@ export function AdminUsers() {
         </table>
       </div>
 
-      <div className="pager">
-        <button className="btn btn--sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('adminUsers.prev')}</button>
-        <span className="muted">{t('adminUsers.page', { page, total: totalPages })}</span>
-        <button className="btn btn--sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>{t('adminUsers.next')}</button>
-      </div>
+      <Pager
+        page={page}
+        total={data?.total ?? 0}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
 
       {deleteConfirm && <ConfirmDialog {...deleteConfirm} />}
     </div>
