@@ -1,6 +1,7 @@
 import { useI18n } from '../../../i18n';
 import { TeamSelect } from '../../../components/TeamSelect';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
+import { actionIcons } from '../../../constants';
 import { useAdminSquads } from './useAdminSquads';
 
 /** Admin squads panel UI - all state and actions live in useAdminSquads. */
@@ -91,15 +92,17 @@ export function AdminSquads() {
                           <td className="table__actions">
                             {editing ? (
                               <>
-                                <button className="btn btn--sm btn--primary" disabled={busy}
-                                  onClick={() => void edit.save(p.id)}>{t('adminSquads.save')}</button>
-                                <button className="btn btn--sm btn--ghost" onClick={edit.cancel}>{t('adminSquads.cancel')}</button>
+                                <button className="btn btn--sm btn--primary" disabled={busy} title={t('adminSquads.save')} aria-label={t('adminSquads.save')}
+                                  onClick={() => void edit.save(p.id)}>{actionIcons.save}</button>
+                                <button className="btn btn--sm btn--ghost" title={t('adminSquads.cancel')} aria-label={t('adminSquads.cancel')}
+                                  onClick={edit.cancel}>{actionIcons.cancel}</button>
                               </>
                             ) : (
                               <>
-                                <button className="btn btn--sm" onClick={() => edit.begin(p)}>{t('adminSquads.edit')}</button>
-                                <button className="btn btn--sm btn--danger" disabled={busy}
-                                  onClick={() => requestDelete(p.id)}>{t('adminSquads.delete')}</button>
+                                <button className="btn btn--sm" title={t('adminSquads.edit')} aria-label={t('adminSquads.edit')}
+                                  onClick={() => edit.begin(p)}>{actionIcons.edit}</button>
+                                <button className="btn btn--sm btn--danger" disabled={busy} title={t('adminSquads.delete')} aria-label={t('adminSquads.delete')}
+                                  onClick={() => requestDelete(p.id)}>{actionIcons.delete}</button>
                               </>
                             )}
                           </td>

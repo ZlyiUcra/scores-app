@@ -464,7 +464,15 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
   margin: 0.75rem 0 0; font-weight: 700; font-size: 0.85rem;
   display: inline-block; background: var(--bg); padding: 0.3rem 0.7rem; border-radius: 999px;
 }
-.export-report { margin-top: 0.75rem; }
+/* Page-emoji icon with a tiny "PDF" plate inscribed over its lower half, so
+   the button reads as a PDF file rather than a plain sheet. */
+.icon-pdf { position: relative; display: inline-block; line-height: 1; }
+.icon-pdf__label {
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  font-size: 0.45em; font-weight: 700; line-height: 1.2;
+  color: #fff; background: var(--danger); border-radius: 2px; padding: 0 0.2em;
+  pointer-events: none;
+}
 
 /* ---------- Standings ---------- */
 /* Any number of groups: as many columns as fit the container, never wider

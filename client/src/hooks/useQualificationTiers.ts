@@ -1,4 +1,4 @@
-import type { Group, GroupTable, StandingRow } from '../../../shared/types';
+import type { Group, GroupTable, StandingRow, Team } from '../../../shared/types';
 import { computeSize, computeQualificationOrder, TOURNAMENT_FORMAT } from '../../../shared/tournament';
 import { useRosterStore } from '../stores/rosterStore';
 
@@ -17,10 +17,9 @@ export type QualificationTiers = {
  * place tiers qualify wholesale until the one CONTESTED tier whose teams
  * still fight for the leftover spots - shared by Overview (live display) and
  * the PDF report (same rule, same output), so the two never drift apart.
+ * Pure so the PDF export can run it on fetched data outside React.
  */
-export function useQualificationTiers(tables: GroupTable[]): QualificationTiers {
-  const groups = useRosterStore((s) => s.groups);
-  const teams = useRosterStore((s) => s.teams);
+export function computeQualificationTiers(groups: Group[], teams: Team[], tables: GroupTable[]): QualificationTiers {
   const sizeInfo = computeSize(groups, teams);
 
   let contested: QualificationTiers['contested'] = [];
@@ -44,4 +43,11 @@ export function useQualificationTiers(tables: GroupTable[]): QualificationTiers 
   const contestedRank = contested.length > 0 ? contested[0].row.rank : null;
 
   return { autoRank, contested, contestedSpots, contestedRank };
+}
+
+/** Store-subscribed wrapper over computeQualificationTiers for live pages. */
+export function useQualificationTiers(tables: GroupTable[]): QualificationTiers {
+  const groups = useRosterStore((s) => s.groups);
+  const teams = useRosterStore((s) => s.teams);
+  return computeQualificationTiers(groups, teams, tables);
 }

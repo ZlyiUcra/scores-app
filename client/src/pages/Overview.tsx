@@ -3,7 +3,6 @@ import { useStandings } from '../hooks/useStandings';
 import { useQualificationTiers } from '../hooks/useQualificationTiers';
 import { StandingsTable } from '../components/StandingsTable';
 import { ThirdPlacesTable } from '../components/ThirdPlacesTable';
-import { ExportReportButton } from '../components/ExportReportButton';
 import { useI18n } from '../i18n';
 
 /** Front page: live group tables (green = qualifies wholesale, blue = the
@@ -30,7 +29,6 @@ export function Overview() {
         <h1 className="tourney__name">{t('tournament.name')}</h1>
         <p className="tourney__meta">{t('tournament.location')}</p>
         <p className="tourney__progress">{t('overview.played', { played, total })}</p>
-        <ExportReportButton tables={tables} tiers={{ autoRank, contested, contestedSpots, contestedRank }} />
       </header>
 
       <section>

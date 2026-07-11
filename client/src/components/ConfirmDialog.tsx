@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { actionIcons } from '../constants';
 import { useI18n } from '../i18n';
 
 type Tone = 'normal' | 'danger';
@@ -62,14 +63,16 @@ export function ConfirmDialog({
         {title && <h3 className="modal__title">{title}</h3>}
         <p className="modal__message">{message}</p>
         <div className="modal__actions">
-          <button className="btn btn--sm btn--ghost" ref={cancelRef} onClick={cancel}>
-            {cancelLabel ?? t('common.cancel')}
+          <button className="btn btn--sm btn--ghost" ref={cancelRef} onClick={cancel}
+            title={cancelLabel ?? t('common.cancel')} aria-label={cancelLabel ?? t('common.cancel')}>
+            {actionIcons.cancel}
           </button>
           <button
             className={`btn btn--sm${tone === 'danger' ? ' btn--danger' : ''}`}
             onClick={confirm}
+            title={confirmLabel ?? t('common.confirm')} aria-label={confirmLabel ?? t('common.confirm')}
           >
-            {confirmLabel ?? t('common.confirm')}
+            {actionIcons.save}
           </button>
         </div>
       </div>

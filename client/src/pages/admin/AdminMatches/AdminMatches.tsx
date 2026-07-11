@@ -5,6 +5,7 @@ import { Fragment as ReactFragment } from 'react';
 import { Link } from 'react-router-dom';
 import { TOURNAMENT_FORMAT } from '../../../../../shared/tournament';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
+import { actionIcons } from '../../../constants';
 import { DateField } from '../../../components/DateField';
 import { useDateLabels } from '../../../lib/dateLabels';
 import { formatKickoff } from '../../../lib/format';
@@ -81,9 +82,10 @@ export function AdminMatches() {
                   <div className="group-row__actions">
                     {editing ? (
                       <>
-                        <button className="btn btn--sm btn--primary" disabled={busy}
-                          onClick={() => groupEdit.save(g.id)}>{t('adminMatches.save')}</button>
-                        <button className="btn btn--sm btn--ghost" onClick={groupEdit.cancel}>{t('adminMatches.cancel')}</button>
+                        <button className="btn btn--sm btn--primary" disabled={busy} title={t('adminMatches.save')} aria-label={t('adminMatches.save')}
+                          onClick={() => groupEdit.save(g.id)}>{actionIcons.save}</button>
+                        <button className="btn btn--sm btn--ghost" title={t('adminMatches.cancel')} aria-label={t('adminMatches.cancel')}
+                          onClick={groupEdit.cancel}>{actionIcons.cancel}</button>
                       </>
                     ) : (
                       <>
@@ -94,9 +96,10 @@ export function AdminMatches() {
                             {t('adminMatches.generate', { n: missingInGroup(g.id) })}
                           </button>
                         )}
-                        <button className="btn btn--sm" onClick={() => groupEdit.begin(g)}>{t('adminMatches.edit')}</button>
-                        <button className="btn btn--sm btn--danger" title={t('adminMatches.deleteGroupTitle')}
-                          onClick={() => groupEdit.remove(g.id)}>{t('adminMatches.delete')}</button>
+                        <button className="btn btn--sm" title={t('adminMatches.edit')} aria-label={t('adminMatches.edit')}
+                          onClick={() => groupEdit.begin(g)}>{actionIcons.edit}</button>
+                        <button className="btn btn--sm btn--danger" title={t('adminMatches.deleteGroupTitle')} aria-label={t('adminMatches.delete')}
+                          onClick={() => groupEdit.remove(g.id)}>{actionIcons.delete}</button>
                       </>
                     )}
                   </div>
@@ -181,15 +184,17 @@ export function AdminMatches() {
                           <td className="table__actions">
                             {editing ? (
                               <>
-                                <button className="btn btn--sm btn--primary" disabled={busy}
-                                  onClick={() => teamEdit.save(tm)}>{t('adminMatches.save')}</button>
-                                <button className="btn btn--sm btn--ghost" onClick={teamEdit.cancel}>{t('adminMatches.cancel')}</button>
+                                <button className="btn btn--sm btn--primary" disabled={busy} title={t('adminMatches.save')} aria-label={t('adminMatches.save')}
+                                  onClick={() => teamEdit.save(tm)}>{actionIcons.save}</button>
+                                <button className="btn btn--sm btn--ghost" title={t('adminMatches.cancel')} aria-label={t('adminMatches.cancel')}
+                                  onClick={teamEdit.cancel}>{actionIcons.cancel}</button>
                               </>
                             ) : (
                               <>
-                                <button className="btn btn--sm" onClick={() => teamEdit.begin(tm)}>{t('adminMatches.edit')}</button>
-                                <button className="btn btn--sm btn--danger"
-                                  onClick={() => teamEdit.remove(tm.id)}>{t('adminMatches.delete')}</button>
+                                <button className="btn btn--sm" title={t('adminMatches.edit')} aria-label={t('adminMatches.edit')}
+                                  onClick={() => teamEdit.begin(tm)}>{actionIcons.edit}</button>
+                                <button className="btn btn--sm btn--danger" title={t('adminMatches.delete')} aria-label={t('adminMatches.delete')}
+                                  onClick={() => teamEdit.remove(tm.id)}>{actionIcons.delete}</button>
                               </>
                             )}
                           </td>
@@ -294,15 +299,17 @@ export function AdminMatches() {
                       {editing ? (
                         <>
                           <button className="btn btn--sm btn--primary" disabled={busy || !matchEdit.startsAt}
-                            onClick={() => matchEdit.save(m)}>{t('adminMatches.save')}</button>
-                          <button className="btn btn--sm btn--ghost" onClick={matchEdit.cancel}>{t('adminMatches.cancel')}</button>
+                            title={t('adminMatches.save')} aria-label={t('adminMatches.save')}
+                            onClick={() => matchEdit.save(m)}>{actionIcons.save}</button>
+                          <button className="btn btn--sm btn--ghost" title={t('adminMatches.cancel')} aria-label={t('adminMatches.cancel')}
+                            onClick={matchEdit.cancel}>{actionIcons.cancel}</button>
                         </>
                       ) : (
                         <>
-                          <button className="btn btn--sm"
-                            onClick={() => matchEdit.begin(m)}>{t('adminMatches.edit')}</button>
-                          <button className="btn btn--sm btn--danger"
-                            onClick={() => matchEdit.remove(id)}>{t('adminMatches.delete')}</button>
+                          <button className="btn btn--sm" title={t('adminMatches.edit')} aria-label={t('adminMatches.edit')}
+                            onClick={() => matchEdit.begin(m)}>{actionIcons.edit}</button>
+                          <button className="btn btn--sm btn--danger" title={t('adminMatches.delete')} aria-label={t('adminMatches.delete')}
+                            onClick={() => matchEdit.remove(id)}>{actionIcons.delete}</button>
                         </>
                       )}
                     </td>
@@ -380,12 +387,14 @@ export function AdminMatches() {
                             <td className="table__actions">
                               {editing ? (
                                 <>
-                                  <button className="btn btn--sm btn--primary" disabled={busy}
-                                    onClick={() => bracketEdit.save(m)}>{t('adminMatches.save')}</button>
-                                  <button className="btn btn--sm btn--ghost" onClick={bracketEdit.cancel}>{t('adminMatches.cancel')}</button>
+                                  <button className="btn btn--sm btn--primary" disabled={busy} title={t('adminMatches.save')} aria-label={t('adminMatches.save')}
+                                    onClick={() => bracketEdit.save(m)}>{actionIcons.save}</button>
+                                  <button className="btn btn--sm btn--ghost" title={t('adminMatches.cancel')} aria-label={t('adminMatches.cancel')}
+                                    onClick={bracketEdit.cancel}>{actionIcons.cancel}</button>
                                 </>
                               ) : (
-                                <button className="btn btn--sm" onClick={() => bracketEdit.begin(m)}>{t('adminMatches.edit')}</button>
+                                <button className="btn btn--sm" title={t('adminMatches.edit')} aria-label={t('adminMatches.edit')}
+                                  onClick={() => bracketEdit.begin(m)}>{actionIcons.edit}</button>
                               )}
                             </td>
                           </tr>

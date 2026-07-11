@@ -1,11 +1,14 @@
 import { useState, type FormEvent } from 'react';
-import type { Tournament, TournamentStatus } from '../../../../../shared/types';
+import type { Match, Tournament, TournamentStatus } from '../../../../../shared/types';
+import { computeStandings } from '../../../../../shared/tournament';
 import { adminApi } from '../../../api/admin';
 import { api, ApiError } from '../../../api/client';
 import { useTournamentStore } from '../../../stores/tournamentStore';
 import { useI18n } from '../../../i18n';
 import type { DateRange } from '../../../components/DateRangeField';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { computeQualificationTiers } from '../../../hooks/useQualificationTiers';
+import { downloadTournamentReport } from '../../../lib/pdfReport';
 
 /**
  * All behavior and state for the AdminTournaments panel, kept out of the
@@ -101,6 +104,44 @@ export function useAdminTournaments() {
     }
   }
 
+  // Download a PDF report of the tournament's results. The row may not be the
+  // admin-selected tournament, so nothing can come from the live stores: the
+  // roster, matches and bracket are fetched one-shot here and standings/tiers
+  // are computed with the same pure functions the live pages use.
+  async function exportPdf(x: Tournament) {
+    setBusy(true);
+    setError(null);
+    try {
+      const [{ roster }, { matches }, { bracket }] = await Promise.all([
+        api.getRoster(x.id),
+        api.listMatches(x.id),
+        api.getBracket(x.id),
+      ]);
+      const tables = computeStandings(roster.groups, roster.teams, matches, { includeLive: true });
+      const tiers = computeQualificationTiers(roster.groups, roster.teams, tables);
+      // Same display order as matchStore.derive: kickoff, id as tiebreak.
+      const sorted = [...matches].sort((a, b) => {
+        const c = a.startsAt.localeCompare(b.startsAt);
+        return c !== 0 ? c : a.id.localeCompare(b.id);
+      });
+      const matchesById: Record<string, Match> = {};
+      const matchesByGroup: Record<string, string[]> = {};
+      for (const m of sorted) {
+        matchesById[m.id] = m;
+        (matchesByGroup[m.group] ??= []).push(m.id);
+      }
+      await downloadTournamentReport(
+        { tournamentName: x.name, tables, tiers, matchesByGroup, matchesById, bracketMatches: bracket.matches },
+        t,
+      );
+    } catch (err) {
+      console.error('[export] PDF report generation failed:', err);
+      setError(err instanceof ApiError ? err.message : t('adminTournaments.errorExportPdf'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // Restore a tournament from a picked export file. A cheap client-side JSON
   // sanity check gives a friendlier message before the round trip; the server
   // is the authority and fully re-validates regardless. Always creates a new
@@ -154,6 +195,7 @@ export function useAdminTournaments() {
     requestDelete,
     deleteConfirm,
     exportTournament,
+    exportPdf,
     importTournament,
   };
 }

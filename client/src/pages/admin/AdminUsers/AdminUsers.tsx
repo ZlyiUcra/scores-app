@@ -3,6 +3,7 @@ import { useAuth } from '../../../auth/AuthContext';
 import { useI18n } from '../../../i18n';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { Pager } from '../../../components/Pager';
+import { actionIcons } from '../../../constants';
 import { useAdminUsers } from './useAdminUsers';
 
 /** Admin user management UI - all state and actions live in useAdminUsers. */
@@ -56,8 +57,9 @@ export function AdminUsers() {
                       {u.role === 'admin' ? t('adminUsers.demote') : t('adminUsers.promote')}
                     </button>
                     <button className="btn btn--sm btn--danger" disabled={busy || isSelf}
+                      title={t('adminUsers.delete')} aria-label={t('adminUsers.delete')}
                       onClick={() => requestDelete(u.id)}>
-                      {t('adminUsers.delete')}
+                      {actionIcons.delete}
                     </button>
                   </td>
                 </tr>

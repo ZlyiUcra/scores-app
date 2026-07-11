@@ -102,6 +102,9 @@
     "export": "Export",
     "exportTitle": "Download a full JSON backup of this tournament.",
     "errorExport": "Tournament not exported.",
+    "exportPdf": "PDF report",
+    "exportPdfTitle": "Download a PDF report of this tournament's results.",
+    "errorExportPdf": "Could not generate the report.",
     "import": "Import",
     "importTitle": "Restore a tournament from a JSON backup file. Always creates a new tournament.",
     "errorImport": "Tournament not imported.",
@@ -224,10 +227,7 @@
   },
   "overview": {
     "played": "Matches played {played} / {total}",
-    "groups": "Group stage",
-    "exportPdf": "Download PDF report",
-    "exportingPdf": "Generating…",
-    "errorExportPdf": "Could not generate the report."
+    "groups": "Group stage"
   },
   "thirds": {
     "title1": "Best group winners",

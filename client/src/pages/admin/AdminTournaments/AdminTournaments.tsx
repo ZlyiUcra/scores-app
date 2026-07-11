@@ -5,6 +5,7 @@ import { DateRangeField } from '../../../components/DateRangeField';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { useDateLabels } from '../../../lib/dateLabels';
 import { useI18n } from '../../../i18n';
+import { actionIcons } from '../../../constants';
 import { useAdminTournaments } from './useAdminTournaments';
 
 const STATUSES: TournamentStatus[] = ['upcoming', 'active', 'finished'];
@@ -20,7 +21,7 @@ const STATUSES: TournamentStatus[] = ['upcoming', 'active', 'finished'];
 export function AdminTournaments() {
   const { t } = useI18n();
   const dateLabels = useDateLabels();
-  const { tournaments, busy, error, create, edit, requestDelete, deleteConfirm, exportTournament, importTournament } =
+  const { tournaments, busy, error, create, edit, requestDelete, deleteConfirm, exportTournament, exportPdf, importTournament } =
     useAdminTournaments();
   const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,8 +77,8 @@ export function AdminTournaments() {
               style={{ display: 'none' }}
               onChange={onImportFileChosen}
             />
-            <button className="btn btn--sm" disabled={busy} title={t('adminTournaments.importTitle')}
-              onClick={pickImportFile}>{t('adminTournaments.import')}</button>
+            <button className="btn btn--sm" disabled={busy} title={t('adminTournaments.importTitle')} aria-label={t('adminTournaments.import')}
+              onClick={pickImportFile}>{actionIcons.import}</button>
           </div>
         </div>
         <div className="table-wrap">
@@ -133,17 +134,23 @@ export function AdminTournaments() {
                     <td className="table__actions">
                       {editing ? (
                         <>
-                          <button className="btn btn--sm btn--primary" disabled={busy}
-                            onClick={() => void edit.save(x.id)}>{t('adminTournaments.save')}</button>
-                          <button className="btn btn--sm btn--ghost" onClick={edit.cancel}>{t('adminTournaments.cancel')}</button>
+                          <button className="btn btn--sm btn--primary" disabled={busy} title={t('adminTournaments.save')} aria-label={t('adminTournaments.save')}
+                            onClick={() => void edit.save(x.id)}>{actionIcons.save}</button>
+                          <button className="btn btn--sm btn--ghost" title={t('adminTournaments.cancel')} aria-label={t('adminTournaments.cancel')}
+                            onClick={edit.cancel}>{actionIcons.cancel}</button>
                         </>
                       ) : (
                         <>
-                          <button className="btn btn--sm" onClick={() => edit.begin(x)}>{t('adminTournaments.edit')}</button>
-                          <button className="btn btn--sm" disabled={busy} title={t('adminTournaments.exportTitle')}
-                            onClick={() => void exportTournament(x.id)}>{t('adminTournaments.export')}</button>
-                          <button className="btn btn--sm btn--danger" disabled={busy} title={t('adminTournaments.deleteTitle')}
-                            onClick={() => requestDelete(x.id)}>{t('adminTournaments.delete')}</button>
+                          <button className="btn btn--sm" title={t('adminTournaments.edit')} aria-label={t('adminTournaments.edit')}
+                            onClick={() => edit.begin(x)}>{actionIcons.edit}</button>
+                          <button className="btn btn--sm" disabled={busy} title={t('adminTournaments.exportTitle')} aria-label={t('adminTournaments.export')}
+                            onClick={() => void exportTournament(x.id)}>{actionIcons.exportJson}</button>
+                          <button className="btn btn--sm" disabled={busy} title={t('adminTournaments.exportPdfTitle')} aria-label={t('adminTournaments.exportPdf')}
+                            onClick={() => void exportPdf(x)}>
+                            <span className="icon-pdf">{actionIcons.exportPdf}<span className="icon-pdf__label">PDF</span></span>
+                          </button>
+                          <button className="btn btn--sm btn--danger" disabled={busy} title={t('adminTournaments.deleteTitle')} aria-label={t('adminTournaments.delete')}
+                            onClick={() => requestDelete(x.id)}>{actionIcons.delete}</button>
                         </>
                       )}
                     </td>
