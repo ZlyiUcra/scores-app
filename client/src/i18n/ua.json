@@ -23,7 +23,8 @@
     "live": "наживо",
     "offline": "офлайн",
     "loading": "Завантаження матчів…",
-    "noGames": "Ще немає ігор."
+    "noGames": "Ще немає ігор.",
+    "knockoutTitle": "Результати плей-офу"
   },
   "matchDetail": { "back": "← До результатів", "notFound": "Матч не знайдено." },
   "knockoutDetail": { "back": "← До сітки", "notFound": "Гру не знайдено." },

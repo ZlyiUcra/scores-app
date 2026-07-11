@@ -134,6 +134,7 @@ body {
 /* ---------- List ---------- */
 .list__head { display: flex; align-items: center; justify-content: space-between; }
 .list__head h2 { font-size: 1.15rem; }
+.list__subtitle { font-size: 1.15rem; margin: 1.5rem 0 0; }
 .live-dot { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 999px; }
 .live-dot--on { background: rgba(63,185,80,0.15); color: var(--accent); }
 .live-dot--off { background: rgba(248,81,73,0.12); color: var(--danger); }

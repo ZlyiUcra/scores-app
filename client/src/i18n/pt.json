@@ -23,7 +23,8 @@
     "live": "ao vivo",
     "offline": "offline",
     "loading": "A carregar jogos…",
-    "noGames": "Ainda sem jogos."
+    "noGames": "Ainda sem jogos.",
+    "knockoutTitle": "Resultados das eliminatórias"
   },
   "matchDetail": { "back": "← Voltar aos resultados", "notFound": "Jogo não encontrado." },
   "knockoutDetail": { "back": "← Voltar ao bracket", "notFound": "Jogo não encontrado." },

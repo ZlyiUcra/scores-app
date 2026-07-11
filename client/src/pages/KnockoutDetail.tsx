@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { useBracketStore, selectBracket } from '../stores/bracketStore';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
@@ -10,20 +10,28 @@ import { participantName, slotShort } from '../lib/bracketLabels';
 
 /** One knockout game, mirroring MatchDetail: scoreboard for everyone, the
  * click-driven slot controls for admins (hidden in a finished tournament).
- * Lives at /t/:tid/ko/:slot. */
+ * Lives at /t/:tid/ko/:slot, reached either from the bracket tree or from a
+ * knockout row on the results list — the back link follows wherever the
+ * incoming Link tagged via `state.from` (falls back to the bracket tree for
+ * a direct URL/refresh, matching the pre-existing behavior). */
 export function KnockoutDetail() {
   const { slot = '' } = useParams();
+  const location = useLocation();
   const view = useBracketStore(selectBracket);
   const { isAdmin } = useAuth();
   const { t } = useI18n();
   const { basePath, readOnly } = useTournament();
+
+  const fromResults = (location.state as { from?: string } | null)?.from === 'results';
+  const backTo = fromResults ? `${basePath}/results` : `${basePath}/ko`;
+  const backLabel = fromResults ? t('matchDetail.back') : t('knockoutDetail.back');
 
   const m = view.matches.find((x) => x.slot === slot);
 
   if (!m) {
     return (
       <div className="detail">
-        <Link to={`${basePath}/ko`} className="back">{t('knockoutDetail.back')}</Link>
+        <Link to={backTo} className="back">{backLabel}</Link>
         <p className="muted">{t('knockoutDetail.notFound')}</p>
       </div>
     );
@@ -36,7 +44,7 @@ export function KnockoutDetail() {
 
   return (
     <div className="detail">
-      <Link to={`${basePath}/ko`} className="back">{t('knockoutDetail.back')}</Link>
+      <Link to={backTo} className="back">{backLabel}</Link>
 
       {preview && <p className="ko-preview-note">{t('bracket.previewNote')}</p>}
 

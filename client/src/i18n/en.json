@@ -23,7 +23,8 @@
     "live": "live",
     "offline": "offline",
     "loading": "Loading matches…",
-    "noGames": "No games yet."
+    "noGames": "No games yet.",
+    "knockoutTitle": "Knockout results"
   },
   "matchDetail": { "back": "← Back to results", "notFound": "Match not found." },
   "knockoutDetail": { "back": "← Back to bracket", "notFound": "Game not found." },
