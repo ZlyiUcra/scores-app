@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { listUsersQuerySchema, parseOrThrow, updateUserSchema } from '../../validation.js';
-import { AppError, AppErrorCode } from '../../errors.js';
 import { audit } from '../../audit.js';
 import { deleteUser, listUsers, updateUser } from '../../services/admin.js';
 import { disconnectUser } from '../../socket.js';
@@ -12,11 +11,8 @@ export const adminUsersRouter = Router();
 
 adminUsersRouter.get('/users', async (req, res, next) => {
   try {
-    const parsed = listUsersQuerySchema.safeParse(req.query);
-    if (!parsed.success) {
-      throw new AppError(AppErrorCode.BadRequest, 'Invalid query.', 400);
-    }
-    res.json(await listUsers(parsed.data));
+    const parsed = parseOrThrow(listUsersQuerySchema, req.query, 'Invalid query.');
+    res.json(await listUsers(parsed));
   } catch (err) {
     next(err);
   }

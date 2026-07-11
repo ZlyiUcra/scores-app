@@ -32,12 +32,12 @@ export class SqliteAuditRepository implements AuditRepository {
     }
   }
 
-  async list(limit: number): Promise<AuditLogEntry[]> {
+  async list(limit: number, offset: number): Promise<AuditLogEntry[]> {
     const rows = this.ctx.db
       .prepare(
-        'SELECT id, ts, actorId, username, action, target FROM audit_log ORDER BY id DESC LIMIT ?',
+        'SELECT id, ts, actorId, username, action, target FROM audit_log ORDER BY id DESC LIMIT ? OFFSET ?',
       )
-      .all(limit) as Array<{
+      .all(limit, offset) as Array<{
       id: number;
       ts: string;
       actorId: string;
@@ -53,5 +53,10 @@ export class SqliteAuditRepository implements AuditRepository {
       action: r.action,
       target: r.target,
     }));
+  }
+
+  async count(): Promise<number> {
+    const row = this.ctx.db.prepare('SELECT COUNT(*) as n FROM audit_log').get() as { n: number };
+    return row.n;
   }
 }

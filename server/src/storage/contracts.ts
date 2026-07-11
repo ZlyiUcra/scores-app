@@ -302,15 +302,16 @@ export interface AuditEntry {
   target: string;
 }
 
-/** Append-only audit trail. No reads in the app yet (query the table directly);
- * a viewer UI is a separate front. */
+/** Append-only audit trail, read by the paginated admin viewer. */
 export interface AuditRepository {
   /** Append one record. Best-effort at the caller: a persist failure rejects
    * (STORE_WRITE_FAILED) and the caller swallows it so audit never breaks the
    * audited action. */
   append(entry: AuditEntry): Promise<void>;
-  /** Newest-first rows bounded by `limit`, for the admin viewer. */
-  list(limit: number): Promise<AuditLogEntry[]>;
+  /** Newest-first page of rows: `limit` rows starting at `offset`. */
+  list(limit: number, offset: number): Promise<AuditLogEntry[]>;
+  /** Total row count, for the pager. */
+  count(): Promise<number>;
 }
 
 /** Everything a storage driver provides. One instance per process. */

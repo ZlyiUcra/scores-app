@@ -203,12 +203,12 @@ export interface AdminUserView {
 }
 
 /** Generic paginated list envelope, reused by admin listings. */
-export interface Paginated<T> {
+export type Paginated<T> = {
   items: T[];
   total: number;
   page: number;
   pageSize: number;
-}
+};
 
 // ---- REST payloads ----
 
@@ -313,14 +313,14 @@ export interface ApiError {
 }
 
 /** One row of the admin audit trail (who did what, and to what). */
-export interface AuditLogEntry {
+export type AuditLogEntry = {
   id: number;
   ts: string;
   actorId: string;
   username: string;
   action: string;
   target: string;
-}
+};
 
 // ---- Socket event names & payload map ----
 

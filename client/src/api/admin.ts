@@ -119,8 +119,13 @@ export const adminApi = {
       method: 'POST',
     }),
 
-  // Audit trail (newest first, server-bounded).
-  listAudit: () => request<{ entries: AuditLogEntry[] }>('/admin/audit'),
+  // Audit trail (newest first, paginated).
+  listAudit: (params: { page: number; pageSize: number }) => {
+    const qs = new URLSearchParams();
+    qs.set('page', String(params.page));
+    qs.set('pageSize', String(params.pageSize));
+    return request<Paginated<AuditLogEntry>>(`/admin/audit?${qs.toString()}`);
+  },
 
   // Full-tournament JSON snapshot (manual backup). NOT request()-based: the
   // response is a file download (blob), not a JSON envelope. The httpOnly

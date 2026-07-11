@@ -1,4 +1,4 @@
-import type { AuditLogEntry, AuthUser } from '../../shared/types.js';
+import type { AuditLogEntry, AuthUser, Paginated } from '../../shared/types.js';
 import { auditRepository } from './storage/index.js';
 
 /** Who performed the action - id (joins to users) plus the readable username. */
@@ -42,7 +42,12 @@ export function audit(actor: Actor, action: string, target: string): void {
     .catch((err: unknown) => console.error('[audit] persist failed:', err));
 }
 
-/** Newest-first audit rows for the admin viewer (bounded by `limit`). */
-export function listAudit(limit = 200): Promise<AuditLogEntry[]> {
-  return auditRepository.list(limit);
+/** Newest-first paginated audit rows for the admin viewer. */
+export async function listAudit(page: number, pageSize: number): Promise<Paginated<AuditLogEntry>> {
+  const offset = (page - 1) * pageSize;
+  const [items, total] = await Promise.all([
+    auditRepository.list(pageSize, offset),
+    auditRepository.count(),
+  ]);
+  return { items, total, page, pageSize };
 }

@@ -277,12 +277,26 @@ export const updateUserSchema = z
     message: 'Nothing to update.',
   });
 
-/** Admin user-list query: optional username filter + bounded pagination. */
-export const listUsersQuerySchema = z.object({
-  q: z.string().trim().max(64).optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+// Shared by every paginated admin listing - one named ceiling for both page
+// and pageSize, so neither number drifts independently in a second schema.
+const pagination = {
+  maxPage: 100_000,
+  maxPageSize: 100,
+  defaultPageSize: 20,
+};
+
+const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).max(pagination.maxPage).default(1),
+  pageSize: z.coerce.number().int().min(1).max(pagination.maxPageSize).default(pagination.defaultPageSize),
 });
+
+/** Admin user-list query: optional username filter + bounded pagination. */
+export const listUsersQuerySchema = paginationQuerySchema.extend({
+  q: z.string().trim().max(64).optional(),
+});
+
+/** Admin audit-trail query: bounded pagination, newest first. */
+export const listAuditQuerySchema = paginationQuerySchema;
 
 // ---- Admin: tournament import ----
 
@@ -377,7 +391,11 @@ export const tournamentExportSchema = z
  * envelope repeated across the routes; the throw rides the route's try/catch +
  * next(err) to the error middleware, so the wire shape is unchanged.
  */
-export function parseOrThrow<T>(schema: z.ZodType<T>, input: unknown, fallback: string): T {
+export function parseOrThrow<S extends z.ZodTypeAny>(
+  schema: S,
+  input: unknown,
+  fallback: string,
+): z.infer<S> {
   const result = schema.safeParse(input);
   if (!result.success) {
     throw new AppError(AppErrorCode.BadRequest, result.error.issues[0]?.message ?? fallback, 400);
@@ -394,6 +412,7 @@ export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 export type CreateMatchInput = z.infer<typeof createMatchSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type ListUsersQueryInput = z.infer<typeof listUsersQuerySchema>;
+export type ListAuditQueryInput = z.infer<typeof listAuditQuerySchema>;
 export type UpdateMatchInput = z.infer<typeof updateMatchSchema>;
 export type GoalInput = z.infer<typeof goalSchema>;
 export type UpdateBracketInput = z.infer<typeof updateBracketSchema>;

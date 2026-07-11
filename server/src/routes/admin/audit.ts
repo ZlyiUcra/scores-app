@@ -1,12 +1,14 @@
 import { Router } from 'express';
+import { listAuditQuerySchema, parseOrThrow } from '../../validation.js';
 import { listAudit } from '../../audit.js';
 
-/** Admin audit-trail viewer: the most recent admin actions, newest first. */
+/** Admin audit-trail viewer: paginated admin actions, newest first. */
 export const adminAuditRouter = Router();
 
-adminAuditRouter.get('/audit', async (_req, res, next) => {
+adminAuditRouter.get('/audit', async (req, res, next) => {
   try {
-    res.json({ entries: await listAudit() });
+    const { page, pageSize } = parseOrThrow(listAuditQuerySchema, req.query, 'Invalid query.');
+    res.json(await listAudit(page, pageSize));
   } catch (err) {
     next(err);
   }

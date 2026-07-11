@@ -1,11 +1,12 @@
 import { useI18n } from '../../../i18n';
 import { formatDay, formatTime } from '../../../lib/format';
+import { Pager } from '../../../components/Pager';
 import { useAdminAudit } from './useAdminAudit';
 
-/** Admin audit-trail viewer: the most recent admin actions, newest first. */
+/** Admin audit-trail viewer: paginated admin actions, newest first. */
 export function AdminAudit() {
   const { t } = useI18n();
-  const { entries, error } = useAdminAudit();
+  const { data, error, page, pageSize, setPage, setPageSize } = useAdminAudit();
 
   return (
     <div className="admin-panel">
@@ -22,7 +23,7 @@ export function AdminAudit() {
             </tr>
           </thead>
           <tbody>
-            {entries?.map((e) => (
+            {data?.items.map((e) => (
               <tr key={e.id}>
                 <td className="muted">{formatDay(e.ts)} {formatTime(e.ts)}</td>
                 <td>{e.username}</td>
@@ -30,12 +31,20 @@ export function AdminAudit() {
                 <td className="muted">{e.target}</td>
               </tr>
             ))}
-            {entries && entries.length === 0 && (
+            {data && data.items.length === 0 && (
               <tr><td colSpan={4} className="muted">{t('adminAudit.empty')}</td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <Pager
+        page={page}
+        total={data?.total ?? 0}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 }
