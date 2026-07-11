@@ -395,7 +395,19 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .tag { margin-left: 0.4rem; font-size: 0.65rem; background: var(--accent-2); color: #fff; padding: 0.05rem 0.35rem; border-radius: 999px; }
 
 .pager { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
-.pager__size { display: flex; align-items: center; gap: 0.4rem; }
+.pager__size { display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+/* Force monochrome (text) presentation so the nav glyphs take the button's
+   own `color` - they follow the text colour and any future theme rather than
+   rendering as a fixed blue emoji. */
+.pager__nav { font-variant-emoji: text; }
+/* A page size is at most three digits, so keep the select and custom input to
+   a ~4-char box instead of stretching to the full container width. */
+.pager__select { width: 4.5rem; padding-left: 0.5rem; padding-right: 0.4rem; }
+/* Drop the number spinner so a 3-digit page size is not squeezed by the
+   up/down arrows (Chrome uses the pseudo-elements, Firefox the appearance). */
+.pager__num { appearance: textfield; -moz-appearance: textfield; }
+.pager__num::-webkit-outer-spin-button,
+.pager__num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
 .team-chip {

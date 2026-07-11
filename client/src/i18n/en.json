@@ -2,7 +2,7 @@
   "header": { "logout": "Log out", "menu": "Menu", "account": "Account", "language": "Language" },
   "app": { "loading": "Loading…", "loadError": "Could not load data. Check your connection.", "retry": "Retry" },
   "common": { "deleteConfirm": "Delete? This cannot be undone.", "confirm": "Confirm", "cancel": "Cancel" },
-  "pager": { "prev": "← Prev", "next": "Next →", "page": "Page {page} / {total}", "perPage": "/ page", "custom": "Custom…" },
+  "pager": { "first": "First page", "prev": "Previous page", "next": "Next page", "last": "Last page", "page": "Page {page} / {total}", "perPage": "/ page", "custom": "№…" },
   "role": { "admin": "admin", "viewer": "viewer" },
   "login": {
     "subtitle": "Local football tournament",

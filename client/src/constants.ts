@@ -10,3 +10,14 @@ export const actionIcons = {
   exportPdf: '\u{1F4C4}',
   import: '\u{1F4E5}',
 };
+
+/** Media-control glyphs for pager navigation, escaped to keep the source
+ * ascii: skip-to-first, reverse (prev), play (next), skip-to-last. The
+ * trailing U+FE0E forces TEXT (monochrome) presentation so the glyphs inherit
+ * the button's `color` (themeable) instead of rendering as a colour emoji. */
+export const pagerIcons = {
+  first: '\u23EE\uFE0E',
+  prev: '\u25C0\uFE0E',
+  next: '\u25B6\uFE0E',
+  last: '\u23ED\uFE0E',
+};

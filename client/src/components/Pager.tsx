@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { pagerIcons } from '../constants';
 import { useI18n } from '../i18n';
 
 const pageSizeOptions = [10, 20, 50, 100];
@@ -45,16 +46,26 @@ export function Pager({ page, total, pageSize, onPageChange, onPageSizeChange }:
 
   return (
     <div className="pager">
-      <button className="btn btn--sm" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
-        {t('pager.prev')}
+      <button className="btn btn--sm pager__nav" disabled={page <= 1} title={t('pager.first')} aria-label={t('pager.first')}
+        onClick={() => onPageChange(1)}>
+        {pagerIcons.first}
+      </button>
+      <button className="btn btn--sm pager__nav" disabled={page <= 1} title={t('pager.prev')} aria-label={t('pager.prev')}
+        onClick={() => onPageChange(page - 1)}>
+        {pagerIcons.prev}
       </button>
       <span className="muted">{t('pager.page', { page, total: totalPages })}</span>
-      <button className="btn btn--sm" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
-        {t('pager.next')}
+      <button className="btn btn--sm pager__nav" disabled={page >= totalPages} title={t('pager.next')} aria-label={t('pager.next')}
+        onClick={() => onPageChange(page + 1)}>
+        {pagerIcons.next}
+      </button>
+      <button className="btn btn--sm pager__nav" disabled={page >= totalPages} title={t('pager.last')} aria-label={t('pager.last')}
+        onClick={() => onPageChange(totalPages)}>
+        {pagerIcons.last}
       </button>
       <label className="pager__size">
         <select
-          className="input"
+          className="input pager__select"
           value={customMode ? 'custom' : String(pageSize)}
           onChange={(e) => selectPageSize(e.target.value)}
         >
@@ -65,7 +76,7 @@ export function Pager({ page, total, pageSize, onPageChange, onPageSizeChange }:
         </select>
         {customMode && (
           <input
-            className="input input--num"
+            className="input input--num pager__num"
             type="number"
             step={10}
             min={minPageSize}
