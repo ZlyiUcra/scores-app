@@ -6,11 +6,11 @@ import { AuthProvider } from './auth/AuthContext';
 import { App } from './App';
 import './styles.css';
 
-// Entry point: provider order matters — i18n wraps auth so even the login
+// Entry point: provider order matters - i18n wraps auth so even the login
 // screen is translatable.
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {/* Opt in to the v7 behaviors early — silences the future-flag warnings
+    {/* Opt in to the v7 behaviors early - silences the future-flag warnings
         and makes the eventual react-router upgrade a no-op here. */}
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <I18nProvider>

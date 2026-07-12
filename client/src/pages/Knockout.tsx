@@ -9,7 +9,7 @@ import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 
-/** Knockout page: the full bracket plus, for admins, the bracket-wide reset —
+/** Knockout page: the full bracket plus, for admins, the bracket-wide reset -
  * the knockout pages are the only place playoff state is managed. A finished
  * tournament is an archive, so the reset is hidden there. */
 export function Knockout() {
@@ -26,7 +26,7 @@ export function Knockout() {
     (m) => ('seed' in m.home && m.home.projected) || ('seed' in m.away && m.away.projected),
   );
 
-  // The bracket-wide reset lives HERE — the knockout pages are the one and
+  // The bracket-wide reset lives HERE - the knockout pages are the one and
   // only place playoff state is managed (the /admin/bracket panel is gone).
   async function doReset() {
     setBusy(true);

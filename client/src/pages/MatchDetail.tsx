@@ -8,7 +8,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { AdminControls } from '../components/AdminControls';
 
 /** One group game, live: scoreboard for everyone, the click-driven scoring
- * controls for admins (hidden in a finished tournament — it is an archive).
+ * controls for admins (hidden in a finished tournament - it is an archive).
  * Lives at /t/:tid/match/:id (mirrored by /t/:tid/ko/:slot for knockouts). */
 export function MatchDetail() {
   const { id = '' } = useParams();

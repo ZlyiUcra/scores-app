@@ -24,7 +24,7 @@ type Props = {
  * A date-range field: one input showing "start - end" plus a calendar where the
  * first click sets the start, the second the end (auto-ordered), and the days
  * between are highlighted. The text is editable too, so a picked range can be
- * corrected by hand. Date-only — pair with a time-range control for intervals.
+ * corrected by hand. Date-only - pair with a time-range control for intervals.
  * Shares the calendar and edge-aware pop-up with DateField.
  */
 export function DateRangeField({

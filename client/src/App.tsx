@@ -51,7 +51,7 @@ function LegacyRedirect({ page }: { page: 'results' | 'ko' | 'teams' | 'match' }
   return <Navigate to={`/t/${defaultId}/${tail}`} replace />;
 }
 
-/** /admin index -> the default tab, keeping the query string — a plain string
+/** /admin index -> the default tab, keeping the query string - a plain string
  * Navigate would drop `?t=` and lose the tournament selection carried in. */
 function AdminIndexRedirect() {
   const { search } = useLocation();
@@ -91,7 +91,7 @@ export function App() {
             <Route path="match/:id" element={<MatchDetail />} />
           </Route>
           <Route path="/help" element={<Help />} />
-          {/* Pre-tournament URLs — keep old bookmarks alive. */}
+          {/* Pre-tournament URLs - keep old bookmarks alive. */}
           <Route path="/results" element={<LegacyRedirect page="results" />} />
           <Route path="/ko" element={<LegacyRedirect page="ko" />} />
           <Route path="/ko/:slot" element={<LegacyRedirect page="ko" />} />

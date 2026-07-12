@@ -6,7 +6,7 @@ type Props = {
   view: CalendarView;
   onView: (v: CalendarView) => void;
   labels: DateLabels;
-  /** Extra class(es) for a day cell — selection / range state; '' for none. */
+  /** Extra class(es) for a day cell - selection / range state; '' for none. */
   dayClass: (d: number) => string;
   onPick: (d: number) => void;
 };

@@ -3,7 +3,7 @@ import { useI18n } from '../i18n';
 
 /**
  * The CONTESTED filler tier: teams of one group place (3rd, 4th or 5th)
- * fighting cross-group for the leftover bracket spots — tiers that qualify
+ * fighting cross-group for the leftover bracket spots - tiers that qualify
  * wholesale are not shown at all. Rows arrive pre-sorted in qualification
  * order (same comparator the bracket seeding uses); the first `qualifyCount`
  * advance. All rows share one place, so the title names it (`row.rank`).

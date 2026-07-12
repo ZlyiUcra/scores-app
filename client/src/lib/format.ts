@@ -1,6 +1,6 @@
 import { p2 } from './dateFormat';
 
-/** "19h30" (or "19г30" in uk) — the app-wide kickoff-time format; empty when
+/** "19h30" (or with the uk locale's own hour letter) - the app-wide kickoff-time format; empty when
  * unset/invalid. `hourIndicator` is the locale's hour/minute letter (i18n
  * `date.hourIndicator`) - this stays a plain, locale-free primitive; see
  * useKickoffFormat.ts for the app-bound version. */
@@ -10,7 +10,7 @@ export function formatTime(iso: string, hourIndicator: string): string {
   return `${p2(d.getHours())}${hourIndicator}${p2(d.getMinutes())}`;
 }
 
-/** "03.07.2026 19h30" — date + hour together, for anywhere a match's
+/** "03.07.2026 19h30" - date + hour together, for anywhere a match's
  * scheduled start needs the date alongside the hour (a tournament can span
  * more than one day). Empty when unset/invalid. */
 export function formatKickoff(iso: string, hourIndicator: string): string {
@@ -18,7 +18,7 @@ export function formatKickoff(iso: string, hourIndicator: string): string {
   return time ? `${formatDay(iso)} ${time}` : '';
 }
 
-// The app-wide DATE format is dd.mm.yyyy — both in displays and in the typed
+// The app-wide DATE format is dd.mm.yyyy - both in displays and in the typed
 // date inputs (native pickers follow the OS locale, so we do not use them).
 
 /** Date -> "03.07.2026". A date-only string ("2026-07-03") is reordered as-is

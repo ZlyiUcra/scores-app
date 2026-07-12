@@ -11,7 +11,7 @@ import { participantName, slotShort } from '../lib/bracketLabels';
 /** One knockout game, mirroring MatchDetail: scoreboard for everyone, the
  * click-driven slot controls for admins (hidden in a finished tournament).
  * Lives at /t/:tid/ko/:slot, reached either from the bracket tree or from a
- * knockout row on the results list — the back link follows wherever the
+ * knockout row on the results list - the back link follows wherever the
  * incoming Link tagged via `state.from` (falls back to the bracket tree for
  * a direct URL/refresh, matching the pre-existing behavior). */
 export function KnockoutDetail() {
@@ -55,7 +55,7 @@ export function KnockoutDetail() {
           <div className="scoreboard__short">{homeShort}</div>
         </div>
         <div className="scoreboard__center">
-          {/* Always show the live counter — a frozen (scheduled) knockout game
+          {/* Always show the live counter - a frozen (scheduled) knockout game
               keeps its score, and the admin edits it right below. */}
           <div className="scoreboard__score">{`${m.homeScore} : ${m.awayScore}`}</div>
           {m.homePens != null && m.awayPens != null && (
@@ -71,8 +71,8 @@ export function KnockoutDetail() {
 
       <div className="detail__meta">
         {t(`bracket.${m.round}`)} ({slotShort(m.slot, t)})
-        {m.startsAt ? ` · ${formatKickoff(m.startsAt)}` : ''}
-        {m.field ? ` · ${m.field}` : ''}
+        {m.startsAt ? ` \u00B7 ${formatKickoff(m.startsAt)}` : ''}
+        {m.field ? ` \u00B7 ${m.field}` : ''}
       </div>
 
       {isAdmin && !readOnly && <BracketSlotControls m={m} />}

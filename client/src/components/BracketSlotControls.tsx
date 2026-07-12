@@ -17,9 +17,9 @@ function overrideValue(p: BracketParticipant): string {
 /**
  * Click-driven slot controls, mirroring the group-match AdminControls: every
  * click PATCHes immediately (guarded by expectedRev) and the authoritative
- * state comes back to everyone over the socket broadcast — no save button.
+ * state comes back to everyone over the socket broadcast - no save button.
  * Kick-off time is the one typed field; it commits on blur.
- * Rendered only for admins (UX) — the server's requireAdmin is the real gate.
+ * Rendered only for admins (UX) - the server's requireAdmin is the real gate.
  */
 export function BracketSlotControls({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
@@ -63,7 +63,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
   const patch = (p: Omit<UpdateBracketRequest, 'expectedRev'>) =>
     run(() => adminApi.updateBracketSlot(tournament.id, m.slot, { ...p, expectedRev: m.rev }));
 
-  // Scoring a scheduled game also starts it — one click instead of two.
+  // Scoring a scheduled game also starts it - one click instead of two.
   const goal = (side: 'home' | 'away', delta: 1 | -1) =>
     patch({
       ...(side === 'home' ? { homeScore: m.homeScore + delta } : { awayScore: m.awayScore + delta }),
@@ -71,7 +71,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
     });
 
   // A decisive shootout needs BOTH pens set, so a click also pins the other
-  // side to 0 when it is still null — otherwise Final would keep rejecting.
+  // side to 0 when it is still null - otherwise Final would keep rejecting.
   const pen = (side: 'home' | 'away', delta: 1 | -1) =>
     patch({
       homePens: (m.homePens ?? 0) + (side === 'home' ? delta : 0),
@@ -79,7 +79,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
     });
 
   // Pin a side to a team ('' = back to auto/derived). Available regardless of
-  // readiness — pinning teams into a pending slot IS the walkover use case.
+  // readiness - pinning teams into a pending slot IS the walkover use case.
   const setOverride = (side: 'home' | 'away', value: string) =>
     patch(
       side === 'home'
@@ -96,7 +96,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
 
   const homeShort = 'team' in m.home ? m.home.team.shortName : '?';
   const awayShort = 'team' in m.away ? m.away.team.shortName : '?';
-  // Pens decide a level knockout. Offered whenever the score is level — a
+  // Pens decide a level knockout. Offered whenever the score is level - a
   // frozen (scheduled) game keeps its score, so pens must stay editable too.
   const showPens = m.homeScore === m.awayScore;
 
@@ -148,14 +148,14 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
               <span className="admin__label">{homeShort}</span>
               <div className="admin__btns">
                 <button disabled={busy} onClick={() => void goal('home', 1)} className="btn btn--goal">{t('adminControls.goal')}</button>
-                <button disabled={busy || m.homeScore <= 0} onClick={() => void goal('home', -1)} className="btn btn--ghost">−</button>
+                <button disabled={busy || m.homeScore <= 0} onClick={() => void goal('home', -1)} className="btn btn--ghost">-</button>
               </div>
             </div>
             <div className="admin__side">
               <span className="admin__label">{awayShort}</span>
               <div className="admin__btns">
                 <button disabled={busy} onClick={() => void goal('away', 1)} className="btn btn--goal">{t('adminControls.goal')}</button>
-                <button disabled={busy || m.awayScore <= 0} onClick={() => void goal('away', -1)} className="btn btn--ghost">−</button>
+                <button disabled={busy || m.awayScore <= 0} onClick={() => void goal('away', -1)} className="btn btn--ghost">-</button>
               </div>
             </div>
           </div>
@@ -165,11 +165,11 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
               <span className="muted">{t('adminBracket.pens')}</span>
               <div className="admin__btns">
                 <button disabled={busy} onClick={() => void pen('home', 1)} className="btn btn--sm">{homeShort} +1</button>
-                <button disabled={busy || (m.homePens ?? 0) <= 0} onClick={() => void pen('home', -1)} className="btn btn--sm btn--ghost">−</button>
+                <button disabled={busy || (m.homePens ?? 0) <= 0} onClick={() => void pen('home', -1)} className="btn btn--sm btn--ghost">-</button>
               </div>
               <div className="admin__btns">
                 <button disabled={busy} onClick={() => void pen('away', 1)} className="btn btn--sm">{awayShort} +1</button>
-                <button disabled={busy || (m.awayPens ?? 0) <= 0} onClick={() => void pen('away', -1)} className="btn btn--sm btn--ghost">−</button>
+                <button disabled={busy || (m.awayPens ?? 0) <= 0} onClick={() => void pen('away', -1)} className="btn btn--sm btn--ghost">-</button>
               </div>
             </div>
           )}
@@ -178,7 +178,7 @@ export function BracketSlotControls({ m }: { m: BracketMatch }) {
             <button disabled={busy || m.status === 'live'} onClick={() => void patch({ status: 'live' })} className="btn btn--sm">{t('adminControls.start')}</button>
             <button disabled={busy || m.status === 'finished'} onClick={() => void patch({ status: 'finished' })} className="btn btn--sm">{t('adminControls.final')}</button>
             {/* Freezes the game back to scheduled KEEPING the score (still
-                editable) — clearing everything is what the bracket-wide reset
+                editable) - clearing everything is what the bracket-wide reset
                 is for. A 0:0 reset IS the pristine state, so pens go too. */}
             <button
               disabled={busy || m.status === 'scheduled'}

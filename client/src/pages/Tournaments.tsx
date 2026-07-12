@@ -14,7 +14,7 @@ function TournamentCard({ tour }: { tour: Tournament }) {
   const { t } = useI18n();
   const dates =
     tour.startsAt || tour.endsAt
-      ? `${tour.startsAt ? formatDay(tour.startsAt) : '…'} - ${tour.endsAt ? formatDay(tour.endsAt) : '…'}`
+      ? `${tour.startsAt ? formatDay(tour.startsAt) : '\u2026'} - ${tour.endsAt ? formatDay(tour.endsAt) : '\u2026'}`
       : null;
   return (
     <Link to={`/t/${tour.id}`} className={`tour-card tour-card--${tour.status}`}>
@@ -57,7 +57,7 @@ function TournamentSection({ status, items, defaultOpen }: { status: TournamentS
   );
 }
 
-/** The tournament picker: every tournament grouped by status — active ones on
+/** The tournament picker: every tournament grouped by status - active ones on
  * top (the "what is happening now" answer), then upcoming, then the archive.
  * There is no socket event for tournaments, so the list re-fetches on mount. */
 export function Tournaments() {

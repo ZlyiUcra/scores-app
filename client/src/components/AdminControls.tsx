@@ -6,7 +6,7 @@ import { useApiErrorMessage } from '../hooks/useApiErrorMessage';
 
 /**
  * Admin-only controls. Rendered only for admins (UX), but the real gate is the
- * server's requireAdmin check — a viewer poking the API directly gets 403.
+ * server's requireAdmin check - a viewer poking the API directly gets 403.
  *
  * We don't optimistically mutate local state here: the authoritative result
  * arrives back over the socket as a rev-bumped diff, keeping every client in
@@ -44,14 +44,14 @@ export function AdminControls({ match }: { match: Match }) {
           <span className="admin__label">{match.home.shortName}</span>
           <div className="admin__btns">
             <button disabled={busy} onClick={() => goal('home', 1)} className="btn btn--goal">{t('adminControls.goal')}</button>
-            <button disabled={busy || match.homeScore <= 0} onClick={() => goal('home', -1)} className="btn btn--ghost">−</button>
+            <button disabled={busy || match.homeScore <= 0} onClick={() => goal('home', -1)} className="btn btn--ghost">-</button>
           </div>
         </div>
         <div className="admin__side">
           <span className="admin__label">{match.away.shortName}</span>
           <div className="admin__btns">
             <button disabled={busy} onClick={() => goal('away', 1)} className="btn btn--goal">{t('adminControls.goal')}</button>
-            <button disabled={busy || match.awayScore <= 0} onClick={() => goal('away', -1)} className="btn btn--ghost">−</button>
+            <button disabled={busy || match.awayScore <= 0} onClick={() => goal('away', -1)} className="btn btn--ghost">-</button>
           </div>
         </div>
       </div>

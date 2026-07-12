@@ -34,7 +34,7 @@ type Props = {
 /**
  * A time-range field: one input showing "from - to" plus a pop-up with two
  * hour/minute steppers (and an AM/PM toggle when the template is 12-hour). No
- * date and no calendar — just a time interval. Text is editable for quick
+ * date and no calendar - just a time interval. Text is editable for quick
  * correction. Shares the edge-aware / bottom-sheet pop-up with the date fields.
  */
 export function TimeRangeField({

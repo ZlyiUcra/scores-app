@@ -22,7 +22,7 @@ export function Overview() {
   });
 
   // Rows up to autoRank are green; the contestedRank place is blue (see
-  // StandingsTable) — an exact bracket fit has no contest and shows nothing.
+  // StandingsTable) - an exact bracket fit has no contest and shows nothing.
   const { autoRank, contested, contestedSpots, contestedRank } = useQualificationTiers(tables);
 
   return (

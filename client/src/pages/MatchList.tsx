@@ -10,7 +10,7 @@ import { useKickoffFormat } from '../lib/useKickoffFormat';
 import { participantName, ROUND_ORDER } from '../lib/bracketLabels';
 import { isMatchPlayed, isBracketMatchPlayed, isBracketMatchDecided } from '../lib/matchStatus';
 
-/** Compact result row: time · field · status, then teams with score. Selects
+/** Compact result row: time - field - status, then teams with score. Selects
  * its own match by id (memoized) so one update re-renders only this row. */
 const ResultRow = memo(function ResultRow({ id }: { id: string }) {
   const m = useMatchStore(selectMatch(id));
@@ -23,13 +23,13 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
     <Link to={`${basePath}/match/${m.id}`} className={`rrow rrow--${m.status}`}>
       <div className="rrow__meta">
         <span>{formatKickoff(m.startsAt)}</span>
-        {m.field && <span>· {m.field}</span>}
+        {m.field && <span>{'\u00B7'} {m.field}</span>}
         {/* Same colored status pill as the admin games table. */}
         <span className={`rrow__status chip chip--${m.status}`}>{t(`status.${m.status}`)}</span>
       </div>
       <div className="rrow__teams">
         <span className="rrow__team">{m.home.name}</span>
-        <span className="rrow__score">{played ? `${m.homeScore} : ${m.awayScore}` : '— : —'}</span>
+        <span className="rrow__score">{played ? `${m.homeScore} : ${m.awayScore}` : '- : -'}</span>
         <span className="rrow__team rrow__team--away">{m.away.name}</span>
       </div>
     </Link>
@@ -50,13 +50,13 @@ function BracketResultRow({ m }: { m: BracketMatch }) {
     <Link to={`${basePath}/ko/${m.slot}`} state={{ from: 'results' }} className={`rrow rrow--${m.status}`}>
       <div className="rrow__meta">
         {m.startsAt && <span>{formatKickoff(m.startsAt)}</span>}
-        {m.field && <span>· {m.field}</span>}
+        {m.field && <span>{'\u00B7'} {m.field}</span>}
         <span className={`rrow__status chip chip--${m.status}`}>{t(`status.${m.status}`)}</span>
       </div>
       <div className="rrow__teams">
         <span className="rrow__team">{participantName(m.home, t)}</span>
         <span className="rrow__score">
-          {played ? `${m.homeScore} : ${m.awayScore}` : '— : —'}
+          {played ? `${m.homeScore} : ${m.awayScore}` : '- : -'}
           {decided && ` (${m.homePens} : ${m.awayPens})`}
         </span>
         <span className="rrow__team rrow__team--away">{participantName(m.away, t)}</span>

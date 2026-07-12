@@ -24,7 +24,7 @@ export function slotShort(slot: string, t: Translate): string {
 }
 
 /** Turn a structured seed reference into a localized label (never parse a
- * display string — the ref is the machine key, this is the human text). */
+ * display string - the ref is the machine key, this is the human text). */
 function seedLabel(seed: SeedRef, t: Translate): string {
   switch (seed.kind) {
     case 'qualifier':

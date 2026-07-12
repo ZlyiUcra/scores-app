@@ -14,7 +14,7 @@ type AdminTournamentValue = {
 
 const AdminTournamentContext = React.createContext<AdminTournamentValue | null>(null);
 
-/** Selected admin tournament. Throws outside the scoped admin pages — only they use it. */
+/** Selected admin tournament. Throws outside the scoped admin pages - only they use it. */
 export function useAdminTournament(): AdminTournamentValue {
   const value = React.useContext(AdminTournamentContext);
   if (!value) throw new Error('useAdminTournament outside AdminLayout');
@@ -27,7 +27,7 @@ const scopedRoots = ['/admin/matches', '/admin/squads'];
 
 /**
  * Shared frame for /admin/*: the sub-navigation, a client-side role gate and
- * the TOURNAMENT SELECTOR — shown only on the tournament-scoped tabs (Games,
+ * the TOURNAMENT SELECTOR - shown only on the tournament-scoped tabs (Games,
  * Squads). The selection lives in the `?t=` query param as its single source
  * of truth (reload and deep links restore it; the subnav links carry it across
  * tabs), falling back to the server's default tournament when absent. The
@@ -44,11 +44,11 @@ export function AdminLayout() {
   const listError = useTournamentStore((s) => s.error);
   const { pathname } = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  // Gates URL canonicalization on THIS entry's list refresh — a stale list
+  // Gates URL canonicalization on THIS entry's list refresh - a stale list
   // must not strip a deep link to a just-created tournament.
   const [refreshed, setRefreshed] = useState(false);
 
-  // Refresh the list on entry (tournaments have no socket event) — the admin
+  // Refresh the list on entry (tournaments have no socket event) - the admin
   // may have just created one elsewhere or its status may have changed.
   useEffect(() => {
     void useTournamentStore
@@ -60,7 +60,7 @@ export function AdminLayout() {
   }, []);
 
   const paramId = searchParams.get('t');
-  // No explicit pick in the URL — follow the server's default tournament. An
+  // No explicit pick in the URL - follow the server's default tournament. An
   // id that disappeared (deleted elsewhere) also falls back to the default.
   const tournament =
     tournaments.find((x) => x.id === paramId) ?? tournaments.find((x) => x.id === defaultId) ?? null;
@@ -76,7 +76,7 @@ export function AdminLayout() {
 
   const { error: feedError, reload } = useTournamentFeed(tournament?.id ?? null);
 
-  // Client-side guard is defense-in-depth only — the server's requireAdmin on
+  // Client-side guard is defense-in-depth only - the server's requireAdmin on
   // /api/admin is the real boundary. A non-admin who reaches here sees nothing.
   if (!isAdmin) return <Navigate to="/" replace />;
 

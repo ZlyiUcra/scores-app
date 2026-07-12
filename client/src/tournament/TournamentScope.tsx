@@ -17,7 +17,7 @@ interface TournamentScopeValue {
 
 const TournamentContext = React.createContext<TournamentScopeValue | null>(null);
 
-/** Current tournament scope. Throws outside /t/:tournamentId — pages that use
+/** Current tournament scope. Throws outside /t/:tournamentId - pages that use
  * it are only ever rendered inside the scope route. */
 export function useTournament(): TournamentScopeValue {
   const value = React.useContext(TournamentContext);
@@ -29,7 +29,7 @@ export function useTournament(): TournamentScopeValue {
  * Layout route for /t/:tournamentId/*: validates the id against the fetched
  * tournament list (unknown -> the tournaments page), provides the scope to
  * every child page, and owns the tournament's data lifecycle (see
- * useTournamentFeed) — torn down and rebuilt whenever the id changes.
+ * useTournamentFeed) - torn down and rebuilt whenever the id changes.
  */
 export function TournamentScope() {
   const { tournamentId = '' } = useParams();

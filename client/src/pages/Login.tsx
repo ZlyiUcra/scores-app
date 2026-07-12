@@ -54,7 +54,7 @@ export function Login() {
           ))}
         </div>
 
-        <h1 className="login__title">⚽ Live Scores</h1>
+        <h1 className="login__title">{'\u26BD'} Live Scores</h1>
         <p className="login__sub">{t('login.subtitle')}</p>
 
         <div className="tabs" role="tablist">
@@ -106,7 +106,7 @@ export function Login() {
           {busy ? t('login.submitBusy') : isRegister ? t('login.submitRegister') : t('login.submitLogin')}
         </button>
 
-        {/* Dev-only seed credentials — never shown in a production build. */}
+        {/* Dev-only seed credentials - never shown in a production build. */}
         {import.meta.env.DEV && !isRegister && (
           <div className="login__hint">
             <div><b>{t('login.hintAdminLabel')}</b> admin / admin123</div>

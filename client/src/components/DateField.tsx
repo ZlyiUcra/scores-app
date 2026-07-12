@@ -22,7 +22,7 @@ type Props = {
   value: string | null;
   /** Emits the canonical value (or null) whenever a valid date is entered/picked. */
   onChange: (value: string | null) => void;
-  /** Fired when editing settles (blur out, or the popup closes) — for fields
+  /** Fired when editing settles (blur out, or the popup closes) - for fields
    * that save on blur rather than via a submit button. */
   onCommit?: (value: string | null) => void;
   /** Display/parse template. Tokens: DD MM YYYY HH hh mm A (see dateFormat.ts). */
@@ -38,7 +38,7 @@ type Props = {
 
 /**
  * A date (and optionally time) field: a typed input in a templated format PLUS
- * a calendar pop-up (portalled + edge-aware). Self-contained — it takes a
+ * a calendar pop-up (portalled + edge-aware). Self-contained - it takes a
  * `format` template and `labels` instead of the app's date helpers/i18n, so it
  * can be lifted out and reused. Typing stays the fast path; the calendar assists.
  */

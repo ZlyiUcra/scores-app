@@ -164,7 +164,7 @@ body {
 .scoreboard__short { color: var(--muted); font-size: 0.8rem; }
 .scoreboard__center { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
 /* Center the LIVE/status badge under the score (its default align-self is
-   flex-start, which looks off-centre here — especially now the minute is gone). */
+   flex-start, which looks off-centre here - especially now the minute is gone). */
 .scoreboard__center .badge { align-self: center; }
 .scoreboard__score { font-size: 2.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .detail__meta { text-align: center; color: var(--muted); margin: 0.75rem 0; font-size: 0.85rem; }
@@ -500,7 +500,7 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .standings__table th.standings__pos, .standings__table td.standings__pos,
 .standings__table th.standings__team, .standings__table td.standings__team { text-align: left; }
 .standings__pos { width: 1.5rem; color: var(--muted); }
-/* Best-3rds card sits right under the group grid — same breathing room as the grid gap. */
+/* Best-3rds card sits right under the group grid - same breathing room as the grid gap. */
 .thirds-section { margin-top: 1rem; }
 /* Inside a standings card the head aligns like a plain card title, not a page section. */
 .standings .section-head { margin: 0 0 0.5rem; }
@@ -528,7 +528,7 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
   margin: 0 0 0.25rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
   color: var(--muted); text-align: center;
 }
-/* Equal vertical slabs per match, card centered in its slab — so a later round's
+/* Equal vertical slabs per match, card centered in its slab - so a later round's
    card lands exactly between the two cards that feed it. */
 .bracket-round__matches { display: flex; flex-direction: column; justify-content: space-around; flex: 1; }
 .bracket-match {
@@ -565,7 +565,7 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 
 /* Mirror (wide): a grid where the rounds fan out from the centred final. A card
    and its mirror across the centre share the SAME grid row, so an auto-sized row
-   lifts only that symmetric pair when a name wraps — not every card. Columns and
+   lifts only that symmetric pair when a name wraps - not every card. Columns and
    row count are set inline (they depend on the bracket size). */
 @media (min-width: 900px) {
   .bracket-linear { display: none; }
@@ -689,7 +689,7 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .slot-editor__scores, .slot-editor__pens { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
 .slot-editor__overrides { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; font-size: 0.85rem; }
 .slot-editor__overrides select { flex: 1; min-width: 0; }
-/* Pens sit under the centered goal panels — center them the same way, and set
+/* Pens sit under the centered goal panels - center them the same way, and set
    them off as their own section so they do not crowd the score controls. */
 .slot-editor__pens {
   justify-content: center;
@@ -703,7 +703,7 @@ details.card[open] > summary { margin-bottom: 0.75rem; }
 .team-edit { display: flex; gap: 0.4rem; align-items: center; }
 .team-edit .input { min-width: 0; }
 /* Inline schedule edit: inputs stack vertically so the row grows down, not
-   sideways — the table is nowrap and would overflow into the scroll bar. */
+   sideways - the table is nowrap and would overflow into the scroll bar. */
 .team-edit--stack { flex-direction: column; align-items: stretch; }
 .team-edit--stack .input { width: auto; }
 

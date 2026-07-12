@@ -1,5 +1,5 @@
 // Viewport-aware placement for anchored pop-ups (calendar, menu, tooltip...).
-// Shared so every overlay handles the screen edges the same way — a pop-up must
+// Shared so every overlay handles the screen edges the same way - a pop-up must
 // stay fully visible and off the very edge no matter which corner its field is
 // in. See DateField.tsx for the reference use.
 
@@ -30,7 +30,7 @@ export function computePopoverPosition(
   left = Math.max(margin, left);
 
   // Vertical: below if it fits, else above if it fits, else whichever side has
-  // more room — clamped so the pop never leaves the viewport.
+  // more room - clamped so the pop never leaves the viewport.
   const below = anchor.bottom + gap;
   const above = anchor.top - gap - pop.height;
   let top: number;

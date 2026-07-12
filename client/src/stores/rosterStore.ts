@@ -22,7 +22,7 @@ export const useRosterStore = create<RosterState>((set) => ({
   setRoster: (roster) => set({ groups: roster.groups, teams: roster.teams, players: roster.players }),
 }));
 
-// Narrow selectors — subscribe to just what a component needs.
+// Narrow selectors - subscribe to just what a component needs.
 export const selectGroups = (s: RosterState) => s.groups;
 export const selectTeams = (s: RosterState) => s.teams;
 export const selectPlayers = (s: RosterState) => s.players;

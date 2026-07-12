@@ -18,7 +18,7 @@ interface FeedState {
  * flashes the previous tournament's data), pull the authoritative REST
  * snapshots, then open the live socket into that tournament's room. Torn
  * down and rebuilt whenever the id changes; null connects nothing. Used by
- * the public TournamentScope layout and the admin area — whichever is on
+ * the public TournamentScope layout and the admin area - whichever is on
  * screen owns the feed (they never render together).
  *
  * Returns a feed state so the caller can show a retry instead of a screen of
@@ -35,7 +35,7 @@ export function useTournamentFeed(tournamentId: string | null): FeedState {
     useMatchStore.getState().setSnapshot([]);
     useBracketStore.getState().setBracket(EMPTY_BRACKET);
     useRosterStore.getState().setRoster({ groups: [], teams: [], players: [] });
-    // All three must land for a usable screen — one failure surfaces a retry.
+    // All three must land for a usable screen - one failure surfaces a retry.
     Promise.all([
       api.listMatches(tournamentId).then(({ matches }) => alive && useMatchStore.getState().setSnapshot(matches)),
       api.getBracket(tournamentId).then(({ bracket }) => alive && useBracketStore.getState().setBracket(bracket)),

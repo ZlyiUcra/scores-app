@@ -41,7 +41,7 @@ function Side({ m, side }: { m: BracketMatch; side: 'home' | 'away' }) {
         )}
       </span>
       <span className="bcard__score">
-        {showScore ? score : '—'}
+        {showScore ? score : '-'}
         {pens != null && <sup className="bcard__pens">{pens}</sup>}
       </span>
     </div>
@@ -115,7 +115,7 @@ function slotIndex(m: BracketMatch): number {
  *  - linear: one column per round, left to right, third-place block below;
  *  - mirror (wide screens): the final centred, rounds fanning out to both
  *    wings, third place centred under the final.
- * Each round's matches split in half by slot index — the first half feeds the
+ * Each round's matches split in half by slot index - the first half feeds the
  * left semifinal, the second half the right one. Shows the unformable reason
  * instead when the group setup cannot produce a bracket.
  */

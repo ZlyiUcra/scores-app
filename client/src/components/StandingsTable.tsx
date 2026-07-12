@@ -2,8 +2,8 @@ import type { GroupTable } from '../../../shared/types';
 import { useI18n } from '../i18n';
 
 /** One group's standings table. Rows up to `autoRank` (places that qualify
- * wholesale) are green; the `contestedRank` place — where the leftover bracket
- * spots are fought over cross-group — is blue. */
+ * wholesale) are green; the `contestedRank` place - where the leftover bracket
+ * spots are fought over cross-group - is blue. */
 export function StandingsTable({ table, autoRank, contestedRank }: {
   table: GroupTable;
   autoRank: number;

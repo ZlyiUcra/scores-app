@@ -37,7 +37,7 @@ export function Squads() {
         <section className="card">
           <h3>
             <span className="standings__short">{team.shortName}</span> {team.name}
-            {groupName ? ` · ${groupName}` : ''}
+            {groupName ? ` \u00B7 ${groupName}` : ''}
           </h3>
           {squad.length === 0 ? (
             <p>{t('squads.empty')}</p>

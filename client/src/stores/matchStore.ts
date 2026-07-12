@@ -4,12 +4,12 @@ import type { Match, MatchUpdate } from '../../../shared/types';
 /**
  * Normalized match store keyed by id (a Record, not an array) so a single
  * match update patches one entry in place. Components select their own match
- * by id, so one goal re-renders exactly one row — not the whole list.
+ * by id, so one goal re-renders exactly one row - not the whole list.
  *
  * `order` and `byGroup` are DERIVED views of the map (display order, and the
  * per-group id buckets used by the results/overview pages). They are recomputed
- * only when the set of matches or their schedule/group changes — NOT on a plain
- * score update — so a page that lists matches by group can subscribe to them
+ * only when the set of matches or their schedule/group changes - NOT on a plain
+ * score update - so a page that lists matches by group can subscribe to them
  * and stay off the hot per-goal re-render path.
  */
 interface MatchState {
@@ -104,7 +104,7 @@ export const useMatchStore = create<MatchState>((set) => ({
   setConnected: (v) => set({ connected: v }),
 }));
 
-// Narrow selectors — subscribe to just what a component needs.
+// Narrow selectors - subscribe to just what a component needs.
 export const selectMatch = (id: string) => (s: MatchState) => s.byId[id];
 export const selectOrder = (s: MatchState) => s.order;
 export const selectByGroup = (s: MatchState) => s.byGroup;
