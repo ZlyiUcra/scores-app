@@ -32,7 +32,6 @@
   "date": {
     "hint": "dd.mm.yyyy",
     "hintTime": "dd.mm.yyyy hh:mm",
-    "invalid": "Invalid date - use dd.mm.yyyy.",
     "invalidTime": "Invalid date/time - use dd.mm.yyyy hh:mm.",
     "months": "January,February,March,April,May,June,July,August,September,October,November,December",
     "weekdays": "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
@@ -85,8 +84,6 @@
     "namePlaceholder": "e.g. Summer Cup 2026",
     "location": "Location",
     "locationPlaceholder": "e.g. Central Park, New York",
-    "start": "Start date",
-    "end": "End date",
     "status": "Status",
     "add": "Add tournament",
     "listTitle": "Tournaments",

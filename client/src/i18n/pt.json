@@ -32,7 +32,6 @@
   "date": {
     "hint": "dd.mm.aaaa",
     "hintTime": "dd.mm.aaaa hh:mm",
-    "invalid": "Data inválida - use dd.mm.aaaa.",
     "invalidTime": "Data/hora inválida - use dd.mm.aaaa hh:mm.",
     "months": "Janeiro,Fevereiro,Março,Abril,Maio,Junho,Julho,Agosto,Setembro,Outubro,Novembro,Dezembro",
     "weekdays": "Seg,Ter,Qua,Qui,Sex,Sáb,Dom",
@@ -85,8 +84,6 @@
     "namePlaceholder": "ex. Taça de Verão 2026",
     "location": "Local",
     "locationPlaceholder": "ex. Parque Central, Lisboa",
-    "start": "Data de início",
-    "end": "Data de fim",
     "status": "Estado",
     "add": "Adicionar torneio",
     "listTitle": "Torneios",
