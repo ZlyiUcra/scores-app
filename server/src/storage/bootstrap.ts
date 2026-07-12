@@ -1,8 +1,27 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import bcrypt from 'bcryptjs';
-import type { MatchStatus, Team } from '../../../shared/types.js';
+import type { BracketSlotId, Group, MatchStatus, Player, Team, Tournament } from '../../../shared/types.js';
+import type { BracketResult, SeedTeam } from '../../../shared/tournament.js';
 import { config } from '../config.js';
 import type { Storage, StoredMatch } from './contracts.js';
+
+// Mirrors the fields of services/export.ts's TournamentExport that this
+// module actually reads. Duplicated (not imported) on purpose: storage must
+// not import services (lint-enforced layering), and this module runs from
+// inside storage/index.js's own top-level await, before its singleton
+// exports are assigned - importing services/import.ts here would also be a
+// circular, not-yet-initialized import.
+type DemoExportFile = {
+  tournament: Tournament;
+  groups: Group[];
+  teams: SeedTeam[];
+  players: Player[];
+  matches: StoredMatch[];
+  bracket: Partial<Record<BracketSlotId, BracketResult>>;
+};
 
 /**
  * Driver-neutral first-boot bootstrap. Runs through the storage CONTRACTS
@@ -21,13 +40,16 @@ export async function runBootstrap(storage: Storage): Promise<void> {
   let tournaments = await storage.tournaments.list();
   if (tournaments.length === 0) {
     // Loud on purpose: an empty production database is either a genuine
-    // first deploy or a wiped ephemeral disk, and the two look identical
+    // first deploy or a wiped ephemeral disk (Render's free tier has no
+    // persistent disk, so a restart is enough), and the two look identical
     // from here - an operator watching boot logs is the only chance to
     // notice the latter before it is mistaken for the former.
     if (config.isProd) {
-      console.warn('[bootstrap] production database is empty - seeding a fresh default tournament and operator accounts. If this is NOT a first deploy, DATA_DIR points at the wrong place or data was lost.');
+      console.warn('[bootstrap] production database is empty. If this is NOT a first deploy, DATA_DIR points at the wrong place or data was lost.');
+      await seedJoynDemo(storage);
+    } else {
+      await storage.tournaments.create({ name: 'Tournament 1', location: null, startsAt: null, endsAt: null, status: 'active' });
     }
-    await storage.tournaments.create({ name: 'Tournament 1', location: null, startsAt: null, endsAt: null, status: 'active' });
     tournaments = await storage.tournaments.list();
   }
   const tournamentId = tournaments[0].id;
@@ -38,6 +60,106 @@ export async function runBootstrap(storage: Storage): Promise<void> {
     await seedDemoRoster(storage, tournamentId);
   }
   await seedUsers(storage);
+}
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** Locates the bundled Joyn Julho 2026 export at the repo root. Two
+ * candidates for the same reason index.ts resolves client/dist twice: this
+ * module runs either from src/ (tsx) or from dist/server/src/storage/ (tsc
+ * build, rootDir=repo root so the compiled layout mirrors it one level
+ * deeper). */
+function resolveDemoFixturePath(): string | null {
+  const candidates = [
+    path.resolve(__dirname, '..', '..', '..', 'joyn-julho-2026-export.json'),
+    path.resolve(__dirname, '..', '..', '..', '..', '..', 'joyn-julho-2026-export.json'),
+  ];
+  return candidates.find((p) => fs.existsSync(p)) ?? null;
+}
+
+/**
+ * Production-only, empty-database path: seed the real Joyn Julho 2026
+ * tournament (bundled at the repo root) instead of a bare default, so a fresh
+ * or wiped production instance always has something to show a client rather
+ * than an empty shell. Mirrors services/import.ts's importTournament (fresh
+ * ids, remapped references) but operates on the `storage` PARAMETER rather
+ * than the storage/index.js singletons - this function runs from inside
+ * storage/index.js's own top-level await, before those singleton exports are
+ * assigned, so importing services/import.ts here would be a circular,
+ * not-yet-initialized import. Falls back to a bare default tournament if the
+ * fixture is missing: boot must never fail over a missing demo asset.
+ */
+async function seedJoynDemo(storage: Storage): Promise<Tournament> {
+  const fixturePath = resolveDemoFixturePath();
+  if (!fixturePath) {
+    console.warn('[bootstrap] joyn-julho-2026-export.json not found next to the app - seeding a bare default tournament instead.');
+    return storage.tournaments.create({ name: 'Tournament 1', location: null, startsAt: null, endsAt: null, status: 'active' });
+  }
+
+  const file = JSON.parse(fs.readFileSync(fixturePath, 'utf8')) as DemoExportFile;
+
+  const tournament = await storage.tournaments.create({
+    name: file.tournament.name,
+    location: file.tournament.location,
+    startsAt: file.tournament.startsAt,
+    endsAt: file.tournament.endsAt,
+    status: file.tournament.status,
+  });
+
+  const groupIdMap = new Map<string, string>();
+  const createdGroups = await storage.groups.createMany(
+    tournament.id,
+    file.groups.map((g) => g.name),
+  );
+  for (let i = 0; i < file.groups.length; i++) groupIdMap.set(file.groups[i].id, createdGroups[i].id);
+
+  const teamIdMap = new Map<string, string>();
+  const createdTeams = await storage.teams.createMany(
+    tournament.id,
+    file.teams.map((t) => ({
+      name: t.name,
+      shortName: t.shortName,
+      groupId: t.groupId != null ? groupIdMap.get(t.groupId)! : null,
+      groupAddedAt: t.groupAddedAt,
+    })),
+  );
+  for (let i = 0; i < file.teams.length; i++) teamIdMap.set(file.teams[i].id, createdTeams[i].id);
+
+  await storage.players.createMany(
+    file.players.map((p) => ({
+      teamId: teamIdMap.get(p.teamId)!,
+      name: p.name,
+      number: p.number,
+      position: p.position,
+    })),
+  );
+
+  const matchesToSave: StoredMatch[] = file.matches.map((m) => ({
+    id: crypto.randomUUID(),
+    tournamentId: tournament.id,
+    group: groupIdMap.get(m.group)!,
+    homeId: teamIdMap.get(m.homeId)!,
+    awayId: teamIdMap.get(m.awayId)!,
+    homeScore: m.homeScore,
+    awayScore: m.awayScore,
+    status: m.status,
+    startsAt: m.startsAt,
+    field: m.field,
+    rev: m.rev,
+  }));
+  await storage.matches.saveMany(matchesToSave);
+
+  for (const [slot, result] of Object.entries(file.bracket)) {
+    if (!result) continue;
+    await storage.bracket.save(tournament.id, slot, {
+      ...result,
+      homeOverrideId: result.homeOverrideId != null ? teamIdMap.get(result.homeOverrideId)! : null,
+      awayOverrideId: result.awayOverrideId != null ? teamIdMap.get(result.awayOverrideId)! : null,
+    });
+  }
+
+  console.warn(`[bootstrap] seeded the Joyn Julho 2026 demo tournament (${tournament.id}) - ${createdGroups.length} groups, ${createdTeams.length} teams, ${matchesToSave.length} matches.`);
+  return tournament;
 }
 
 /** Demo groups/teams/matches/players - ONLY when all three collections are
