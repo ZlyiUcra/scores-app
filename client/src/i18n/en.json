@@ -284,5 +284,26 @@
     "pens": "Penalties",
     "notReady": "Teams for this match are not decided yet.",
     "override": "Manual teams", "auto": "Auto"
+  },
+  "apiError": {
+    "accountDisabled": "Your account has been deactivated. Contact an administrator.",
+    "bracketStarted": "Reset the knockout stage before changing groups, teams or group matches.",
+    "crossOrigin": "Cross-origin request rejected.",
+    "drawUnresolved": "A level knockout match needs a penalty result to decide a winner.",
+    "forbidden": "Admin role required.",
+    "groupInUse": "Remove the group's teams before deleting it.",
+    "invalidCredentials": "Wrong username or password.",
+    "lastAdmin": "Cannot remove the last active admin.",
+    "lastTournament": "The last tournament cannot be deleted.",
+    "rateLimited": "Too many attempts. Try again shortly.",
+    "revConflict": "This record changed elsewhere - reload and try again.",
+    "selfLockout": "You cannot do this to your own account.",
+    "slotNotReady": "This knockout match has no teams yet.",
+    "teamHasFixtures": "A team with fixtures cannot change its group.",
+    "tournamentFinished": "This tournament is finished. Set it back to active to make changes.",
+    "tournamentInUse": "Remove the tournament's groups, teams and games before deleting it.",
+    "unauthenticated": "Login required.",
+    "userLimit": "Registration is temporarily closed.",
+    "usernameTaken": "This username is already taken."
   }
 }

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { ApiError } from '../api/client';
 import { useI18n, LANGS } from '../i18n';
+import { useApiErrorMessage } from '../hooks/useApiErrorMessage';
 
 type Mode = 'login' | 'register';
 
@@ -10,6 +10,7 @@ type Mode = 'login' | 'register';
 export function Login() {
   const { login, register } = useAuth();
   const { t, lang, setLang } = useI18n();
+  const errorMessage = useApiErrorMessage();
   const [mode, setMode] = useState<Mode>('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +32,7 @@ export function Login() {
       const action = isRegister ? register : login;
       await action(username.trim(), password);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('login.errorGeneric'));
+      setError(errorMessage(err, 'login.errorGeneric'));
     } finally {
       setBusy(false);
     }

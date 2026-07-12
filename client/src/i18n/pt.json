@@ -284,5 +284,26 @@
     "pens": "Penáltis",
     "notReady": "As equipas deste jogo ainda não estão decididas.",
     "override": "Equipas manuais", "auto": "Auto"
+  },
+  "apiError": {
+    "accountDisabled": "A sua conta foi desativada. Contacte um administrador.",
+    "bracketStarted": "Reinicie a fase eliminatória antes de alterar grupos, equipas ou jogos de grupo.",
+    "crossOrigin": "Pedido de origem cruzada rejeitado.",
+    "drawUnresolved": "Um jogo eliminatório empatado precisa de um resultado de penáltis para decidir o vencedor.",
+    "forbidden": "É necessário o perfil de administrador.",
+    "groupInUse": "Remova as equipas do grupo antes de o eliminar.",
+    "invalidCredentials": "Utilizador ou palavra-passe incorretos.",
+    "lastAdmin": "Não é possível remover o último administrador ativo.",
+    "lastTournament": "O último torneio não pode ser eliminado.",
+    "rateLimited": "Demasiadas tentativas. Tente novamente em breve.",
+    "revConflict": "Este registo foi alterado noutro local - recarregue e tente novamente.",
+    "selfLockout": "Não pode fazer isto à sua própria conta.",
+    "slotNotReady": "Este jogo eliminatório ainda não tem equipas.",
+    "teamHasFixtures": "Uma equipa com jogos marcados não pode mudar de grupo.",
+    "tournamentFinished": "Este torneio está terminado. Reponha-o como ativo para fazer alterações.",
+    "tournamentInUse": "Remova os grupos, equipas e jogos do torneio antes de o eliminar.",
+    "unauthenticated": "É necessário iniciar sessão.",
+    "userLimit": "O registo está temporariamente encerrado.",
+    "usernameTaken": "Este nome de utilizador já está em uso."
   }
 }

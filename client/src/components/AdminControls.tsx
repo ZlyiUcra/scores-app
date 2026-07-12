@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { Match, MatchStatus } from '../../../shared/types';
-import { api, ApiError } from '../api/client';
+import { api } from '../api/client';
 import { useI18n } from '../i18n';
+import { useApiErrorMessage } from '../hooks/useApiErrorMessage';
 
 /**
  * Admin-only controls. Rendered only for admins (UX), but the real gate is the
@@ -13,6 +14,7 @@ import { useI18n } from '../i18n';
  */
 export function AdminControls({ match }: { match: Match }) {
   const { t } = useI18n();
+  const errorMessage = useApiErrorMessage();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +24,7 @@ export function AdminControls({ match }: { match: Match }) {
     try {
       await action();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('adminControls.error'));
+      setError(errorMessage(err, 'adminControls.error'));
     } finally {
       setBusy(false);
     }

@@ -2,11 +2,12 @@ import { useState, type FormEvent } from 'react';
 import type { Match, Tournament, TournamentStatus } from '../../../../../shared/types';
 import { computeStandings } from '../../../../../shared/tournament';
 import { adminApi } from '../../../api/admin';
-import { api, ApiError } from '../../../api/client';
+import { api } from '../../../api/client';
 import { useTournamentStore } from '../../../stores/tournamentStore';
 import { useI18n } from '../../../i18n';
 import type { DateRange } from '../../../components/DateRangeField';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { computeQualificationTiers } from '../../../hooks/useQualificationTiers';
 import { downloadTournamentReport } from '../../../lib/pdfReport';
 
@@ -21,6 +22,7 @@ const defaultPageSize = 20;
  */
 export function useAdminTournaments() {
   const { t } = useI18n();
+  const errorMessage = useApiErrorMessage();
   const tournaments = useTournamentStore((s) => s.tournaments);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -57,7 +59,7 @@ export function useAdminTournaments() {
       const { tournaments: list, defaultId } = await api.listTournaments();
       useTournamentStore.getState().setTournaments(list, defaultId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t(fallback));
+      setError(errorMessage(err, fallback));
     } finally {
       setBusy(false);
     }
@@ -122,7 +124,7 @@ export function useAdminTournaments() {
       a.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('adminTournaments.errorExport'));
+      setError(errorMessage(err, 'adminTournaments.errorExport'));
     } finally {
       setBusy(false);
     }
@@ -160,7 +162,7 @@ export function useAdminTournaments() {
       );
     } catch (err) {
       console.error('[export] PDF report generation failed:', err);
-      setError(err instanceof ApiError ? err.message : t('adminTournaments.errorExportPdf'));
+      setError(errorMessage(err, 'adminTournaments.errorExportPdf'));
     } finally {
       setBusy(false);
     }
@@ -185,7 +187,7 @@ export function useAdminTournaments() {
       const { tournaments: list, defaultId } = await api.listTournaments();
       useTournamentStore.getState().setTournaments(list, defaultId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('adminTournaments.errorImport'));
+      setError(errorMessage(err, 'adminTournaments.errorImport'));
     } finally {
       setBusy(false);
     }

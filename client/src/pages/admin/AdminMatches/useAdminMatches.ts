@@ -7,6 +7,7 @@ import { selectGroups, selectTeams, useRosterStore } from '../../../stores/roste
 import { selectBracket, useBracketStore } from '../../../stores/bracketStore';
 import { useI18n } from '../../../i18n';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { useAdminTournament } from '../AdminLayout';
 
 /** Which card of the panel an error belongs to - every failure surfaces inside
@@ -30,6 +31,7 @@ export enum PanelSection {
  */
 export function useAdminMatches() {
   const { t } = useI18n();
+  const errorMessage = useApiErrorMessage();
   const { tournament } = useAdminTournament();
   const [errors, setErrors] = useState<Partial<Record<PanelSection, string>>>({});
   const order = useMatchStore(selectOrder);
@@ -143,7 +145,7 @@ export function useAdminMatches() {
     try {
       await fn();
     } catch (err) {
-      setErrors({ [section]: err instanceof ApiError ? err.message : t(fallback) });
+      setErrors({ [section]: errorMessage(err, fallback) });
     } finally {
       setBusy(false);
     }

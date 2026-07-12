@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AdminUserView, Paginated } from '../../../../../shared/types';
 import { adminApi } from '../../../api/admin';
-import { ApiError } from '../../../api/client';
 import { useI18n } from '../../../i18n';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 
 const defaultPageSize = 20;
 
@@ -15,6 +15,7 @@ const defaultPageSize = 20;
  */
 export function useAdminUsers() {
   const { t } = useI18n();
+  const errorMessage = useApiErrorMessage();
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSizeState] = useState(defaultPageSize);
@@ -26,9 +27,9 @@ export function useAdminUsers() {
     try {
       setData(await adminApi.listUsers({ q: q.trim() || undefined, page, pageSize }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('adminUsers.errorLoad'));
+      setError(errorMessage(err, 'adminUsers.errorLoad'));
     }
-  }, [q, page, pageSize, t]);
+  }, [q, page, pageSize, errorMessage]);
 
   useEffect(() => {
     void load();
@@ -41,7 +42,7 @@ export function useAdminUsers() {
       await fn();
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('adminUsers.errorAction'));
+      setError(errorMessage(err, 'adminUsers.errorAction'));
     } finally {
       setBusyId(null);
     }

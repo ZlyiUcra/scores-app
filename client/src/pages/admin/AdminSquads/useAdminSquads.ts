@@ -1,10 +1,10 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import type { Player } from '../../../../../shared/types';
 import { adminApi } from '../../../api/admin';
-import { ApiError } from '../../../api/client';
 import { useRosterStore, selectGroups, selectPlayers, selectTeams, bySquadOrder } from '../../../stores/rosterStore';
 import { useI18n } from '../../../i18n';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 
 /**
  * All behavior and state for the AdminSquads panel, kept out of the component
@@ -14,6 +14,7 @@ import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
  */
 export function useAdminSquads() {
   const { t } = useI18n();
+  const errorMessage = useApiErrorMessage();
   const teams = useRosterStore(selectTeams);
   const groups = useRosterStore(selectGroups);
   const players = useRosterStore(selectPlayers);
@@ -62,7 +63,7 @@ export function useAdminSquads() {
     try {
       await fn();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t(fallback));
+      setError(errorMessage(err, fallback));
     } finally {
       setBusy(false);
     }
