@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { config } from '../../config.js';
 
 // SQLite driver internals. node:sqlite is synchronous (DatabaseSync), so the
 // repositories in this directory fulfill the async storage contracts with
@@ -34,9 +35,17 @@ export function openDatabase(dataDir: string): SqliteContext {
   // had no groups table. Groups are now first-class and teams reference them by
   // `groupId`. If we see the old shape, drop the tournament tables so they reseed
   // under the new model. USERS ARE PRESERVED (accounts live only there and are
-  // re-imported from users.json if empty).
+  // re-imported from users.json if empty). In production this destructive shape
+  // is never auto-migrated: refuse to start instead of silently dropping data.
   const teamsInfo = db.prepare('PRAGMA table_info(teams)').all() as Array<{ name: string }>;
   if (teamsInfo.length > 0 && !teamsInfo.some((c) => c.name === 'groupId')) {
+    if (config.isProd) {
+      throw new Error(
+        'Refusing to start: the teams table is in the pre-groups shape and this ' +
+          'destructive migration only runs outside production. Migrate the ' +
+          'database with a development instance first.',
+      );
+    }
     db.exec('DROP TABLE IF EXISTS bracket; DROP TABLE IF EXISTS matches; DROP TABLE IF EXISTS teams; DROP TABLE IF EXISTS groups;');
   }
 
