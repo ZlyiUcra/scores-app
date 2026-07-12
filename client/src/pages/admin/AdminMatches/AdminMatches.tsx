@@ -2,7 +2,6 @@
 // binding into this module (for `<>...</>`), and a bare `Fragment` import
 // collides with it at runtime even though TypeScript is fine with it.
 import { Fragment as ReactFragment } from 'react';
-import { Link } from 'react-router-dom';
 import { TOURNAMENT_FORMAT } from '../../../../../shared/tournament';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { actionIcons } from '../../../constants';
@@ -29,7 +28,6 @@ export function AdminMatches() {
   const {
     errors,
     busy,
-    tournamentId,
     readOnly,
     groups,
     teams,
@@ -365,9 +363,7 @@ export function AdminMatches() {
                         return (
                           <tr key={m.slot}>
                             <td title={`${participantName(m.home, t)} - ${participantName(m.away, t)}`}>
-                              <Link className="table-link" to={`/t/${tournamentId}/ko/${m.slot}`}>
-                                {participantName(m.home, t)} - {participantName(m.away, t)}
-                              </Link>
+                              {participantName(m.home, t)} - {participantName(m.away, t)}
                             </td>
                             <td>
                               {editing ? (

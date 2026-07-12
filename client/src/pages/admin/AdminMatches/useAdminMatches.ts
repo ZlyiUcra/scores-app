@@ -280,7 +280,6 @@ export function useAdminMatches() {
   return {
     errors,
     busy,
-    tournamentId: tournament.id,
     readOnly: tournament.status === 'finished',
     groups,
     teams,
