@@ -71,6 +71,22 @@ function resolveDataDir(): string {
   return path.join(__dirname, '..', 'data');
 }
 
+function resolveTrustProxy(): number | false {
+  const fromEnv = process.env.TRUST_PROXY?.trim();
+  if (!fromEnv) return false;
+
+  const parsed = Number(fromEnv);
+  // A direct-access deployment (no rewriting proxy) must NOT trust
+  // X-Forwarded-For - a client could set it to any value and evade
+  // per-IP rate limiting. Only a value the operator explicitly set names
+  // a real hop count; anything malformed falls back to the safe default.
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    console.warn(`[config] TRUST_PROXY="${fromEnv}" is not a non-negative integer - trusting no proxy.`);
+    return false;
+  }
+  return parsed;
+}
+
 function resolveMaxUsers(): number {
   const fromEnv = process.env.MAX_USERS?.trim();
   if (!fromEnv) return 500;
@@ -102,6 +118,11 @@ export const config = {
    * default relative to the app directory is exactly the shape that loses
    * everything on an ephemeral-filesystem redeploy. */
   dataDir: resolveDataDir(),
+  /** Number of reverse-proxy hops to trust for X-Forwarded-For (Express's
+   * `trust proxy` setting). Defaults to none - a direct-access deployment
+   * must not honor a client-supplied header. Set TRUST_PROXY to the real
+   * hop count behind a rewriting proxy (Render & co: 1). */
+  trustProxy: resolveTrustProxy(),
   /** Cost for every bcrypt hash (auth + seeded accounts). */
   bcryptCost: 12,
   /** Global account cap - blunts registration flooding. Override via MAX_USERS

@@ -17,9 +17,11 @@ import { initSocket } from './socket.js';
 
 const app = express();
 
-// Behind a TLS-terminating proxy (Render & co) the client IP arrives in
-// X-Forwarded-For; rate limiting needs it to bucket per user, not per proxy.
-app.set('trust proxy', 1);
+// Behind a TLS-terminating proxy (Render & co) the client IP arrives via
+// X-Forwarded-For; rate limiting needs it to bucket per user, not per hop.
+// Defaults to trusting no proxy (see config.trustProxy) - a direct-access
+// deployment must not honor a client-supplied header for its own IP.
+app.set('trust proxy', config.trustProxy);
 
 // A whole tournament export (groups/teams/players/matches/bracket) can run
 // tens to a couple hundred KB, well past the global 16 KB cap below - so this
