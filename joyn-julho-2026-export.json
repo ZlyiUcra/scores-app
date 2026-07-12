@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-07-12T16:08:41.764Z",
+  "tournament": {
+    "id": "8f20aef6-0d62-41cd-9604-120566b02547",
+    "name": "Joyn Julho 2026",
+    "location": "Urban Soccer, Monsanto, Lisbon",
+    "startsAt": "2026-07-02",
+    "endsAt": "2026-07-03",
+    "status": "active"
+  },
+  "groups": [
+    {
+      "id": "gA",
+      "name": "Group A"
+    },
+    {
+      "id": "gB",
+      "name": "Group B"
+    },
+    {
+      "id": "gC",
+      "name": "Group C"
+    }
+  ],
+  "teams": [
+    {
+      "id": "t1",
+      "name": "FC Lions",
+      "shortName": "LIO",
+      "groupId": "gA",
+      "groupAddedAt": "2026-07-01T22:29:58.932Z"
+    },
+    {
+      "id": "t2",
+      "name": "Eagles United",
+      "shortName": "EAG",
+      "groupId": "gA",
+      "groupAddedAt": "2026-07-01T22:29:58.933Z"
+    },
+    {
+      "id": "t3",
+      "name": "Blue Sharks",
+      "shortName": "SHA",
+      "groupId": "gA",
+      "groupAddedAt": "2026-07-01T22:29:58.934Z"
+    },
+    {
+      "id": "t4",
+      "name": "Grey Wolves",
+      "shortName": "WOL",
+      "groupId": "gB",
+      "groupAddedAt": "2026-07-01T22:29:58.935Z"
+    },
+    {
+      "id": "t5",
+      "name": "Red Foxes",
+      "shortName": "FOX",
+      "groupId": "gB",
+      "groupAddedAt": "2026-07-01T22:29:58.936Z"
+    },
+    {
+      "id": "t6",
+      "name": "City Bears",
+      "shortName": "BEA",
+      "groupId": "gB",
+      "groupAddedAt": "2026-07-01T22:29:58.937Z"
+    },
+    {
+      "id": "t7",
+      "name": "Sky Hawks",
+      "shortName": "HAW",
+      "groupId": "gC",
+      "groupAddedAt": "2026-07-01T22:29:58.938Z"
+    },
+    {
+      "id": "t8",
+      "name": "Iron Bulls",
+      "shortName": "BUL",
+      "groupId": "gC",
+      "groupAddedAt": "2026-07-01T22:29:58.939Z"
+    },
+    {
+      "id": "t9",
+      "name": "Green Vipers",
+      "shortName": "VIP",
+      "groupId": "gC",
+      "groupAddedAt": "2026-07-01T22:29:58.940Z"
+    }
+  ],
+  "players": [
+    {
+      "id": "p1",
+      "teamId": "t1",
+      "name": "Miguel Costa",
+      "number": 1,
+      "position": "GK"
+    },
+    {
+      "id": "p2",
+      "teamId": "t1",
+      "name": "Diogo Santos",
+      "number": 7,
+      "position": "FW"
+    },
+    {
+      "id": "p3",
+      "teamId": "t1",
+      "name": "Rui Almeida",
+      "number": 10,
+      "position": "MF"
+    }
+  ],
+  "matches": [
+    {
+      "id": "m2",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gA",
+      "homeId": "t1",
+      "awayId": "t3",
+      "homeScore": 1,
+      "awayScore": 1,
+      "status": "finished",
+      "startsAt": "2026-07-01T19:19:00.000Z",
+      "field": "Campo 2",
+      "rev": 5
+    },
+    {
+      "id": "m3",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gA",
+      "homeId": "t2",
+      "awayId": "t3",
+      "homeScore": 0,
+      "awayScore": 3,
+      "status": "finished",
+      "startsAt": "2026-07-01T19:49:58.944Z",
+      "field": "Campo 1",
+      "rev": 1
+    },
+    {
+      "id": "m4",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gB",
+      "homeId": "t4",
+      "awayId": "t5",
+      "homeScore": 1,
+      "awayScore": 0,
+      "status": "finished",
+      "startsAt": "2026-07-01T20:19:58.944Z",
+      "field": "Campo 2",
+      "rev": 1
+    },
+    {
+      "id": "m5",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gB",
+      "homeId": "t4",
+      "awayId": "t6",
+      "homeScore": 2,
+      "awayScore": 2,
+      "status": "finished",
+      "startsAt": "2026-07-01T20:49:58.944Z",
+      "field": "Campo 3",
+      "rev": 1
+    },
+    {
+      "id": "m6",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gB",
+      "homeId": "t5",
+      "awayId": "t6",
+      "homeScore": 1,
+      "awayScore": 0,
+      "status": "finished",
+      "startsAt": "2026-07-01T21:35:58.944Z",
+      "field": "Campo 1",
+      "rev": 10
+    },
+    {
+      "id": "m7",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gC",
+      "homeId": "t7",
+      "awayId": "t8",
+      "homeScore": 3,
+      "awayScore": 2,
+      "status": "finished",
+      "startsAt": "2026-07-01T21:19:58.944Z",
+      "field": "Campo 3",
+      "rev": 1
+    },
+    {
+      "id": "m8",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gC",
+      "homeId": "t7",
+      "awayId": "t9",
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": "finished",
+      "startsAt": "2026-07-01T22:59:58.944Z",
+      "field": "Campo 2",
+      "rev": 8
+    },
+    {
+      "id": "m9",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gC",
+      "homeId": "t8",
+      "awayId": "t9",
+      "homeScore": 0,
+      "awayScore": 0,
+      "status": "finished",
+      "startsAt": "2026-07-01T23:29:58.944Z",
+      "field": "Campo 3",
+      "rev": 57
+    },
+    {
+      "id": "880a3800-dca7-4afe-bd2a-c371339fad14",
+      "tournamentId": "8f20aef6-0d62-41cd-9604-120566b02547",
+      "group": "gA",
+      "homeId": "t1",
+      "awayId": "t2",
+      "homeScore": 0,
+      "awayScore": 0,
+      "status": "finished",
+      "startsAt": "2026-07-02T13:00:00.000Z",
+      "field": "C3",
+      "rev": 19
+    }
+  ],
+  "bracket": {
+    "R8M0": {
+      "homeScore": 0,
+      "awayScore": 0,
+      "homePens": null,
+      "awayPens": null,
+      "status": "scheduled",
+      "field": "",
+      "startsAt": "2027-07-09T13:00:00.000Z",
+      "homeOverrideId": null,
+      "awayOverrideId": null,
+      "rev": 226
+    },
+    "R8M1": {
+      "homeScore": 0,
+      "awayScore": 0,
+      "homePens": null,
+      "awayPens": null,
+      "status": "scheduled",
+      "field": "",
+      "startsAt": null,
+      "homeOverrideId": null,
+      "awayOverrideId": null,
+      "rev": 10
+    },
+    "R4M0": {
+      "homeScore": 0,
+      "awayScore": 0,
+      "homePens": null,
+      "awayPens": null,
+      "status": "scheduled",
+      "field": "",
+      "startsAt": null,
+      "homeOverrideId": null,
+      "awayOverrideId": null,
+      "rev": 8
+    }
+  }
+}
