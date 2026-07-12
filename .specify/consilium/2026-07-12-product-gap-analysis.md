@@ -98,21 +98,33 @@ so this file stays the single source of truth for gap-analysis progress across s
 
 ## Tier 4 - hygiene, bundle into one pass whenever picked up
 
-- [ ] T4.1 README self-contradiction: still describes accounts as living in
+- [x] T4.1 README self-contradiction: still describes accounts as living in
   `server/data/users.json` (README.md:73/222/372) when the real store is `scores.db`;
-  `users.json` is a one-time legacy import only.
-- [ ] T4.2 `<html lang="ua">` is not a valid BCP-47 tag (should be `uk`) and is only synced to the
+  `users.json` is a one-time legacy import only. DONE: commit f91d1fb, all 3 locales.
+- [x] T4.2 `<html lang="ua">` is not a valid BCP-47 tag (should be `uk`) and is only synced to the
   active locale inside `setLang`, not on mount - a fresh English-UI load ships under `lang="ua"`.
-- [ ] T4.3 Dead i18n keys with zero call sites in all three catalogs: `date.invalid`,
-  `adminTournaments.start`, `adminTournaments.end`.
-- [ ] T4.4 Dead `.table-link` CSS class (`client/src/styles.css`), left over from commit
-  `10b2a16`.
-- [ ] T4.5 ASCII-rule violations in client source (U+2212 minus, middle dot, ellipsis, emoji
+  DONE: commit 8d099a1. index.html default -> `en`; a `HTML_LANG` map + a mount-time effect sync
+  `document.documentElement.lang` (ua -> uk). Verified via CDP (3 cases): no stored pref -> `en`;
+  stored `ua` pref, on MOUNT before any click -> `uk`; manual switch -> `uk`.
+- [x] T4.3 Dead i18n keys with zero call sites in all three catalogs: `date.invalid`,
+  `adminTournaments.start`, `adminTournaments.end`. DONE: commit cc23382, re-verified zero call
+  sites (static and template form) before removing; key-parity across en/ua/pt re-confirmed
+  (298 keys each).
+- [x] T4.4 Dead `.table-link` CSS class (`client/src/styles.css`), left over from commit
+  `10b2a16`. DONE: commit e8278be, re-verified zero references first.
+- [x] T4.5 ASCII-rule violations in client source (U+2212 minus, middle dot, ellipsis, emoji
   literals, em-dashes in comments) that bypass the `constants.ts` escaping convention used
-  elsewhere.
-- [ ] T4.6 SCREAMING_SNAKE_CASE constant names outside `constants.ts` (`STORAGE_KEY`, `TOKEN`,
+  elsewhere. DONE: commit 015435e. 66 em-dashes + 4 typographic minus signs (30 files) replaced
+  with ASCII hyphens; the middle-dot separator, the date-fallback ellipsis and the login football
+  emoji kept their exact rendered glyph via `\uXXXX` escapes (JSX-children sites wrapped in an
+  expression, e.g. `{'·'}`). Verified: a full non-ASCII rescan of client/src (excluding i18n
+  JSON and help pages) returns zero hits; CDP against a prod build confirms the login emoji and
+  the results-row middle-dot separator still render as the real glyphs, not escape-sequence text.
+- [x] T4.6 SCREAMING_SNAKE_CASE constant names outside `constants.ts` (`STORAGE_KEY`, `TOKEN`,
   `TIME_TOKENS`, `POPOVER_SHEET_MAX`, `DATETIME_FORMAT`, `STATUSES`) inconsistent with the
-  project's camelCase convention.
+  project's camelCase convention. DONE: commit 7d23319, renamed to camelCase (incl. two
+  descriptive CSS comments referencing `POPOVER_SHEET_MAX` by name); zero remaining references
+  confirmed by a full-repo grep.
 
 ## Зауваження, що вціліли
 
