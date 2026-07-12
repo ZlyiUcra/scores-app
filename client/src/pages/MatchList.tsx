@@ -6,7 +6,7 @@ import { useRosterStore, selectGroups } from '../stores/rosterStore';
 import { useBracketStore, selectBracket } from '../stores/bracketStore';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
-import { formatKickoff } from '../lib/format';
+import { useKickoffFormat } from '../lib/useKickoffFormat';
 import { participantName, ROUND_ORDER } from '../lib/bracketLabels';
 import { isMatchPlayed, isBracketMatchPlayed, isBracketMatchDecided } from '../lib/matchStatus';
 
@@ -16,6 +16,7 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
   const m = useMatchStore(selectMatch(id));
   const { t } = useI18n();
   const { basePath } = useTournament();
+  const { formatKickoff } = useKickoffFormat();
   if (!m) return null;
   const played = isMatchPlayed(m);
   return (
@@ -42,6 +43,7 @@ const ResultRow = memo(function ResultRow({ id }: { id: string }) {
 function BracketResultRow({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
   const { basePath } = useTournament();
+  const { formatKickoff } = useKickoffFormat();
   const played = isBracketMatchPlayed(m);
   const decided = isBracketMatchDecided(m);
   return (

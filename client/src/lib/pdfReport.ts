@@ -100,7 +100,7 @@ function groupMatchesSection(tables: GroupTable[], matchesByGroup: Record<string
       const played = isMatchPlayed(m);
       return [
         `${m.home.name} - ${m.away.name}`,
-        `${m.field ? `${m.field} - ` : ''}${formatKickoff(m.startsAt)}`,
+        `${m.field ? `${m.field} - ` : ''}${formatKickoff(m.startsAt, t('date.hourIndicator'))}`,
         played ? `${m.homeScore} : ${m.awayScore}` : '-',
         t(`status.${m.status}`),
       ];
@@ -122,7 +122,7 @@ function playoffSection(matches: BracketMatch[], t: Translate): Content {
       const score = played ? `${m.homeScore} : ${m.awayScore}${decided ? ` (${m.homePens} : ${m.awayPens})` : ''}` : '-';
       return [
         `${participantName(m.home, t)} - ${participantName(m.away, t)}`,
-        m.startsAt ? formatKickoff(m.startsAt) : '',
+        m.startsAt ? formatKickoff(m.startsAt, t('date.hourIndicator')) : '',
         score,
         t(`status.${m.status}`),
       ];

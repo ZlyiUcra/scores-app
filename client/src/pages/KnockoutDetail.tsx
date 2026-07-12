@@ -5,7 +5,7 @@ import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 import { StatusBadge } from '../components/StatusBadge';
 import { BracketSlotControls } from '../components/BracketSlotControls';
-import { formatKickoff } from '../lib/format';
+import { useKickoffFormat } from '../lib/useKickoffFormat';
 import { participantName, slotShort } from '../lib/bracketLabels';
 
 /** One knockout game, mirroring MatchDetail: scoreboard for everyone, the
@@ -21,6 +21,7 @@ export function KnockoutDetail() {
   const { isAdmin } = useAuth();
   const { t } = useI18n();
   const { basePath, readOnly } = useTournament();
+  const { formatKickoff } = useKickoffFormat();
 
   const fromResults = (location.state as { from?: string } | null)?.from === 'results';
   const backTo = fromResults ? `${basePath}/results` : `${basePath}/ko`;

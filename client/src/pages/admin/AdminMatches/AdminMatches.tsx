@@ -7,7 +7,7 @@ import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { actionIcons } from '../../../constants';
 import { DateField } from '../../../components/DateField';
 import { useDateLabels } from '../../../lib/dateLabels';
-import { formatKickoff } from '../../../lib/format';
+import { useKickoffFormat } from '../../../lib/useKickoffFormat';
 import { participantName, ROUND_ORDER } from '../../../lib/bracketLabels';
 import { useI18n } from '../../../i18n';
 import { useAdminMatches, PanelSection } from './useAdminMatches';
@@ -25,6 +25,7 @@ const DATETIME_FORMAT = 'DD.MM.YYYY HH:mm';
 export function AdminMatches() {
   const { t } = useI18n();
   const dateLabels = useDateLabels();
+  const { formatKickoff } = useKickoffFormat();
   const {
     errors,
     busy,

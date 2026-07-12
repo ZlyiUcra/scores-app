@@ -3,7 +3,7 @@ import type { BracketMatch, BracketView, Round } from '../../../shared/types';
 import { useI18n } from '../i18n';
 import { useTournament } from '../tournament/TournamentScope';
 import { participantName, slotShort } from '../lib/bracketLabels';
-import { formatKickoff } from '../lib/format';
+import { useKickoffFormat } from '../lib/useKickoffFormat';
 
 /** Which side won a finished knockout match ('home' | 'away' | null). */
 function winnerSide(m: BracketMatch): 'home' | 'away' | null {
@@ -51,6 +51,7 @@ function Side({ m, side }: { m: BracketMatch; side: 'home' | 'away' }) {
 function BracketCard({ m }: { m: BracketMatch }) {
   const { t } = useI18n();
   const { basePath } = useTournament();
+  const { formatKickoff } = useKickoffFormat();
   // Final and third-place are the trophy games - a distinct card accent marks
   // them out from the rounds that feed them.
   const trophyClass = m.round === 'final' ? ' bcard--final' : m.round === 'third' ? ' bcard--third' : '';

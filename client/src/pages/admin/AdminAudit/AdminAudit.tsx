@@ -1,11 +1,13 @@
 import { useI18n } from '../../../i18n';
-import { formatDay, formatTime } from '../../../lib/format';
+import { formatDay } from '../../../lib/format';
+import { useKickoffFormat } from '../../../lib/useKickoffFormat';
 import { Pager } from '../../../components/Pager';
 import { useAdminAudit } from './useAdminAudit';
 
 /** Admin audit-trail viewer: paginated admin actions, newest first. */
 export function AdminAudit() {
   const { t } = useI18n();
+  const { formatTime } = useKickoffFormat();
   const { data, error, page, pageSize, setPage, setPageSize } = useAdminAudit();
 
   return (

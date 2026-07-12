@@ -1,17 +1,20 @@
 import { p2 } from './dateFormat';
 
-/** "19h30" — the app-wide kickoff-time format; empty when unset/invalid. */
-export function formatTime(iso: string): string {
+/** "19h30" (or "19г30" in uk) — the app-wide kickoff-time format; empty when
+ * unset/invalid. `hourIndicator` is the locale's hour/minute letter (i18n
+ * `date.hourIndicator`) - this stays a plain, locale-free primitive; see
+ * useKickoffFormat.ts for the app-bound version. */
+export function formatTime(iso: string, hourIndicator: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  return `${p2(d.getHours())}h${p2(d.getMinutes())}`;
+  return `${p2(d.getHours())}${hourIndicator}${p2(d.getMinutes())}`;
 }
 
 /** "03.07.2026 19h30" — date + hour together, for anywhere a match's
  * scheduled start needs the date alongside the hour (a tournament can span
  * more than one day). Empty when unset/invalid. */
-export function formatKickoff(iso: string): string {
-  const time = formatTime(iso);
+export function formatKickoff(iso: string, hourIndicator: string): string {
+  const time = formatTime(iso, hourIndicator);
   return time ? `${formatDay(iso)} ${time}` : '';
 }
 
