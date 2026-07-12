@@ -17,7 +17,7 @@ export const LANGS: Lang[] = ['en', 'ua', 'pt'];
 
 // English is the default and the fallback for any missing key.
 const DICTIONARIES: Record<Lang, unknown> = { en, ua, pt };
-const STORAGE_KEY = 'lang';
+const storageKey = 'lang';
 
 type Params = Record<string, string | number>;
 
@@ -50,7 +50,7 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 function initialLang(): Lang {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = localStorage.getItem(storageKey);
   if (stored === 'uk') return 'ua'; // migrate the pre-rename stored value
   return stored === 'ua' || stored === 'pt' || stored === 'en' ? stored : 'en';
 }
@@ -68,7 +68,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [lang]);
 
   const setLang = useCallback((next: Lang) => {
-    localStorage.setItem(STORAGE_KEY, next);
+    localStorage.setItem(storageKey, next);
     setLangState(next);
   }, []);
 

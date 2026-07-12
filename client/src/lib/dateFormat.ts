@@ -54,13 +54,13 @@ export const DEFAULT_DATE_LABELS: DateLabels = {
 /** Broken-down local date/time. `h24` is always 0-23 regardless of template. */
 export type DateParts = { y: number; mo: number; d: number; h24: number; mi: number };
 
-const TOKEN = /^(YYYY|DD|MM|HH|hh|mm|A)/;
+const tokenPattern = /^(YYYY|DD|MM|HH|hh|mm|A)/;
 
 /** Split a template into tokens and literal separators, in order. */
 export function tokenize(format: string): string[] {
   const out: string[] = [];
   for (let i = 0; i < format.length; ) {
-    const m = TOKEN.exec(format.slice(i));
+    const m = tokenPattern.exec(format.slice(i));
     if (m) {
       out.push(m[0]);
       i += m[0].length;
@@ -72,10 +72,10 @@ export function tokenize(format: string): string[] {
   return out;
 }
 
-const TIME_TOKENS = new Set(['HH', 'hh', 'mm', 'A']);
+const timeTokens = new Set(['HH', 'hh', 'mm', 'A']);
 
 export function formatHasTime(format: string): boolean {
-  return tokenize(format).some((tk) => TIME_TOKENS.has(tk));
+  return tokenize(format).some((tk) => timeTokens.has(tk));
 }
 
 export function formatIsTwelveHour(format: string): boolean {

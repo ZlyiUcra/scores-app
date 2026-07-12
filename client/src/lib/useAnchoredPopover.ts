@@ -3,7 +3,7 @@ import { computePopoverPosition, type Point } from './popover';
 
 /** At or below this viewport width a pop-up becomes a full-width bottom sheet
  * (bigger tap targets, no fiddly anchoring) instead of an anchored pop-up. */
-export const POPOVER_SHEET_MAX = 480;
+export const popoverSheetMax = 480;
 
 export type PopoverPlacement = { style: CSSProperties; sheet: boolean };
 
@@ -24,10 +24,10 @@ export function useAnchoredPopover(opts: {
 }): PopoverPlacement {
   const { open, anchorRef, popRef, onClose, reflowKey } = opts;
   const [pos, setPos] = useState<Point | null>(null);
-  const [sheet, setSheet] = useState(() => typeof window !== 'undefined' && window.innerWidth <= POPOVER_SHEET_MAX);
+  const [sheet, setSheet] = useState(() => typeof window !== 'undefined' && window.innerWidth <= popoverSheetMax);
 
   const reposition = useCallback(() => {
-    const isSheet = window.innerWidth <= POPOVER_SHEET_MAX;
+    const isSheet = window.innerWidth <= popoverSheetMax;
     setSheet(isSheet);
     if (isSheet) return; // a bottom sheet is positioned by CSS, not measured
     const a = anchorRef.current?.getBoundingClientRect();

@@ -290,7 +290,7 @@ body {
 .datefield__timerow { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem; }
 .datefield__timelabel { min-width: 2.5rem; }
 
-/* Phone-width bottom sheet (see useAnchoredPopover POPOVER_SHEET_MAX): full
+/* Phone-width bottom sheet (see useAnchoredPopover popoverSheetMax): full
    width along the bottom, bigger tap targets. */
 .datefield__pop--sheet {
   position: fixed; inset: auto 0 0 0; width: auto; max-width: none;
@@ -343,7 +343,7 @@ body {
 }
 .teamselect__opt--sel .teamselect__short { color: #fff; }
 
-/* Phone-width bottom sheet, matching the date field (see POPOVER_SHEET_MAX). */
+/* Phone-width bottom sheet, matching the date field (see popoverSheetMax). */
 .teamselect__pop--sheet {
   position: fixed; inset: auto 0 0 0; width: auto; max-width: none; max-height: 60vh;
   border-radius: 12px 12px 0 0; padding: 0.75rem 0.75rem 1rem;

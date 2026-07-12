@@ -9,7 +9,7 @@ import { useI18n } from '../../../i18n';
 import { actionIcons } from '../../../constants';
 import { useAdminTournaments } from './useAdminTournaments';
 
-const STATUSES: TournamentStatus[] = ['upcoming', 'active', 'finished'];
+const statuses: TournamentStatus[] = ['upcoming', 'active', 'finished'];
 
 /**
  * Admin tournaments panel: create (name, planned dates, status) and inline-
@@ -67,7 +67,7 @@ export function AdminTournaments() {
           <label className="field">
             <span>{t('adminTournaments.status')}</span>
             <select className="input" value={create.status} onChange={(e) => create.setStatus(e.target.value as TournamentStatus)}>
-              {STATUSES.map((s) => <option key={s} value={s}>{t(`tournaments.${s}`)}</option>)}
+              {statuses.map((s) => <option key={s} value={s}>{t(`tournaments.${s}`)}</option>)}
             </select>
           </label>
           <button className="btn btn--primary" disabled={busy} type="submit">{t('adminTournaments.add')}</button>
@@ -142,7 +142,7 @@ export function AdminTournaments() {
                       {editing ? (
                         <select className="input" value={edit.status} aria-label={t('adminTournaments.status')}
                           onChange={(e) => edit.setStatus(e.target.value as TournamentStatus)}>
-                          {STATUSES.map((s) => <option key={s} value={s}>{t(`tournaments.${s}`)}</option>)}
+                          {statuses.map((s) => <option key={s} value={s}>{t(`tournaments.${s}`)}</option>)}
                         </select>
                       ) : (
                         <span className={`chip chip--${x.status}`}>{t(`tournaments.${x.status}`)}</span>

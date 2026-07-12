@@ -13,7 +13,7 @@ import { useI18n } from '../../../i18n';
 import { useAdminMatches, PanelSection } from './useAdminMatches';
 
 /** Wire (ISO) date-time template used across the games panel. */
-const DATETIME_FORMAT = 'DD.MM.YYYY HH:mm';
+const datetimeFormat = 'DD.MM.YYYY HH:mm';
 
 /**
  * Admin games panel UI - all state and mutations live in useAdminMatches.
@@ -237,7 +237,7 @@ export function AdminMatches() {
           </label>
           <label className="field">
             <span>{t('adminMatches.start')}</span>
-            <DateField value={matchCreate.startsAt} onChange={matchCreate.setStartsAt} format={DATETIME_FORMAT} labels={dateLabels}
+            <DateField value={matchCreate.startsAt} onChange={matchCreate.setStartsAt} format={datetimeFormat} labels={dateLabels}
               required placeholder={t('date.hintTime')} />
           </label>
           <button className="btn btn--primary" disabled={busy} type="submit">{t('adminMatches.createGame')}</button>
@@ -283,7 +283,7 @@ export function AdminMatches() {
                           <input className="input" value={matchEdit.field} maxLength={40}
                             onChange={(e) => matchEdit.setField(e.target.value)}
                             placeholder={t('adminMatches.fieldPlaceholder')} aria-label={t('adminMatches.fieldLabel')} />
-                          <DateField value={matchEdit.startsAt} onChange={matchEdit.setStartsAt} format={DATETIME_FORMAT}
+                          <DateField value={matchEdit.startsAt} onChange={matchEdit.setStartsAt} format={datetimeFormat}
                             labels={dateLabels} placeholder={t('date.hintTime')} ariaLabel={t('adminMatches.start')} />
                         </div>
                       ) : (
@@ -368,7 +368,7 @@ export function AdminMatches() {
                             </td>
                             <td>
                               {editing ? (
-                                <DateField value={bracketEdit.startsAt} onChange={bracketEdit.setStartsAt} format={DATETIME_FORMAT}
+                                <DateField value={bracketEdit.startsAt} onChange={bracketEdit.setStartsAt} format={datetimeFormat}
                                   labels={dateLabels} placeholder={t('date.hintTime')} ariaLabel={t('adminMatches.start')} />
                               ) : (
                                 <span>{m.field ? `${m.field} - ` : ''}{m.startsAt ? formatKickoff(m.startsAt) : ''}</span>
