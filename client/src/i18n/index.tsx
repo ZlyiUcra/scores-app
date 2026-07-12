@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import en from './en.json';
 import ua from './ua.json';
 import pt from './pt.json';
@@ -6,6 +6,11 @@ import pt from './pt.json';
 // NOTE: 'ua' is used for Ukrainian by explicit project decision (ISO 639-1
 // would be 'uk', but it reads as "United Kingdom" in the UI).
 export type Lang = 'en' | 'ua' | 'pt';
+
+// The internal 'ua' code is a deliberate in-app choice, but the <html lang>
+// attribute is a real BCP-47 tag consumed by browsers/screen readers/
+// translation prompts - it must say 'uk', not 'ua'.
+const HTML_LANG: Record<Lang, string> = { en: 'en', ua: 'uk', pt: 'pt' };
 
 /** Display order of the language switcher buttons. */
 export const LANGS: Lang[] = ['en', 'ua', 'pt'];
@@ -55,9 +60,15 @@ function initialLang(): Lang {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(initialLang);
 
+  // Keeps <html lang> in sync with the active language on every change AND
+  // on the initial mount - a fresh load must not sit under the static
+  // index.html default once the real (possibly stored) language is known.
+  useEffect(() => {
+    document.documentElement.lang = HTML_LANG[lang];
+  }, [lang]);
+
   const setLang = useCallback((next: Lang) => {
     localStorage.setItem(STORAGE_KEY, next);
-    document.documentElement.lang = next;
     setLangState(next);
   }, []);
 
