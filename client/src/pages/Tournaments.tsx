@@ -43,18 +43,16 @@ function TournamentSection({ status, items, defaultOpen }: { status: TournamentS
       {pageItems.map((tour) => (
         <TournamentCard key={tour.id} tour={tour} />
       ))}
-      {items.length > pageSize && (
-        <Pager
-          page={page}
-          total={items.length}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-        />
-      )}
+      <Pager
+        page={page}
+        total={items.length}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
     </Accordion>
   );
 }

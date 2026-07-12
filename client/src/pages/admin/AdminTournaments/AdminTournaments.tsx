@@ -3,6 +3,7 @@ import type { TournamentStatus } from '../../../../../shared/types';
 import { formatDay } from '../../../lib/format';
 import { DateRangeField } from '../../../components/DateRangeField';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
+import { Pager } from '../../../components/Pager';
 import { useDateLabels } from '../../../lib/dateLabels';
 import { useI18n } from '../../../i18n';
 import { actionIcons } from '../../../constants';
@@ -21,8 +22,10 @@ const STATUSES: TournamentStatus[] = ['upcoming', 'active', 'finished'];
 export function AdminTournaments() {
   const { t } = useI18n();
   const dateLabels = useDateLabels();
-  const { tournaments, busy, error, create, edit, requestDelete, deleteConfirm, exportTournament, exportPdf, importTournament } =
-    useAdminTournaments();
+  const {
+    tournaments, total, page, pageSize, setPage, setPageSize,
+    busy, error, create, edit, requestDelete, deleteConfirm, exportTournament, exportPdf, importTournament,
+  } = useAdminTournaments();
   const importInputRef = useRef<HTMLInputElement>(null);
 
   function pickImportFile() {
@@ -73,7 +76,7 @@ export function AdminTournaments() {
 
       <section className="card">
         <div className="admin-panel__head">
-          <h3>{t('adminTournaments.listTitle')} ({tournaments.length})</h3>
+          <h3>{t('adminTournaments.listTitle')} ({total})</h3>
           <div>
             <input
               ref={importInputRef}
@@ -174,6 +177,13 @@ export function AdminTournaments() {
             </tbody>
           </table>
         </div>
+        <Pager
+          page={page}
+          total={total}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       </section>
 
       {deleteConfirm && <ConfirmDialog {...deleteConfirm} />}

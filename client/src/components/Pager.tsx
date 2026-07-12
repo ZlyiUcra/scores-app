@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { pagerIcons } from '../constants';
+import { pagerIcons, pagerVisibility } from '../constants';
 import { useI18n } from '../i18n';
 
 const pageSizeOptions = [10, 20, 50, 100];
@@ -15,13 +15,17 @@ type PagerProps = {
 };
 
 /** Shared pager: prev/next navigation plus a page-size picker (presets or a
- * custom value, rounded to the nearest 10). Reused by AdminUsers and
- * AdminAudit - `total`/`page`/`pageSize` are owned by the caller's hook. */
+ * custom value, rounded to the nearest 10). Reused across every paginated
+ * list in the app - `total`/`page`/`pageSize` are owned by the caller's hook.
+ * Hides itself below `pagerVisibility.minTotal`: a handful of items needs no
+ * controls. */
 export function Pager({ page, total, pageSize, onPageChange, onPageSizeChange }: PagerProps) {
   const { t } = useI18n();
   const [customMode, setCustomMode] = useState(false);
   const [customValue, setCustomValue] = useState(String(pageSize));
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  if (total <= pagerVisibility.minTotal) return null;
 
   function selectPageSize(value: string) {
     if (value === 'custom') {

@@ -10,6 +10,8 @@ import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { computeQualificationTiers } from '../../../hooks/useQualificationTiers';
 import { downloadTournamentReport } from '../../../lib/pdfReport';
 
+const defaultPageSize = 20;
+
 /**
  * All behavior and state for the AdminTournaments panel, kept out of the
  * component so it renders only. Owns the tournament list (from the store), the
@@ -22,6 +24,17 @@ export function useAdminTournaments() {
   const tournaments = useTournamentStore((s) => s.tournaments);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Pagination: the full list is already loaded (no socket event, tournaments
+  // rarely number more than a handful), so this just slices it - no server round-trip.
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSizeState] = useState(defaultPageSize);
+  function setPageSize(value: number) {
+    setPage(1);
+    setPageSizeState(value);
+  }
+  const pageStart = (page - 1) * pageSize;
+  const pageItems = tournaments.slice(pageStart, pageStart + pageSize);
 
   // Create form.
   const [name, setName] = useState('');
@@ -187,7 +200,12 @@ export function useAdminTournaments() {
   }
 
   return {
-    tournaments,
+    tournaments: pageItems,
+    total: tournaments.length,
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
     busy,
     error,
     create: { name, location, range, status, setName, setLocation, setRange, setStatus, submit },

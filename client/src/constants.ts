@@ -27,3 +27,9 @@ export const pagerIcons = {
 export const accordionIcons = {
   toggle: '\u25B6\uFE0E',
 };
+
+/** Below this item count a paginated list already fits without controls, so
+ * Pager hides itself rather than showing a useless single-page control. */
+export const pagerVisibility = {
+  minTotal: 10,
+};
