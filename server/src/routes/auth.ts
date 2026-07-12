@@ -18,11 +18,15 @@ import {
 export const authRouter = Router();
 
 // Throttle auth writes to blunt online password guessing & registration spam.
+// skipSuccessfulRequests: only failed attempts count - a shared viewer login
+// used by many attendees behind one venue NAT must not exhaust the bucket on
+// successful logins alone.
 const loginLimiter = rateLimit({
   windowMs: 60_000,
   limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true,
   message: { error: { code: AppErrorCode.RateLimited, message: 'Too many attempts. Try again shortly.' } },
 });
 
