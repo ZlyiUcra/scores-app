@@ -70,8 +70,10 @@ Self-registration for viewers, so any number of people can follow the tournament
 
 - **Role is always `user`** — the server hardcodes it; the request body is never
   read for a role (privilege-escalation protection).
-- **Storage:** `server/data/users.json` — a `{ version, users }` envelope behind a
-  `UserRepository` (mirrors `MatchRepository`). Passwords use bcrypt (cost 12).
+- **Storage:** SQLite (the `users` table) behind a `UserRepository` (mirrors
+  `MatchRepository`). A legacy `server/data/users.json` file, if present, is
+  imported ONCE on first boot into an empty table, then never read again.
+  Passwords use bcrypt (cost 12).
 - **Uniqueness:** case-insensitive, `Map<usernameLower, user>` — O(1); an atomic
   `create()` (hashing happens BEFORE the critical section, so parallel registers
   can't race).
@@ -219,9 +221,10 @@ Auto-registo para espectadores, para que qualquer número de pessoas possa segui
 - **O perfil é sempre `user`** — o servidor define-o de forma fixa; o corpo do
   pedido nunca é lido para obter um perfil (proteção contra escalonamento de
   privilégios).
-- **Armazenamento:** `server/data/users.json` — um envelope `{ version, users }`
-  atrás de um `UserRepository` (espelha o `MatchRepository`). As palavras-passe usam
-  bcrypt (custo 12).
+- **Armazenamento:** SQLite (tabela `users`) atrás de um `UserRepository` (espelha
+  o `MatchRepository`). Um ficheiro legado `server/data/users.json`, se existir, é
+  importado UMA VEZ no primeiro arranque para uma tabela vazia e nunca mais é lido.
+  As palavras-passe usam bcrypt (custo 12).
 - **Unicidade:** insensível a maiúsculas, `Map<usernameLower, user>` — O(1); um
   `create()` atómico (o hash acontece ANTES da secção crítica, para que registos
   paralelos não colidam).
@@ -369,8 +372,10 @@ npm run dev
 
 - **Роль завжди `user`** — сервер жорстко проставляє її; тіло запиту ніколи не
   читається на роль (захист від привілейної ескалації).
-- **Зберігання:** `server/data/users.json` — envelope `{ version, users }` за
-  інтерфейсом `UserRepository` (дзеркалить `MatchRepository`). Паролі — bcrypt (cost 12).
+- **Зберігання:** SQLite (таблиця `users`) за інтерфейсом `UserRepository`
+  (дзеркалить `MatchRepository`). Застарілий файл `server/data/users.json`, якщо є,
+  імпортується ОДИН РАЗ на перший запуск у порожню таблицю і більше не читається.
+  Паролі — bcrypt (cost 12).
 - **Унікальність:** case-insensitive, `Map<usernameLower, user>` — O(1), атомарний
   `create()` (хеш рахується ДО критичної секції → без race при паралельних реєстраціях).
 - **ID:** `crypto.randomUUID()` (не позиційні — колізія id = чужа сесія).
