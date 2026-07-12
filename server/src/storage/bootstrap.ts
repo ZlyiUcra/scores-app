@@ -20,12 +20,23 @@ import type { Storage, StoredMatch } from './contracts.js';
 export async function runBootstrap(storage: Storage): Promise<void> {
   let tournaments = await storage.tournaments.list();
   if (tournaments.length === 0) {
+    // Loud on purpose: an empty production database is either a genuine
+    // first deploy or a wiped ephemeral disk, and the two look identical
+    // from here - an operator watching boot logs is the only chance to
+    // notice the latter before it is mistaken for the former.
+    if (config.isProd) {
+      console.warn('[bootstrap] production database is empty - seeding a fresh default tournament and operator accounts. If this is NOT a first deploy, DATA_DIR points at the wrong place or data was lost.');
+    }
     await storage.tournaments.create({ name: 'Tournament 1', location: null, startsAt: null, endsAt: null, status: 'active' });
     tournaments = await storage.tournaments.list();
   }
   const tournamentId = tournaments[0].id;
 
-  await seedDemoRoster(storage, tournamentId);
+  // Demo teams/groups/matches are a local-dev convenience, never appropriate
+  // on a live deployment.
+  if (!config.isProd) {
+    await seedDemoRoster(storage, tournamentId);
+  }
   await seedUsers(storage);
 }
 

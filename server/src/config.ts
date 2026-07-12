@@ -55,6 +55,22 @@ function resolveViewerPassword(): string {
   return 'viewer123';
 }
 
+function resolveDataDir(): string {
+  const fromEnv = process.env.DATA_DIR?.trim();
+  if (fromEnv) return fromEnv;
+
+  // A prod boot with no explicit DATA_DIR defaults under the app's own
+  // directory, which is exactly the shape that silently loses everything on
+  // an ephemeral-filesystem redeploy - require it explicitly, like the other
+  // production secrets.
+  if (isProd) {
+    throw new Error(
+      'DATA_DIR must be set in production. Refusing to start.',
+    );
+  }
+  return path.join(__dirname, '..', 'data');
+}
+
 function resolveMaxUsers(): number {
   const fromEnv = process.env.MAX_USERS?.trim();
   if (!fromEnv) return 500;
@@ -82,8 +98,10 @@ export const config = {
   cookieName: 'scores_token',
   clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
   /** Where the storage driver keeps its files - overridable so a host with a
-   * persistent disk can point it at the mount. */
-  dataDir: process.env.DATA_DIR ?? path.join(__dirname, '..', 'data'),
+   * persistent disk can point it at the mount. Required in production: a
+   * default relative to the app directory is exactly the shape that loses
+   * everything on an ephemeral-filesystem redeploy. */
+  dataDir: resolveDataDir(),
   /** Cost for every bcrypt hash (auth + seeded accounts). */
   bcryptCost: 12,
   /** Global account cap - blunts registration flooding. Override via MAX_USERS
